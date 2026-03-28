@@ -1,0 +1,49 @@
+---
+interface Props {
+  network: {
+    nodes_total: number;
+    nodes_online: number;
+    latest_ledger: number;
+    total_requests_served: number;
+    regions: Record<string, { nodes: number; online: number }>;
+  };
+}
+
+const { network } = Astro.props;
+const regionCount = Object.keys(network.regions || {}).length;
+---
+
+<section class="stats">
+  <div class="stat">
+    <div class="stat-value">{network.nodes_online}/{network.nodes_total}</div>
+    <div class="stat-label">Nodes Online</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">{network.latest_ledger?.toLocaleString()}</div>
+    <div class="stat-label">Latest Ledger</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">{network.total_requests_served?.toLocaleString()}</div>
+    <div class="stat-label">Requests Served</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">{regionCount}</div>
+    <div class="stat-label">Regions</div>
+  </div>
+</section>
+
+<div class="regions">
+  {Object.entries(network.regions || {}).map(([name, r]) => (
+    <div class="region"><span class="count">{r.online}/{r.nodes}</span> {name}</div>
+  ))}
+</div>
+
+<style>
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
+  .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
+  .stat-label { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
+  .regions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+  .region { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; font-size: 0.85rem; }
+  .region .count { color: var(--accent); font-weight: 700; }
+</style>

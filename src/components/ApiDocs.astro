@@ -1,0 +1,70 @@
+---
+---
+
+<section class="card">
+  <h2>API Endpoints</h2>
+  <div class="endpoint">
+    <span class="method post">POST</span><code class="url">https://xrplmesh.com/</code>
+    <p class="desc">XRPL JSON-RPC commands. Drop-in replacement for s1.ripple.com.</p>
+  </div>
+  <div class="endpoint">
+    <span class="method get">GET</span><code class="url">https://xrplmesh.com/health</code>
+    <p class="desc">Node health and status.</p>
+  </div>
+  <div class="endpoint">
+    <span class="method get">GET</span><code class="url">https://xrplmesh.com/network</code>
+    <p class="desc">Network-wide aggregated statistics.</p>
+  </div>
+  <div class="endpoint">
+    <span class="method ws">WS</span><code class="url">wss://xrplmesh.com/</code>
+    <p class="desc">WebSocket for subscriptions and streaming.</p>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Quick Start</h2>
+  <pre><code><span class="c">// Drop-in replacement for any XRPL endpoint</span>
+const resp = await fetch('<span class="s">https://xrplmesh.com/</span>', {'{'}
+  method: 'POST',
+  headers: {'{'} 'Content-Type': 'application/json' {'}'},
+  body: JSON.stringify({'{'}
+    command: 'account_info',
+    account: 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe',
+    ledger_index: 'validated'
+  {'}'})
+{'}'});
+const data = await resp.json();
+console.log(data.result.account_data);</code></pre>
+</section>
+
+<section class="card">
+  <h2>Features</h2>
+  <ul class="features">
+    <li>Multi-region edge caching with distributed ledger storage</li>
+    <li>Range-based sharding across nodes for full XRPL history</li>
+    <li>P2C load balancing — automatic request distribution under load</li>
+    <li>Gossip protocol for sub-second failure detection</li>
+    <li>Read repair — self-healing data gaps across the network</li>
+    <li>Only caches immutable, validated data — never stale results</li>
+    <li>WebSocket subscriptions with upstream multiplexing</li>
+    <li>Free, no API key required</li>
+  </ul>
+</section>
+
+<style>
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin-bottom: 24px; }
+  .card h2 { font-size: 1.2rem; margin-bottom: 16px; color: var(--text); }
+  .endpoint { margin-bottom: 14px; }
+  .method { display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-right: 8px; color: #fff; vertical-align: middle; }
+  .method.post { background: var(--green); }
+  .method.get { background: #1f6feb; }
+  .method.ws { background: #8957e5; }
+  .url { color: var(--accent); font-size: 0.9rem; }
+  .desc { color: var(--text-muted); font-size: 0.9rem; margin-top: 2px; }
+  pre { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 16px; overflow-x: auto; font-size: 0.85rem; color: var(--text); line-height: 1.6; }
+  .c { color: var(--text-dim); }
+  .s { color: #a5d6ff; }
+  .features { list-style: none; padding: 0; }
+  .features li { padding: 6px 0; padding-left: 20px; position: relative; color: var(--text-muted); font-size: 0.95rem; }
+  .features li::before { content: ''; position: absolute; left: 0; top: 14px; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+</style>

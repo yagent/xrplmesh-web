@@ -1,0 +1,42 @@
+---
+import Base from '../layouts/Base.astro';
+import Stats from '../components/Stats.astro';
+import ApiDocs from '../components/ApiDocs.astro';
+
+const API_URL = import.meta.env.API_URL || 'https://xrplmesh.com';
+
+let network = {
+  nodes_total: 0, nodes_online: 0, latest_ledger: 0,
+  total_requests_served: 0, regions: {},
+};
+
+try {
+  const res = await fetch(`${API_URL}/network`, { signal: AbortSignal.timeout(5000) });
+  if (res.ok) network = await res.json();
+} catch {}
+---
+
+<Base title="XRPL Mesh - Distributed XRPL Proxy Network">
+  <div class="container">
+    <header>
+      <h1><span class="accent">XRPL</span> Mesh</h1>
+      <p class="subtitle">Distributed XRPL proxy network with edge caching across multiple regions.</p>
+    </header>
+
+    <Stats network={network} />
+    <ApiDocs />
+
+    <footer>
+      XRPL Mesh &middot; Open distributed XRPL infrastructure
+    </footer>
+  </div>
+</Base>
+
+<style>
+  .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+  header { margin-bottom: 40px; }
+  h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 8px; }
+  .accent { color: var(--accent); }
+  .subtitle { color: var(--text-muted); font-size: 1.1rem; }
+  footer { color: var(--text-dim); font-size: 0.85rem; margin-top: 40px; text-align: center; }
+</style>
