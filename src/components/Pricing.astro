@@ -88,6 +88,11 @@ function isDisabled(plan: string) {
         body: JSON.stringify({ plan }),
       });
       const data = await resp.json();
+      if (resp.status === 401) {
+        // Not logged in — redirect to login, then back to pricing
+        window.location.href = data.redirect || '/api/auth/login';
+        return;
+      }
       if (data.url) {
         window.location.href = data.url;
       } else {
