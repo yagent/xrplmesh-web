@@ -8,6 +8,22 @@ import { Zap, Globe, ShieldCheck, RefreshCw, Cable, KeyRound } from 'lucide-astr
 import { getSessionFromCookie } from '../lib/auth';
 
 const session = getSessionFromCookie(Astro.request);
+const ADMIN_TOKEN = import.meta.env.ADMIN_TOKEN || '';
+
+let userPlan = '';
+if (session) {
+  try {
+    const kr = await fetch(`${import.meta.env.API_URL || 'http://127.0.0.1:9000'}/admin/keys`, {
+      headers: { 'X-Proxy-Token': ADMIN_TOKEN },
+      signal: AbortSignal.timeout(3000),
+    });
+    if (kr.ok) {
+      const keys = await kr.json();
+      const owned = keys.find((k: any) => k.owner === session.email && k.active);
+      if (owned) userPlan = owned.plan;
+    }
+  } catch {}
+}
 
 const API_URL = import.meta.env.API_URL || 'https://s1.xrplmesh.com';
 // SSR: fetch from local node (same server), fallback to public API
@@ -121,7 +137,7 @@ const regionCount = Object.keys(network.regions || {}).length;
       </div>
     </section>
 
-    <Pricing />
+    <Pricing userPlan={userPlan} />
 
     <div id="quickstart">
       <ApiDocs />
