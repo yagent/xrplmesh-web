@@ -1,0 +1,232 @@
+---
+import Base from '../layouts/Base.astro';
+import { getSessionFromCookie } from '../lib/auth';
+
+const session = getSessionFromCookie(Astro.request);
+if (!session) return Astro.redirect('/');
+
+const API_URL = import.meta.env.API_URL || 'http://127.0.0.1:9000';
+const ADMIN_TOKEN = import.meta.env.ADMIN_TOKEN || '';
+
+let userKey: any = null;
+let usageData: Record<string, number> = {};
+
+try {
+  // Get user's keys
+  const keysResp = await fetch(`${API_URL}/admin/keys`, {
+    headers: { 'X-Proxy-Token': ADMIN_TOKEN },
+    signal: AbortSignal.timeout(5000),
+  });
+  if (keysResp.ok) {
+    const allKeys = await keysResp.json();
+    const owned = allKeys.filter((k: any) => k.owner === session.email && k.active);
+    userKey = owned[0] || null;
+  }
+
+  // Auto-create free endpoint if user has none
+  if (!userKey) {
+    const createResp = await fetch(`${API_URL}/admin/keys`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Proxy-Token': ADMIN_TOKEN },
+      body: JSON.stringify({ plan: 'free', owner: session.email, label: `${session.name}'s endpoint` }),
+    });
+    if (createResp.ok) userKey = await createResp.json();
+  }
+
+  // Get usage
+  const usageResp = await fetch(`${API_URL}/admin/usage`, {
+    headers: { 'X-Proxy-Token': ADMIN_TOKEN },
+    signal: AbortSignal.timeout(5000),
+  });
+  if (usageResp.ok) {
+    const ud = await usageResp.json();
+    usageData = ud.usage || {};
+  }
+} catch {}
+
+const plans: Record<string, { credits: string; rate: string; price: string; raw: number }> = {
+  free: { credits: '10M', rate: '15 req/s', price: 'Free', raw: 10_000_000 },
+  builder: { credits: '100M', rate: '50 req/s', price: '$29/mo', raw: 100_000_000 },
+  pro: { credits: '500M', rate: '150 req/s', price: '$79/mo', raw: 500_000_000 },
+  scale: { credits: '2B', rate: '300 req/s', price: '$199/mo', raw: 2_000_000_000 },
+  enterprise: { credits: 'Unlimited', rate: '2000 req/s', price: 'Partner', raw: Infinity },
+};
+
+const key = userKey?.key || '';
+const planKey = userKey?.plan || 'free';
+const plan = plans[planKey] || plans.free;
+const credits = usageData[session.email] || 0;
+const creditsFormatted = credits > 1000000 ? (credits / 1000000).toFixed(1) + 'M' : credits > 1000 ? (credits / 1000).toFixed(0) + 'K' : String(credits);
+const pct = plan.raw === Infinity ? 0 : Math.min(100, (credits / plan.raw) * 100);
+const httpEndpoint = `https://s1.xrplmesh.com/e/${key}`;
+const wsEndpoint = `wss://s1.xrplmesh.com/e/${key}`;
+---
+
+<Base title="Dashboard - XRPL Mesh">
+  <div class="dash">
+    <div class="dash-header">
+      <div class="user">
+        <img src={session.picture} alt="" class="avatar" />
+        <div>
+          <div class="user-name">{session.name}</div>
+          <div class="user-email">{session.email}</div>
+        </div>
+      </div>
+      <div class="dash-actions">
+        <a href="/" class="btn-sm">Home</a>
+        <a href="/api/auth/logout" class="btn-sm">Sign Out</a>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-top">
+        <h2>Your Endpoint</h2>
+        <div class="plan-badge">{userKey?.plan || 'free'} &middot; {plan.price}</div>
+      </div>
+
+      <div class="endpoints">
+        <div class="ep-row">
+          <span class="ep-label">HTTP</span>
+          <code class="ep-url" id="http-ep">{httpEndpoint}</code>
+          <button class="ep-copy" onclick="copyEp('http-ep')">Copy</button>
+        </div>
+        <div class="ep-row">
+          <span class="ep-label ws">WS</span>
+          <code class="ep-url" id="ws-ep">{wsEndpoint}</code>
+          <button class="ep-copy" onclick="copyEp('ws-ep')">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section usage-section">
+      <div class="usage-header">
+        <h2>Usage This Month</h2>
+        <span class="usage-live" id="live-dot" title="Live updating">&#9679;</span>
+      </div>
+      <div class="usage-numbers">
+        <span class="usage-used" id="usage-used">{creditsFormatted}</span>
+        <span class="usage-sep">/</span>
+        <span class="usage-limit">{plan.credits}</span>
+      </div>
+      <div class="usage-bar-bg">
+        <div class="usage-bar-fill" id="usage-bar" style={`width:${pct}%`}></div>
+      </div>
+      <div class="usage-footer">
+        <span class="usage-pct" id="usage-pct">{pct.toFixed(1)}% used</span>
+        <span class="usage-rate">{plan.rate}</span>
+      </div>
+    </div>
+    <div data-email={session.email} data-plan-raw={plan.raw} data-plan-credits={plan.credits} id="usage-meta" style="display:none"></div>
+
+    {userKey?.plan !== 'scale' && userKey?.plan !== 'enterprise' && (
+      <div class="section">
+        <h2>Upgrade Plan</h2>
+        <div class="upgrade-grid">
+          {userKey?.plan === 'free' && <button class="up-btn" onclick={`upgradePlan('builder','${key}')`}><span class="up-name">Builder</span><span class="up-price">$29/mo</span><span class="up-detail">50 req/s &middot; 100M credits</span></button>}
+          {(userKey?.plan === 'free' || userKey?.plan === 'builder') && <button class="up-btn highlight" onclick={`upgradePlan('pro','${key}')`}><span class="up-name">Pro</span><span class="up-price">$79/mo</span><span class="up-detail">150 req/s &middot; 500M credits</span></button>}
+          {userKey?.plan !== 'scale' && <button class="up-btn" onclick={`upgradePlan('scale','${key}')`}><span class="up-name">Scale</span><span class="up-price">$199/mo</span><span class="up-detail">300 req/s &middot; 2B credits</span></button>}
+        </div>
+      </div>
+    )}
+  </div>
+</Base>
+
+<script is:inline>
+  function copyEp(id) {
+    const text = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById(id).nextElementSibling;
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 1500);
+    });
+  }
+  async function upgradePlan(plan, key) {
+    const resp = await fetch('/api/upgrade', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan, key }),
+    });
+    const data = await resp.json();
+    if (data.url) window.location.href = data.url;
+    else alert(data.error || 'Failed');
+  }
+
+  // Live usage polling
+  (function() {
+    const meta = document.getElementById('usage-meta');
+    if (!meta) return;
+    const email = meta.dataset.email;
+    const planRaw = Number(meta.dataset.planRaw);
+    const planCredits = meta.dataset.planCredits;
+    const dot = document.getElementById('live-dot');
+
+    function fmt(n) {
+      if (n >= 1e9) return (n / 1e9).toFixed(1) + 'B';
+      if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+      if (n >= 1e3) return (n / 1e3).toFixed(0) + 'K';
+      return String(n);
+    }
+
+    async function poll() {
+      try {
+        const r = await fetch('/api/usage');
+        if (!r.ok) return;
+        const d = await r.json();
+        const c = d.usage?.[email] || 0;
+        document.getElementById('usage-used').textContent = fmt(c);
+        const pct = planRaw === Infinity || !planRaw ? 0 : Math.min(100, (c / planRaw) * 100);
+        document.getElementById('usage-bar').style.width = pct + '%';
+        document.getElementById('usage-pct').textContent = pct.toFixed(1) + '% used';
+        // Flash the dot
+        dot.style.opacity = '1';
+        setTimeout(() => dot.style.opacity = '0.4', 300);
+      } catch {}
+    }
+
+    setInterval(poll, 30000);
+    setTimeout(poll, 5000);
+  })();
+</script>
+
+<style>
+  .dash { max-width: 700px; margin: 0 auto; padding: 40px 24px; }
+  .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .user { display: flex; align-items: center; gap: 12px; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; }
+  .user-name { font-weight: 600; font-size: 0.95rem; }
+  .user-email { color: var(--text-muted); font-size: 0.8rem; }
+  .dash-actions { display: flex; gap: 8px; }
+  .btn-sm { padding: 6px 14px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem; color: var(--text-muted); transition: all 0.2s; }
+  .btn-sm:hover { border-color: var(--accent); color: var(--text); text-decoration: none; }
+  .section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+  .section-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .section h2 { font-size: 1rem; font-weight: 600; margin-bottom: 0; }
+  .plan-badge { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); padding: 4px 12px; border-radius: 20px; }
+  .endpoints { display: flex; flex-direction: column; gap: 8px; }
+  .ep-row { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px 14px; }
+  .ep-label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #238636; background: rgba(35,134,54,0.1); padding: 3px 8px; border-radius: 4px; flex-shrink: 0; }
+  .ep-label.ws { color: #8957e5; background: rgba(137,87,229,0.1); }
+  .ep-url { flex: 1; font-size: 0.78rem; color: var(--text-muted); word-break: break-all; }
+  .ep-copy { padding: 4px 12px; background: transparent; border: 1px solid var(--border); border-radius: 5px; color: var(--text-muted); font-size: 0.72rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit; white-space: nowrap; }
+  .ep-copy:hover { border-color: var(--accent); color: var(--accent); }
+  .usage-section { margin-bottom: 16px; }
+  .usage-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .usage-header h2 { margin-bottom: 0; }
+  .usage-live { color: #3fb950; font-size: 0.5rem; opacity: 0.4; transition: opacity 0.3s; }
+  .usage-numbers { display: flex; align-items: baseline; gap: 6px; margin-bottom: 10px; }
+  .usage-used { font-size: 1.8rem; font-weight: 800; font-family: var(--mono); color: var(--text); }
+  .usage-sep { font-size: 1rem; color: var(--text-dim); }
+  .usage-limit { font-size: 1rem; color: var(--text-muted); font-family: var(--mono); }
+  .usage-bar-bg { height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+  .usage-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #3fb950); border-radius: 4px; transition: width 0.6s ease; min-width: 2px; }
+  .usage-footer { display: flex; justify-content: space-between; margin-top: 8px; }
+  .usage-pct { font-size: 0.72rem; color: var(--text-muted); font-family: var(--mono); }
+  .usage-rate { font-size: 0.72rem; color: var(--text-dim); }
+  .upgrade-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 14px; }
+  .up-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 16px; background: transparent; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s; font-family: var(--font); }
+  .up-btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .up-btn.highlight { border-color: var(--accent); }
+  .up-name { font-size: 0.9rem; font-weight: 700; color: var(--text); }
+  .up-price { font-size: 1.1rem; font-weight: 800; color: var(--accent); }
+  .up-detail { font-size: 0.7rem; color: var(--text-dim); }
+</style>
