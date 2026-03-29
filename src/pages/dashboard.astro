@@ -81,7 +81,7 @@ const wsEndpoint = `wss://s1.xrplmesh.com/e/${key}`;
     <div class="section">
       <div class="section-top">
         <h2>Your Endpoint</h2>
-        <div class="plan-badge">{userKey?.plan || 'free'} &middot; {plan.price}</div>
+        <div class="plan-badge">{(userKey?.plan || 'free').charAt(0).toUpperCase() + (userKey?.plan || 'free').slice(1)}{plan.price !== 'Free' ? ` · ${plan.price}` : ''}</div>
       </div>
 
       <div class="endpoints">
