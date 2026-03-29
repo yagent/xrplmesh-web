@@ -1,70 +1,304 @@
 ---
+import { Copy, Play, ArrowRight } from 'lucide-astro';
 ---
 
-<section class="card">
+<section class="card" id="api">
   <h2>API Endpoints</h2>
-  <div class="endpoint">
-    <span class="method post">POST</span><code class="url">https://xrplmesh.com/</code>
-    <p class="desc">XRPL JSON-RPC commands. Drop-in replacement for s1.ripple.com.</p>
-  </div>
-  <div class="endpoint">
-    <span class="method get">GET</span><code class="url">https://xrplmesh.com/health</code>
-    <p class="desc">Node health and status.</p>
-  </div>
-  <div class="endpoint">
-    <span class="method get">GET</span><code class="url">https://xrplmesh.com/network</code>
-    <p class="desc">Network-wide aggregated statistics.</p>
-  </div>
-  <div class="endpoint">
-    <span class="method ws">WS</span><code class="url">wss://xrplmesh.com/</code>
-    <p class="desc">WebSocket for subscriptions and streaming.</p>
+  <div class="endpoints">
+    <div class="endpoint">
+      <div class="endpoint-header">
+        <span class="method post">POST</span>
+        <code class="url">https://s1.xrplmesh.com/e/YOUR_TOKEN</code>
+      </div>
+      <p class="desc">Your dedicated endpoint. Full XRPL API, full history.</p>
+    </div>
+    <div class="endpoint">
+      <div class="endpoint-header">
+        <span class="method ws">WS</span>
+        <code class="url">wss://s1.xrplmesh.com/e/YOUR_TOKEN</code>
+      </div>
+      <p class="desc">WebSocket endpoint for subscriptions and live streaming.</p>
+    </div>
   </div>
 </section>
 
-<section class="card">
-  <h2>Quick Start</h2>
-  <pre><code><span class="c">// Drop-in replacement for any XRPL endpoint</span>
-const resp = await fetch('<span class="s">https://xrplmesh.com/</span>', {'{'}
-  method: 'POST',
-  headers: {'{'} 'Content-Type': 'application/json' {'}'},
-  body: JSON.stringify({'{'}
-    command: 'account_info',
-    account: 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe',
-    ledger_index: 'validated'
-  {'}'})
-{'}'});
-const data = await resp.json();
-console.log(data.result.account_data);</code></pre>
+<section class="qs" id="quickstart">
+  <div class="qs-header">
+    <div>
+      <h2>Quick Start</h2>
+      <p class="qs-sub">Replace your XRPL endpoint URL. That's it.</p>
+    </div>
+    <div class="qs-tabs">
+      <button class="tab active" data-tab="curl">cURL</button>
+      <button class="tab" data-tab="js">JavaScript</button>
+      <button class="tab" data-tab="python">Python</button>
+    </div>
+  </div>
+
+  <div class="terminal">
+    <div class="terminal-bar">
+      <div class="terminal-dots">
+        <span class="dot r"></span>
+        <span class="dot y"></span>
+        <span class="dot g"></span>
+      </div>
+      <span class="terminal-title" id="term-title">bash</span>
+      <button class="copy-btn" id="copy-btn" title="Copy to clipboard"><Copy size={13} /></button>
+    </div>
+
+    <!-- cURL -->
+    <div class="terminal-body tab-panel active" data-panel="curl">
+      <div class="term-line"><span class="prompt">$</span> <span class="cmd typed" style="--chars:62">curl -s -X POST https://s1.xrplmesh.com/e/YOUR_TOKEN \</span></div>
+      <div class="term-line"><span class="prompt">&gt;</span> <span class="cmd typed" style="--chars:42;--delay:1.2s">  -H "Content-Type: application/json" \</span></div>
+      <div class="term-line"><span class="prompt">&gt;</span> <span class="cmd typed" style="--chars:56;--delay:2s">  -d '{"{"}"command":"account_info","account":"rPT1..."{"}"}'</span></div>
+      <div class="term-blank"></div>
+      <div class="resp fade-in" style="--delay:3s"><span class="out">{`{`}</span></div>
+      <div class="resp fade-in" style="--delay:3.1s"><span class="out">  <span class="jk">"result"</span>: {`{`}</span></div>
+      <div class="resp fade-in" style="--delay:3.2s"><span class="out">    <span class="jk">"account_data"</span>: {`{`}</span></div>
+      <div class="resp fade-in" style="--delay:3.3s"><span class="out">      <span class="jk">"Account"</span>: <span class="jv">"rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe"</span>,</span></div>
+      <div class="resp fade-in" style="--delay:3.4s"><span class="out">      <span class="jk">"Balance"</span>: <span class="jn">"999991"</span>,</span></div>
+      <div class="resp fade-in" style="--delay:3.5s"><span class="out">      <span class="jk">"Sequence"</span>: <span class="jn">1</span></span></div>
+      <div class="resp fade-in" style="--delay:3.6s"><span class="out">    {`}`},</span></div>
+      <div class="resp fade-in" style="--delay:3.7s"><span class="out">    <span class="jk">"validated"</span>: <span class="jb">true</span></span></div>
+      <div class="resp fade-in" style="--delay:3.8s"><span class="out">  {`}`}</span></div>
+      <div class="resp fade-in" style="--delay:3.9s"><span class="out">{`}`}</span></div>
+      <div class="term-line fade-in" style="--delay:4.2s"><span class="prompt">$</span> <span class="cursor"></span></div>
+    </div>
+
+    <!-- JavaScript -->
+    <div class="terminal-body tab-panel" data-panel="js">
+      <div class="term-line"><span class="kw">import</span> {`{`} Client {`}`} <span class="kw">from</span> <span class="jv">'xrpl'</span></div>
+      <div class="term-blank"></div>
+      <div class="term-line"><span class="kw">const</span> client = <span class="kw">new</span> <span class="fn">Client</span>(<span class="jv">'wss://s1.xrplmesh.com/e/YOUR_TOKEN'</span>)</div>
+      <div class="term-line"><span class="kw">await</span> client.<span class="fn">connect</span>()</div>
+      <div class="term-blank"></div>
+      <div class="term-line"><span class="kw">const</span> resp = <span class="kw">await</span> client.<span class="fn">request</span>({`{`}</div>
+      <div class="term-line">  <span class="jk">command</span>: <span class="jv">'account_info'</span>,</div>
+      <div class="term-line">  <span class="jk">account</span>: <span class="jv">'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe'</span></div>
+      <div class="term-line">{`}`})</div>
+      <div class="term-blank"></div>
+      <div class="term-line">console.<span class="fn">log</span>(resp.result.account_data.<span class="jk">Balance</span>)</div>
+      <div class="term-line cmt">// "999991"</div>
+    </div>
+
+    <!-- Python -->
+    <div class="terminal-body tab-panel" data-panel="python">
+      <div class="term-line"><span class="kw">from</span> xrpl.clients <span class="kw">import</span> JsonRpcClient</div>
+      <div class="term-line"><span class="kw">from</span> xrpl.models <span class="kw">import</span> AccountInfo</div>
+      <div class="term-blank"></div>
+      <div class="term-line">client = <span class="fn">JsonRpcClient</span>(<span class="jv">"https://s1.xrplmesh.com/e/YOUR_TOKEN"</span>)</div>
+      <div class="term-blank"></div>
+      <div class="term-line">resp = client.<span class="fn">request</span>(<span class="fn">AccountInfo</span>(</div>
+      <div class="term-line">    account=<span class="jv">"rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe"</span></div>
+      <div class="term-line">))</div>
+      <div class="term-blank"></div>
+      <div class="term-line"><span class="fn">print</span>(resp.result[<span class="jv">"account_data"</span>][<span class="jv">"Balance"</span>])</div>
+      <div class="term-line cmt"># "999991"</div>
+    </div>
+  </div>
+
+  <div class="qs-footer">
+    <a href="/docs" class="qs-link">Read the docs <ArrowRight size={14} /></a>
+  </div>
 </section>
 
-<section class="card">
-  <h2>Features</h2>
-  <ul class="features">
-    <li>Multi-region edge caching with distributed ledger storage</li>
-    <li>Range-based sharding across nodes for full XRPL history</li>
-    <li>P2C load balancing — automatic request distribution under load</li>
-    <li>Gossip protocol for sub-second failure detection</li>
-    <li>Read repair — self-healing data gaps across the network</li>
-    <li>Only caches immutable, validated data — never stale results</li>
-    <li>WebSocket subscriptions with upstream multiplexing</li>
-    <li>Free, no API key required</li>
-  </ul>
-</section>
+<script is:inline>
+  // Tab switching
+  document.querySelectorAll('.qs-tabs .tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.qs-tabs .tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      const panel = document.querySelector(`[data-panel="${btn.dataset.tab}"]`);
+      if (panel) panel.classList.add('active');
+      const titles = { curl: 'bash', js: 'node', python: 'python3' };
+      document.getElementById('term-title').textContent = titles[btn.dataset.tab] || 'bash';
+    });
+  });
+
+  // Copy button
+  document.getElementById('copy-btn').addEventListener('click', () => {
+    const active = document.querySelector('.tab-panel.active');
+    const lines = [...active.querySelectorAll('.term-line, .resp')].map(l => l.textContent).join('\n');
+    navigator.clipboard.writeText(lines).then(() => {
+      const btn = document.getElementById('copy-btn');
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+      setTimeout(() => btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>', 1500);
+    });
+  });
+</script>
 
 <style>
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin-bottom: 24px; }
-  .card h2 { font-size: 1.2rem; margin-bottom: 16px; color: var(--text); }
-  .endpoint { margin-bottom: 14px; }
-  .method { display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-right: 8px; color: #fff; vertical-align: middle; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+  .card h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+  .endpoints { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+  .endpoint {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    transition: border-color 0.2s;
+  }
+  .endpoint:hover { border-color: rgba(88,166,255,0.3); }
+  .endpoint-header { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .method {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    color: #fff;
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+  }
   .method.post { background: var(--green); }
-  .method.get { background: #1f6feb; }
   .method.ws { background: #8957e5; }
-  .url { color: var(--accent); font-size: 0.9rem; }
-  .desc { color: var(--text-muted); font-size: 0.9rem; margin-top: 2px; }
-  pre { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 16px; overflow-x: auto; font-size: 0.85rem; color: var(--text); line-height: 1.6; }
-  .c { color: var(--text-dim); }
-  .s { color: #a5d6ff; }
-  .features { list-style: none; padding: 0; }
-  .features li { padding: 6px 0; padding-left: 20px; position: relative; color: var(--text-muted); font-size: 0.95rem; }
-  .features li::before { content: ''; position: absolute; left: 0; top: 14px; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+  .url { color: var(--accent); font-size: 0.85rem; }
+  .desc { color: var(--text-muted); font-size: 0.82rem; margin: 0; padding-left: 52px; }
+
+  /* Quick Start */
+  .qs {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+  .qs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .qs h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 4px; }
+  .qs-sub { color: var(--text-muted); font-size: 0.88rem; margin: 0; }
+
+  /* Tabs */
+  .qs-tabs { display: flex; gap: 4px; background: rgba(0,0,0,0.3); padding: 3px; border-radius: 8px; }
+  .tab {
+    padding: 6px 14px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: var(--mono);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab:hover { color: var(--text-muted); }
+  .tab.active { background: rgba(88,166,255,0.1); color: var(--accent); }
+
+  /* Terminal */
+  .terminal {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03);
+  }
+  .terminal-bar {
+    background: linear-gradient(180deg, #1e222a 0%, #181c24 100%);
+    padding: 11px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .terminal-dots { display: flex; gap: 7px; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; box-shadow: inset 0 -1px 1px rgba(0,0,0,0.15); }
+  .dot.y { background: #febc2e; box-shadow: inset 0 -1px 1px rgba(0,0,0,0.15); }
+  .dot.g { background: #28c840; box-shadow: inset 0 -1px 1px rgba(0,0,0,0.15); }
+  .terminal-title { font-size: 0.7rem; color: rgba(255,255,255,0.25); font-family: var(--mono); }
+  .copy-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 5px;
+    color: rgba(255,255,255,0.3);
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    line-height: 1;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: rgba(88,166,255,0.3); }
+
+  .terminal-body {
+    background: #0c1018;
+    padding: 20px 22px;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    line-height: 1.8;
+    min-height: 280px;
+    display: none;
+  }
+  .tab-panel.active { display: block; }
+  .term-line { white-space: pre-wrap; word-break: break-all; }
+  .term-blank { height: 10px; }
+  .prompt { color: #3fb950; font-weight: 700; margin-right: 6px; }
+  .cmd { color: #e6edf3; }
+  .out { color: rgba(230,237,243,0.55); }
+  .kw { color: #ff7b72; }
+  .fn { color: #d2a8ff; }
+  .jk { color: #79c0ff; }
+  .jv { color: #a5d6ff; }
+  .jn { color: #d2a8ff; }
+  .jb { color: #7ee787; }
+  .cmt { color: rgba(255,255,255,0.2); }
+  .resp { white-space: pre-wrap; }
+  .cursor {
+    display: inline-block;
+    width: 8px;
+    height: 16px;
+    background: var(--accent);
+    animation: blink 1s step-end infinite;
+    vertical-align: text-bottom;
+    border-radius: 1px;
+  }
+
+  /* Typing animation */
+  .typed {
+    display: inline-block;
+    overflow: hidden;
+    white-space: pre;
+    width: 0;
+    animation: typing 1.2s steps(var(--chars, 40)) forwards;
+    animation-delay: var(--delay, 0s);
+  }
+  .fade-in {
+    opacity: 0;
+    animation: fadein 0.15s ease forwards;
+    animation-delay: var(--delay, 0s);
+  }
+  @keyframes typing { to { width: 100%; } }
+  @keyframes fadein { to { opacity: 1; } }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* Footer link */
+  .qs-footer { margin-top: 16px; text-align: right; }
+  .qs-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    color: var(--accent);
+    font-weight: 500;
+    transition: gap 0.2s;
+  }
+  .qs-link:hover { gap: 10px; text-decoration: none; }
+
+  @media (max-width: 600px) {
+    .qs-header { flex-direction: column; }
+    .terminal-body { font-size: 0.72rem; padding: 14px 16px; min-height: 240px; }
+  }
 </style>
