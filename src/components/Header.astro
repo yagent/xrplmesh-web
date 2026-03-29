@@ -1,0 +1,76 @@
+---
+import { getSessionFromCookie } from '../lib/auth';
+
+const session = getSessionFromCookie(Astro.request);
+const path = Astro.url.pathname;
+---
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo"><span class="accent">XRPL</span> Mesh</a>
+    <div class="nav-links">
+      <a href="/#pricing" class:list={[{ active: path === '/' }]}>Pricing</a>
+      <a href="/docs" class:list={[{ active: path === '/docs' }]}>Docs</a>
+      <a href="/agents" class:list={[{ active: path === '/agents' }]}>Agents</a>
+      <a href="/stats" class:list={[{ active: path === '/stats' }]}>Stats</a>
+      <a href="/status" class:list={[{ active: path === '/status' }]}>Status</a>
+      {session ? (
+        <a href="/dashboard" class:list={['nav-cta', { active: path === '/dashboard' }]}>Dashboard</a>
+      ) : (
+        <a href="/api/auth/login" class="nav-cta">Sign In</a>
+      )}
+    </div>
+    <button class="nav-mobile" id="nav-toggle" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<script is:inline>
+  const toggle = document.getElementById('nav-toggle');
+  const links = document.querySelector('.nav-links');
+  if (toggle && links) {
+    toggle.addEventListener('click', () => {
+      links.classList.toggle('open');
+      toggle.classList.toggle('open');
+    });
+  }
+</script>
+
+<style>
+  .nav { position: sticky; top: 0; z-index: 100; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+  .nav-inner { max-width: 1400px; margin: 0 auto; padding: 12px 40px; display: flex; justify-content: space-between; align-items: center; }
+  .nav-logo { font-weight: 700; font-size: 1rem; color: var(--text); }
+  .nav-logo:hover { text-decoration: none; }
+  .nav-links { display: flex; align-items: center; gap: 24px; font-size: 0.85rem; }
+  .nav-links a { color: var(--text-muted); transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text); text-decoration: none; }
+  .nav-links a.active { color: var(--text); }
+  .nav-cta { padding: 6px 16px !important; border: 1px solid var(--border); border-radius: 6px; color: var(--text) !important; }
+  .nav-cta:hover { border-color: var(--accent); }
+  .nav-cta.active { border-color: var(--accent); color: var(--accent) !important; }
+  .nav-mobile { display: none; background: none; border: none; cursor: pointer; padding: 4px; flex-direction: column; gap: 4px; }
+  .nav-mobile span { display: block; width: 18px; height: 2px; background: var(--text-muted); border-radius: 1px; transition: all 0.2s; }
+  .nav-mobile.open span:nth-child(1) { transform: rotate(45deg) translate(3px, 4px); }
+  .nav-mobile.open span:nth-child(2) { opacity: 0; }
+  .nav-mobile.open span:nth-child(3) { transform: rotate(-45deg) translate(3px, -4px); }
+
+  @media (max-width: 700px) {
+    .nav-inner { padding: 12px 20px; }
+    .nav-mobile { display: flex; }
+    .nav-links {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      flex-direction: column;
+      background: rgba(0,0,0,0.95);
+      backdrop-filter: blur(12px);
+      padding: 16px 20px;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-links.open { display: flex; }
+  }
+</style>

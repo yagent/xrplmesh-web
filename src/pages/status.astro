@@ -1,0 +1,192 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+const NODES = [
+  { id: 'slc-2', region: 'US West', ip: '144.225.144.34' },
+  { id: 'slc-1', region: 'US West', ip: '144.225.144.33' },
+  { id: 'nyc-1', region: 'US East', ip: '157.254.224.90' },
+  { id: 'lax-1', region: 'US West', ip: '172.99.249.123' },
+  { id: 'mia-1', region: 'US East', ip: '69.166.231.61' },
+  { id: 'us-1', region: 'US East', ip: '74.208.76.39' },
+  { id: 'us-2', region: 'US East', ip: '74.208.76.45' },
+  { id: 'rbx-1', region: 'EU West', ip: '137.74.16.215' },
+  { id: 'rbx-2', region: 'EU West', ip: '137.74.16.217' },
+  { id: 'rbx-3', region: 'EU West', ip: '137.74.16.216' },
+  { id: 'hel1-1', region: 'EU North', ip: '204.168.216.162' },
+  { id: 'hel1-2', region: 'EU North', ip: '37.27.195.72' },
+  { id: 'hel1-3', region: 'EU North', ip: '46.62.200.125' },
+  { id: 'hel1-4', region: 'EU North', ip: '65.21.83.210' },
+  { id: 'ded-1', region: 'EU North', ip: '65.108.227.154' },
+  { id: 'de-1', region: 'EU Central', ip: '135.125.254.37' },
+  { id: 'de-2', region: 'EU Central', ip: '135.125.254.47' },
+  { id: 'de-3', region: 'EU Central', ip: '135.125.254.48' },
+  { id: 'it-1', region: 'EU South', ip: '57.131.46.7' },
+  { id: 'it-2', region: 'EU South', ip: '57.131.46.8' },
+  { id: 'it-3', region: 'EU South', ip: '57.131.46.9' },
+];
+
+const results = await Promise.all(
+  NODES.map(async (node, idx) => {
+    const t0 = Date.now();
+    try {
+      const resp = await fetch(`http://${node.ip}:9000/health`, { signal: AbortSignal.timeout(5000) });
+      const latency = Date.now() - t0;
+      if (resp.ok) {
+        const h = await resp.json();
+        return { label: `Node ${idx + 1}`, region: node.region, status: 'online' as const, latency, ledger: h.latest_ledger || 0 };
+      }
+      return { label: `Node ${idx + 1}`, region: node.region, status: 'degraded' as const, latency, ledger: 0 };
+    } catch {
+      return { label: `Node ${idx + 1}`, region: node.region, status: 'offline' as const, latency: Date.now() - t0, ledger: 0 };
+    }
+  })
+);
+
+const online = results.filter(n => n.status === 'online').length;
+const ledgers = results.filter(n => n.ledger > 0).map(n => n.ledger);
+const latestLedger = Math.max(0, ...ledgers);
+const allSynced = ledgers.length > 0 && ledgers.every(l => Math.abs(l - latestLedger) < 5);
+const overall = online === results.length ? 'operational' : online > results.length * 0.8 ? 'degraded' : 'outage';
+const overallColor = overall === 'operational' ? '#238636' : overall === 'degraded' ? '#d29922' : '#f85149';
+const overallLabel = overall === 'operational' ? 'All Systems Operational' : overall === 'degraded' ? 'Partial Degradation' : 'Service Disruption';
+
+// Group by region
+const regionMap = new Map<string, typeof results>();
+for (const node of results) {
+  if (!regionMap.has(node.region)) regionMap.set(node.region, []);
+  regionMap.get(node.region)!.push(node);
+}
+
+function statusColor(s: string) {
+  return s === 'online' ? '#238636' : s === 'degraded' ? '#d29922' : '#f85149';
+}
+---
+
+<Base title="Network Status - XRPL Mesh" description="Real-time health status of all XRPL Mesh nodes across 9 regions.">
+  <Header />
+
+  <div class="container">
+    <div class="banner">
+      <div class="banner-icon" id="b-icon" style={`background:${overallColor};box-shadow:0 0 12px ${overallColor}`}></div>
+      <div class="banner-text">
+        <span class="banner-title" id="b-title">{overallLabel}</span>
+        <span class="banner-sub" id="b-sub">{allSynced ? 'All nodes synced' : 'Nodes syncing'}</span>
+      </div>
+      <div class="banner-meta">
+        <span class="banner-val mono" id="b-ledger">{latestLedger.toLocaleString()}</span>
+        <span class="banner-label">Latest Ledger</span>
+      </div>
+      <div class="banner-meta">
+        <span class="banner-val mono" id="b-count">{online}/{results.length}</span>
+        <span class="banner-label">Nodes Online</span>
+      </div>
+    </div>
+
+    {[...regionMap.entries()].map(([region, nodes]) => {
+      const regionOnline = nodes.filter(n => n.status === 'online').length;
+      const regionColor = regionOnline === nodes.length ? '#238636' : '#d29922';
+      return (
+        <div class="region-section">
+          <div class="region-header">
+            <div class="region-dot" data-region-dot={region} style={`background:${regionColor};box-shadow:0 0 6px ${regionColor}`}></div>
+            <span class="region-name">{region}</span>
+            <span class="region-count" data-region-count={region}>{regionOnline}/{nodes.length}</span>
+          </div>
+          <div class="nodes-row">
+            {nodes.map(n => (
+              <div class="node-card" data-node={n.label}>
+                <div class="node-top">
+                  <div class="node-dot" data-node-dot={n.label} style={`background:${statusColor(n.status)};box-shadow:0 0 4px ${statusColor(n.status)}`}></div>
+                  <span class="node-id">{n.label}</span>
+                  <span class="node-status" data-node-status={n.label} style={`color:${statusColor(n.status)}`}>{n.status}</span>
+                </div>
+                <div class="node-detail">
+                  <span class="nd-item"><span class="nd-label">Latency</span><span class="nd-val" data-node-latency={n.label}>{n.latency}ms</span></span>
+                  <span class="nd-item"><span class="nd-label">Ledger</span><span class="nd-val" data-node-ledger={n.label}>{n.ledger ? n.ledger.toLocaleString() : '--'}</span></span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    })}
+  </div>
+
+  <script is:inline>
+  var SC={online:'#238636',degraded:'#d29922',offline:'#f85149'};
+  var SL={operational:'All Systems Operational',degraded:'Partial Degradation',outage:'Service Disruption'};
+  setInterval(async function(){
+    try{
+      var r=await fetch('/api/status');if(!r.ok)return;var d=await r.json();
+      var c=d.overall==='operational'?'#238636':d.overall==='degraded'?'#d29922':'#f85149';
+      var bi=document.getElementById('b-icon');bi.style.background=c;bi.style.boxShadow='0 0 12px '+c;
+      document.getElementById('b-title').textContent=SL[d.overall]||d.overall;
+      document.getElementById('b-sub').textContent=d.synced?'All nodes synced':'Nodes syncing';
+      document.getElementById('b-ledger').textContent=d.latest_ledger?d.latest_ledger.toLocaleString():'--';
+      document.getElementById('b-count').textContent=d.nodes_online+'/'+d.nodes_total;
+      var regions={};
+      d.nodes.forEach(function(n){
+        if(!regions[n.region])regions[n.region]={total:0,online:0};
+        regions[n.region].total++;if(n.status==='online')regions[n.region].online++;
+        var nc=SC[n.status];
+        var dot=document.querySelector('[data-node-dot="'+n.label+'"]');
+        if(dot){dot.style.background=nc;dot.style.boxShadow='0 0 4px '+nc}
+        var st=document.querySelector('[data-node-status="'+n.label+'"]');
+        if(st){st.textContent=n.status;st.style.color=nc}
+        var lat=document.querySelector('[data-node-latency="'+n.label+'"]');
+        if(lat)lat.textContent=n.latency+'ms';
+        var led=document.querySelector('[data-node-ledger="'+n.label+'"]');
+        if(led)led.textContent=n.ledger?n.ledger.toLocaleString():'--';
+      });
+      for(var reg in regions){
+        var rc=regions[reg].online===regions[reg].total?'#238636':'#d29922';
+        var rd=document.querySelector('[data-region-dot="'+reg+'"]');
+        if(rd){rd.style.background=rc;rd.style.boxShadow='0 0 6px '+rc}
+        var rct=document.querySelector('[data-region-count="'+reg+'"]');
+        if(rct)rct.textContent=regions[reg].online+'/'+regions[reg].total;
+      }
+    }catch(e){}
+  },15000);
+  </script>
+  <Footer />
+</Base>
+
+<style>
+  .mono { font-family: var(--mono); }
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px 40px 48px; }
+
+  .banner { display: flex; align-items: center; gap: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 28px; margin-bottom: 20px; }
+  .banner-icon { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .banner-text { flex: 1; }
+  .banner-title { display: block; font-size: 1.05rem; font-weight: 700; }
+  .banner-sub { display: block; font-size: 0.75rem; color: var(--text-dim); margin-top: 2px; }
+  .banner-meta { text-align: center; padding: 0 16px; border-left: 1px solid var(--border); }
+  .banner-val { display: block; font-size: 1.1rem; font-weight: 700; }
+  .banner-label { display: block; font-size: 0.62rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+
+  .region-section { margin-bottom: 16px; }
+  .region-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid rgba(88,166,255,0.04); }
+  .region-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .region-name { font-size: 0.85rem; font-weight: 600; }
+  .region-count { font-size: 0.72rem; color: var(--text-dim); font-family: var(--mono); margin-left: auto; }
+  .nodes-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+  .node-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+  .node-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .node-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .node-id { font-size: 0.82rem; font-weight: 600; font-family: var(--mono); }
+  .node-status { margin-left: auto; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  .node-detail { display: flex; gap: 16px; }
+  .nd-item { display: flex; flex-direction: column; }
+  .nd-label { font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
+  .nd-val { font-size: 0.78rem; font-family: var(--mono); color: var(--text-muted); }
+
+  @media (max-width: 768px) {
+    .container { padding: 16px 16px 40px; }
+    .banner { flex-wrap: wrap; gap: 12px; padding: 16px 18px; }
+    .banner-meta { border-left: none; padding: 0; text-align: left; }
+    .nodes-row { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 480px) { .nodes-row { grid-template-columns: 1fr; } }
+</style>

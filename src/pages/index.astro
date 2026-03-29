@@ -1,5 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
 import Stats from '../components/Stats.astro';
 import ApiDocs from '../components/ApiDocs.astro';
 import NetworkMap from '../components/NetworkMap.astro';
@@ -54,19 +56,7 @@ const regionCount = Object.keys(network.regions || {}).length;
 ---
 
 <Base title="XRPL Mesh — Full History XRP Ledger Node API Endpoint" description="Free XRP Ledger full history node endpoint. 21 nodes across 9 regions. WebSocket and JSON-RPC API. Get started in seconds.">
-  <nav class="nav">
-    <div class="nav-inner">
-      <a href="/" class="nav-logo"><span class="accent">XRPL</span> Mesh</a>
-      <div class="nav-links">
-        <a href="#pricing">Pricing</a>
-        <a href="/docs">Docs</a>
-        <a href="/agents">Agents</a>
-        <a href="/stats">Stats</a>
-        <a href="/status">Status</a>
-        {session ? <a href="/dashboard" class="nav-cta">Dashboard</a> : <a href="/api/auth/login" class="nav-cta">Sign In</a>}
-      </div>
-    </div>
-  </nav>
+  <Header />
   <div class="hero">
     <canvas id="cmd-flow" class="grid-canvas"></canvas>
     <div class="hero-glow"></div>
@@ -278,25 +268,11 @@ const regionCount = Object.keys(network.regions || {}).length;
     })();
     </script>
 
-    <footer>
-      <div class="footer-inner">
-        <span>XRPL Mesh</span>
-        <span class="sep"></span>
-        <span>Open distributed XRPL infrastructure</span>
-      </div>
-    </footer>
+    <Footer />
   </div>
 </Base>
 
 <style>
-  .nav { position: sticky; top: 0; z-index: 100; background: rgba(0,0,0,0.8); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
-  .nav-inner { max-width: 1400px; margin: 0 auto; padding: 12px 40px; display: flex; justify-content: space-between; align-items: center; }
-  .nav-logo { font-weight: 700; font-size: 1rem; color: var(--text); }
-  .nav-logo:hover { text-decoration: none; }
-  .nav-links { display: flex; align-items: center; gap: 24px; font-size: 0.85rem; }
-  .nav-links a { color: var(--text-muted); transition: color 0.2s; }
-  .nav-links a:hover { color: var(--text); text-decoration: none; }
-  .nav-cta { padding: 6px 16px; border: 1px solid var(--border); border-radius: 6px; color: var(--text) !important; }
   .nav-cta:hover { border-color: var(--accent); }
   .grid-canvas {
     position: absolute;
@@ -485,7 +461,6 @@ const regionCount = Object.keys(network.regions || {}).length;
   .feature h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; color: var(--text); }
   .feature p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.55; }
 
-  footer { margin: 56px 0 36px; }
   @media (max-width: 768px) {
     .nav-inner { padding: 10px 16px; }
     .nav-links { gap: 14px; font-size: 0.8rem; }
@@ -510,13 +485,4 @@ const regionCount = Object.keys(network.regions || {}).length;
     .data-sep { display: none; }
     .data-cell { padding: 8px 12px; background: rgba(88,166,255,0.03); border-radius: 8px; border: 1px solid rgba(88,166,255,0.06); }
   }
-  .footer-inner {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    color: var(--text-dim);
-    font-size: 0.82rem;
-  }
-  .sep { width: 3px; height: 3px; background: var(--text-dim); border-radius: 50%; }
 </style>

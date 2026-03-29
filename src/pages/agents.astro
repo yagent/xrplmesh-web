@@ -1,0 +1,384 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Base title="XRPL API for AI Agents - Build Autonomous XRP Ledger Agents | XRPL Mesh" description="Give your AI agents direct access to full history XRP Ledger data. WebSocket streaming, JSON-RPC, and MCP-ready infrastructure built for autonomous agent workflows.">
+  <Header />
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <span class="hero-badge">AI Agent Infrastructure</span>
+      <h1>Give Your AI Agents<br/><span class="accent">Full Access to the XRP Ledger</span></h1>
+      <p class="hero-sub">Purpose-built API infrastructure for autonomous agents. Query any account, stream every ledger, access full transaction history since genesis — with one endpoint.</p>
+      <div class="hero-actions">
+        <a href="/api/auth/login" class="btn btn-primary">Get Your Endpoint</a>
+        <a href="/docs" class="btn btn-ghost">View Documentation</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <!-- Why agents need dedicated infra -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-tag">The Problem</span>
+        <h2>Public XRPL Nodes Weren't Built for Agents</h2>
+        <p class="section-desc">Public endpoints rate-limit aggressively, drop WebSocket connections without warning, and lack full history. Your agent deserves infrastructure that keeps up.</p>
+      </div>
+      <div class="problems-grid">
+        <div class="problem">
+          <span class="problem-icon">5 req/s</span>
+          <h3>Aggressive Rate Limits</h3>
+          <p>Public nodes throttle at 5 requests per second. An AI agent doing account analysis burns through that in milliseconds.</p>
+        </div>
+        <div class="problem">
+          <span class="problem-icon">~50%</span>
+          <h3>Incomplete History</h3>
+          <p>Most public nodes don't serve full ledger history. Your agent can't look up transactions from 2013 or trace an account's complete activity.</p>
+        </div>
+        <div class="problem">
+          <span class="problem-icon">0 SLA</span>
+          <h3>No Reliability Guarantee</h3>
+          <p>Public infrastructure restarts without notice, drops subscriptions, and offers no uptime commitments. Agents need deterministic infrastructure.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Capabilities -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-tag">What Your Agent Gets</span>
+        <h2>Complete XRP Ledger Access in One Endpoint</h2>
+      </div>
+      <div class="capabilities">
+        <div class="cap-card">
+          <h3>Full History Since Genesis</h3>
+          <p>Every transaction, every ledger, every account state change since ledger 32,570. Your agent can trace any on-chain activity without gaps.</p>
+          <div class="cap-example">
+            <code>account_tx</code> <code>tx</code> <code>ledger</code> <code>ledger_data</code>
+          </div>
+        </div>
+        <div class="cap-card">
+          <h3>Real-Time Streaming</h3>
+          <p>WebSocket subscriptions for ledger closes, account activity, order book changes, and payment paths. Your agent reacts to on-chain events as they happen.</p>
+          <div class="cap-example">
+            <code>subscribe</code> <code>ledger</code> <code>accounts</code> <code>books</code>
+          </div>
+        </div>
+        <div class="cap-card">
+          <h3>Transaction Submission</h3>
+          <p>Submit signed transactions directly through your endpoint. Your agent can send payments, create offers, mint NFTs, and interact with AMM pools.</p>
+          <div class="cap-example">
+            <code>submit</code> <code>submit_multisigned</code> <code>fee</code>
+          </div>
+        </div>
+        <div class="cap-card">
+          <h3>Account Intelligence</h3>
+          <p>Deep account analysis — balances, trust lines, open offers, NFT holdings, payment channels, and escrows. Everything your agent needs to understand an account.</p>
+          <div class="cap-example">
+            <code>account_info</code> <code>account_lines</code> <code>account_objects</code> <code>account_offers</code>
+          </div>
+        </div>
+        <div class="cap-card">
+          <h3>DEX and Order Book Data</h3>
+          <p>Query the XRPL decentralized exchange directly. Your agent can analyze order books, find arbitrage paths, and monitor trading activity.</p>
+          <div class="cap-example">
+            <code>book_offers</code> <code>path_find</code> <code>amm_info</code> <code>book_changes</code>
+          </div>
+        </div>
+        <div class="cap-card">
+          <h3>NFT and Token Operations</h3>
+          <p>Full NFT marketplace support — browse offers, check ownership, query by issuer. Plus complete token and trust line management.</p>
+          <div class="cap-example">
+            <code>nft_info</code> <code>nft_buy_offers</code> <code>nft_sell_offers</code> <code>nfts_by_issuer</code>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Integration -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-tag">Integration</span>
+        <h2>Connect Your Agent in 30 Seconds</h2>
+        <p class="section-desc">Drop-in compatible with every XRPL client library. One URL, full access.</p>
+      </div>
+      <div class="code-examples">
+        <div class="code-block">
+          <div class="code-label">xrpl.js</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre set:html={`<span class="kw">import</span> { Client } <span class="kw">from</span> <span class="str">'xrpl'</span>;
+
+<span class="kw">const</span> client = <span class="kw">new</span> Client(<span class="str">'wss://s1.xrplmesh.com/e/YOUR_KEY'</span>);
+<span class="kw">await</span> client.connect();
+
+<span class="cm">// Query any account's complete history</span>
+<span class="kw">const</span> history = <span class="kw">await</span> client.request({
+  command: <span class="str">'account_tx'</span>,
+  account: <span class="str">'rAddress...'</span>,
+  ledger_index_min: -1,
+  ledger_index_max: -1,
+});
+
+<span class="cm">// Stream real-time ledger events</span>
+<span class="kw">await</span> client.request({
+  command: <span class="str">'subscribe'</span>,
+  streams: [<span class="str">'ledger'</span>],
+});`} />
+        </div>
+        <div class="code-block">
+          <div class="code-label">Python</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre set:html={`<span class="kw">import</span> requests
+
+endpoint = <span class="str">"https://s1.xrplmesh.com/e/YOUR_KEY"</span>
+
+<span class="cm"># Analyze any account</span>
+resp = requests.post(endpoint, json={
+    <span class="str">"method"</span>: <span class="str">"account_info"</span>,
+    <span class="str">"params"</span>: [{
+        <span class="str">"account"</span>: <span class="str">"rAddress..."</span>,
+        <span class="str">"ledger_index"</span>: <span class="str">"validated"</span>
+    }]
+}).json()
+
+balance = resp[<span class="str">"result"</span>][<span class="str">"account_data"</span>][<span class="str">"Balance"</span>]`} />
+        </div>
+        <div class="code-block">
+          <div class="code-label">cURL</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre set:html={`curl -X POST https://s1.xrplmesh.com/e/YOUR_KEY \\
+  -H <span class="str">"Content-Type: application/json"</span> \\
+  -d <span class="str">'{ "method": "server_info" }'</span>`} />
+        </div>
+      </div>
+    </section>
+
+    <!-- Use cases -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-tag">Use Cases</span>
+        <h2>What AI Agents Build on XRPL</h2>
+      </div>
+      <div class="usecases">
+        <div class="usecase">
+          <h3>Portfolio Analysis Agents</h3>
+          <p>Agents that analyze XRP wallet holdings, trust lines, NFT collections, and transaction history to provide investment insights.</p>
+        </div>
+        <div class="usecase">
+          <h3>DEX Trading Agents</h3>
+          <p>Autonomous agents that monitor XRPL order books, identify arbitrage opportunities, and execute trades on the built-in decentralized exchange.</p>
+        </div>
+        <div class="usecase">
+          <h3>Payment Automation Agents</h3>
+          <p>Agents that manage cross-border payments, escrows, and payment channels on the XRP Ledger with sub-second finality.</p>
+        </div>
+        <div class="usecase">
+          <h3>Compliance and Monitoring Agents</h3>
+          <p>Agents that track account activity, flag suspicious transactions, and generate compliance reports using full ledger history.</p>
+        </div>
+        <div class="usecase">
+          <h3>NFT Market Agents</h3>
+          <p>Agents that browse XRPL NFT offers, analyze pricing trends, manage collections, and automate marketplace interactions.</p>
+        </div>
+        <div class="usecase">
+          <h3>Data Pipeline Agents</h3>
+          <p>Agents that ingest real-time ledger data via WebSocket, transform it, and feed analytics dashboards, ML models, or alerting systems.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Infrastructure stats -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-tag">Infrastructure</span>
+        <h2>Built for Always-On Agent Workloads</h2>
+      </div>
+      <div class="infra-grid">
+        <div class="infra-card">
+          <span class="infra-value">21</span>
+          <span class="infra-label">Global Nodes</span>
+        </div>
+        <div class="infra-card">
+          <span class="infra-value">9</span>
+          <span class="infra-label">Regions</span>
+        </div>
+        <div class="infra-card">
+          <span class="infra-value">100%</span>
+          <span class="infra-label">Ledger History</span>
+        </div>
+        <div class="infra-card">
+          <span class="infra-value">&lt;400ms</span>
+          <span class="infra-label">Avg Latency</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ with schema -->
+    <section class="section" id="faq">
+      <div class="section-header">
+        <h2>Frequently Asked Questions</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>How do I connect an AI agent to the XRP Ledger?</summary>
+          <p>Sign up for a free XRPL Mesh endpoint. Use the WebSocket URL with xrpl.js, or the HTTP URL with any language's HTTP client. Your agent gets full access to every XRPL command — account queries, transaction history, ledger data, and real-time subscriptions.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What XRPL data can my AI agent access?</summary>
+          <p>Everything on the XRP Ledger since genesis — account balances, trust lines, transaction history, order books, NFTs, AMM pools, payment channels, and escrows. Both historical and real-time data via WebSocket streaming.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can my AI agent submit transactions to the XRP Ledger?</summary>
+          <p>Yes. Your agent can sign and submit transactions through the submit command — payments, offers, NFT operations, trust line changes, and more. Transactions finalize in 3-5 seconds on the XRP Ledger.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Is there a free tier for AI agent development?</summary>
+          <p>Yes. Sign up with Google and get a free endpoint with 10M monthly credits and 15 requests per second — enough to build and test your agent. Paid plans scale to 2,000 requests per second.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What makes XRPL Mesh different from public XRP Ledger nodes?</summary>
+          <p>Full ledger history since genesis (public nodes often lack this), higher rate limits, dedicated endpoints, automatic failover across 21 nodes, WebSocket subscription reliability, and gzip compression for large responses.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Does XRPL Mesh work with xrpl.js and xrpl-py?</summary>
+          <p>Yes. XRPL Mesh is a drop-in replacement for any XRPL endpoint. Replace the URL in your xrpl.js Client or Python xrpl library configuration — no other code changes needed.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I use XRPL Mesh with an MCP server for AI assistants?</summary>
+          <p>Yes. Point your MCP server's XRPL connection to your XRPL Mesh endpoint. Your AI assistant gets reliable, full-history access to the XRP Ledger through the MCP protocol.</p>
+        </details>
+        <details class="faq-item">
+          <summary>How does real-time WebSocket streaming work for agents?</summary>
+          <p>Connect via WebSocket and subscribe to ledger closes, account activity, or order book changes. Your agent receives events as they happen on the XRP Ledger — no polling required.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <h2>Your Agent Is One Endpoint Away</h2>
+      <p>Full history. Real-time streaming. 21 nodes. Free tier included.</p>
+      <div class="hero-actions">
+        <a href="/api/auth/login" class="btn btn-primary">Get Your Endpoint</a>
+        <a href="/docs" class="btn btn-ghost">Read the Docs</a>
+      </div>
+    </section>
+
+    <Footer />
+  </div>
+
+  <script is:inline>
+  function copyCode(btn){var t=btn.parentElement.querySelector('pre').textContent;navigator.clipboard.writeText(t).then(function(){btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy'},1500)})}
+  </script>
+
+  <!-- FAQ Schema for rich snippets -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      { "@type": "Question", "name": "How do I connect an AI agent to the XRP Ledger?", "acceptedAnswer": { "@type": "Answer", "text": "Sign up for a free XRPL Mesh endpoint. Use the WebSocket URL with xrpl.js, or the HTTP URL with any language's HTTP client. Your agent gets full access to every XRPL command." }},
+      { "@type": "Question", "name": "What XRPL data can my AI agent access?", "acceptedAnswer": { "@type": "Answer", "text": "Everything on the XRP Ledger since genesis — account balances, trust lines, transaction history, order books, NFTs, AMM pools, payment channels, and escrows." }},
+      { "@type": "Question", "name": "Can my AI agent submit transactions to the XRP Ledger?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Your agent can sign and submit transactions through the submit command — payments, offers, NFT operations, trust line changes, and more." }},
+      { "@type": "Question", "name": "Is there a free tier for AI agent development?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Sign up with Google and get a free endpoint with 10M monthly credits and 15 requests per second." }},
+      { "@type": "Question", "name": "Does XRPL Mesh work with xrpl.js and xrpl-py?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. XRPL Mesh is a drop-in replacement for any XRPL endpoint. Replace the URL — no other code changes needed." }},
+      { "@type": "Question", "name": "Can I use XRPL Mesh with an MCP server for AI assistants?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Point your MCP server's XRPL connection to your XRPL Mesh endpoint for reliable, full-history access through the MCP protocol." }},
+    ]
+  })} />
+</Base>
+
+<style>
+  .accent { color: var(--accent); text-shadow: 0 0 40px rgba(88,166,255,0.2); }
+  .container { max-width: 1400px; margin: 0 auto; padding: 0 40px; }
+
+  /* Hero */
+  .hero { text-align: center; padding: 100px 40px 80px; }
+  .hero-badge { display: inline-block; font-size: 0.68rem; font-weight: 600; color: var(--accent); border: 1px solid rgba(88,166,255,0.2); background: rgba(88,166,255,0.05); border-radius: 20px; padding: 5px 16px; margin-bottom: 20px; letter-spacing: 0.08em; text-transform: uppercase; }
+  h1 { font-size: 3.2rem; font-weight: 800; line-height: 1.15; margin-bottom: 20px; letter-spacing: -0.02em; }
+  .hero-sub { color: var(--text-muted); font-size: 1.05rem; line-height: 1.7; max-width: 600px; margin: 0 auto 32px; }
+  .hero-actions { display: flex; gap: 12px; justify-content: center; }
+  .btn { display: inline-block; padding: 12px 28px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; cursor: pointer; }
+  .btn-primary { background: var(--accent); color: #0a0e17; box-shadow: 0 0 24px rgba(88,166,255,0.15); }
+  .btn-primary:hover { background: #79c0ff; text-decoration: none; box-shadow: 0 0 36px rgba(88,166,255,0.25); }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text-muted); background: transparent; }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--text); text-decoration: none; }
+
+  /* Sections */
+  .section { margin-bottom: 64px; }
+  .section-header { text-align: center; margin-bottom: 36px; }
+  .section-tag { display: inline-block; font-size: 0.65rem; font-weight: 600; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; }
+  .section h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 10px; }
+  .section-desc { color: var(--text-muted); font-size: 0.95rem; max-width: 580px; margin: 0 auto; line-height: 1.6; }
+
+  /* Problems */
+  .problems-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .problem { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 28px 24px; }
+  .problem-icon { display: block; font-family: var(--mono); font-size: 1.4rem; font-weight: 800; color: #f85149; margin-bottom: 12px; }
+  .problem h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; }
+  .problem p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.55; }
+
+  /* Capabilities */
+  .capabilities { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .cap-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 28px 24px; transition: border-color 0.2s; }
+  .cap-card:hover { border-color: rgba(88,166,255,0.2); }
+  .cap-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; }
+  .cap-card p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.55; margin-bottom: 14px; }
+  .cap-example { display: flex; flex-wrap: wrap; gap: 6px; }
+  .cap-example code { font-size: 0.72rem; background: rgba(88,166,255,0.06); border: 1px solid rgba(88,166,255,0.1); padding: 3px 8px; border-radius: 4px; color: var(--accent); font-family: var(--mono); }
+
+  /* Code examples */
+  .code-examples { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .code-label { padding: 8px 16px; font-size: 0.7rem; font-weight: 600; color: var(--text-dim); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.05em; }
+  .code-block { position: relative; }
+  .code-block pre { padding: 16px; font-size: 0.78rem; line-height: 1.6; color: var(--text-muted); overflow: hidden; font-family: var(--mono); margin: 0; }
+  .copy-btn { position: absolute; top: 36px; right: 8px; padding: 4px 10px; background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); border-radius: 5px; color: var(--text-dim); font-size: 0.65rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .kw { color: #ff7b72; }
+  .str { color: #a5d6ff; }
+  .cm { color: #484f58; }
+
+  /* Use cases */
+  .usecases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .usecase { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; }
+  .usecase h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; }
+  .usecase p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.55; }
+
+  /* Infra stats */
+  .infra-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .infra-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 28px; text-align: center; }
+  .infra-value { display: block; font-size: 2rem; font-weight: 800; color: var(--accent); font-family: var(--mono); }
+  .infra-label { display: block; font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 6px; }
+
+  /* FAQ */
+  .faq-list { max-width: 800px; margin: 0 auto; }
+  .faq-item { border-bottom: 1px solid var(--border); }
+  .faq-item summary { padding: 16px 0; font-size: 0.92rem; font-weight: 600; cursor: pointer; color: var(--text); list-style: none; display: flex; justify-content: space-between; align-items: center; }
+  .faq-item summary::after { content: '+'; font-size: 1.2rem; color: var(--text-dim); }
+  .faq-item[open] summary::after { content: '-'; }
+  .faq-item p { padding: 0 0 16px; color: var(--text-muted); font-size: 0.88rem; line-height: 1.65; }
+
+  /* CTA */
+  .cta-section { text-align: center; padding: 64px 0; margin-bottom: 40px; border-top: 1px solid var(--border); }
+  .cta-section h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 10px; }
+  .cta-section p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 28px; }
+
+  .sep { width: 3px; height: 3px; background: var(--text-dim); border-radius: 50%; }
+
+  @media (max-width: 1024px) {
+    .capabilities, .usecases, .code-examples { grid-template-columns: 1fr 1fr; }
+    .infra-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .hero { padding: 60px 20px 48px; }
+    h1 { font-size: 2rem; }
+    .section h2 { font-size: 1.3rem; }
+    .problems-grid, .capabilities, .usecases, .code-examples { grid-template-columns: 1fr; }
+    .infra-grid { grid-template-columns: 1fr 1fr; }
+    .container { padding: 0 16px; }
+  }
+  @media (max-width: 480px) {
+    h1 { font-size: 1.7rem; }
+    .hero-actions { flex-direction: column; align-items: center; }
+  }
+</style>

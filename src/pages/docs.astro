@@ -1,0 +1,204 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Base title="XRPL API Documentation — XRP Ledger Node Endpoint" description="How to connect to XRPL Mesh full history nodes. WebSocket, JSON-RPC, xrpl.js, Python examples. Free tier available.">
+  <Header />
+
+  <div class="docs">
+    <h1>Documentation</h1>
+
+    <section id="quickstart">
+      <h2>Quick Start</h2>
+      <p>XRPL Mesh is a drop-in replacement for any XRPL endpoint. Replace your URL and you're connected.</p>
+
+      <h3>Your Endpoint</h3>
+      <p>After signing in, you get a unique endpoint URL:</p>
+      <div class="code">
+        <div class="code-label">HTTP</div>
+        <pre>https://s1.xrplmesh.com/e/xm_live_your_token_here</pre>
+      </div>
+      <div class="code">
+        <div class="code-label">WebSocket</div>
+        <pre>wss://s1.xrplmesh.com/e/xm_live_your_token_here</pre>
+      </div>
+      <p class="note">Sign in at <a href="/dashboard">xrplmesh.com/dashboard</a> to get your endpoint.</p>
+    </section>
+
+    <section id="http">
+      <h2>HTTP JSON-RPC</h2>
+      <p>Send a POST request with your XRPL command as JSON.</p>
+
+      <h3>Using your endpoint URL (recommended)</h3>
+      <div class="code">
+        <div class="code-label">curl</div>
+        <pre>curl -X POST https://s1.xrplmesh.com/e/YOUR_TOKEN \
+  -H "Content-Type: application/json" \
+  -d '{"{"}command":"account_info","account":"rN7n3...","ledger_index":"validated"{"}"}'</pre>
+      </div>
+
+      <h3>Using X-API-Key header</h3>
+      <div class="code">
+        <div class="code-label">curl</div>
+        <pre>curl -X POST https://s1.xrplmesh.com/ \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: xm_live_your_token_here" \
+  -d '{"{"}command":"server_info"{"}"}'</pre>
+      </div>
+
+      <h3>Without authentication (free tier, lower limits)</h3>
+      <div class="code">
+        <div class="code-label">curl</div>
+        <pre>curl -X POST https://s1.xrplmesh.com/ \
+  -H "Content-Type: application/json" \
+  -d '{"{"}command":"server_info"{"}"}'</pre>
+      </div>
+    </section>
+
+    <section id="websocket">
+      <h2>WebSocket</h2>
+      <p>Connect via WebSocket for subscriptions and streaming.</p>
+
+      <div class="code">
+        <div class="code-label">JavaScript</div>
+        <pre>const ws = new WebSocket('wss://s1.xrplmesh.com/e/YOUR_TOKEN');
+
+ws.onopen = () => {'{'}
+  ws.send(JSON.stringify({'{'}
+    command: 'subscribe',
+    streams: ['ledger']
+  {'}'}));
+{'}'};
+
+ws.onmessage = (msg) => {'{'}
+  console.log(JSON.parse(msg.data));
+{'}'};</pre>
+      </div>
+    </section>
+
+    <section id="xrpljs">
+      <h2>xrpl.js</h2>
+      <div class="code">
+        <div class="code-label">JavaScript</div>
+        <pre>import {'{'} Client {'}'} from 'xrpl';
+
+const client = new Client('wss://s1.xrplmesh.com/e/YOUR_TOKEN');
+await client.connect();
+
+const info = await client.request({'{'}
+  command: 'account_info',
+  account: 'rN7n3473SoZtKGBB5JnUB29hMcFSfZaV7v',
+  ledger_index: 'validated'
+{'}'});
+
+console.log(info.result.account_data);</pre>
+      </div>
+    </section>
+
+    <section id="python">
+      <h2>Python</h2>
+      <div class="code">
+        <div class="code-label">Python</div>
+        <pre>import requests
+
+resp = requests.post(
+    'https://s1.xrplmesh.com/e/YOUR_TOKEN',
+    json={'{'}
+        'method': 'account_info',
+        'params': [{'{'}
+            'account': 'rN7n3473SoZtKGBB5JnUB29hMcFSfZaV7v',
+            'ledger_index': 'validated'
+        {'}'}]
+    {'}'}
+)
+
+print(resp.json()['result']['account_data'])</pre>
+      </div>
+    </section>
+
+    <section id="response-headers">
+      <h2>Response Headers</h2>
+      <p>Every response includes rate limit info:</p>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Header</th><th>Description</th></tr>
+          <tr><td><code>X-RateLimit-Limit</code></td><td>Your plan's requests per second</td></tr>
+          <tr><td><code>X-RateLimit-Remaining</code></td><td>Tokens remaining in current window</td></tr>
+          <tr><td><code>Cache-Control</code></td><td><code>immutable</code> for validated data</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section id="errors">
+      <h2>Error Responses</h2>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Status</th><th>Error</th><th>Meaning</th></tr>
+          <tr><td>401</td><td><code>invalid_endpoint</code></td><td>Token not recognized</td></tr>
+          <tr><td>403</td><td><code>endpoint_disabled</code></td><td>Account deactivated</td></tr>
+          <tr><td>429</td><td><code>rate_limited</code></td><td>Exceeded requests per second</td></tr>
+          <tr><td>429</td><td><code>monthly_quota_exceeded</code></td><td>Monthly credits exhausted</td></tr>
+          <tr><td>400</td><td><code>invalid_json</code></td><td>Request body not valid JSON</td></tr>
+          <tr><td>400</td><td><code>missing method or command</code></td><td>No command in payload</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section id="credits">
+      <h2>Credits</h2>
+      <p>Each API request consumes a small number of credits from your monthly allowance.</p>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Plan</th><th>Rate Limit</th><th>Monthly Credits</th><th>Price</th></tr>
+          <tr><td>No key</td><td>5 req/s</td><td>1M</td><td>Free</td></tr>
+          <tr><td>Free</td><td>15 req/s</td><td>10M</td><td>Free (key required)</td></tr>
+          <tr><td>Builder</td><td>50 req/s</td><td>100M</td><td>$29/mo</td></tr>
+          <tr><td>Pro</td><td>150 req/s</td><td>500M</td><td>$79/mo</td></tr>
+          <tr><td>Scale</td><td>300 req/s</td><td>2B</td><td>$199/mo</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section id="features">
+      <h2>What You Get</h2>
+      <ul>
+        <li>Full XRPL ledger history since genesis on every plan</li>
+        <li>All XRPL WebSocket and JSON-RPC commands supported</li>
+        <li>21 nodes across 9 regions for low-latency global coverage</li>
+        <li>WebSocket subscriptions (ledger, transactions, accounts, order books)</li>
+        <li>Automatic failover and load balancing</li>
+        <li>No archive add-ons required</li>
+      </ul>
+    </section>
+  </div>
+  <Footer />
+</Base>
+
+<style>
+  .docs { max-width: 1400px; margin: 0 auto; padding: 48px 40px; }
+  h1 { font-size: 2rem; font-weight: 800; margin-bottom: 40px; }
+  h2 { font-size: 1.2rem; font-weight: 700; margin-top: 48px; margin-bottom: 12px; padding-top: 24px; border-top: 1px solid var(--border); }
+  h2:first-of-type { border-top: none; margin-top: 0; padding-top: 0; }
+  h3 { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); margin-top: 20px; margin-bottom: 8px; }
+  p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 12px; }
+  .note { font-size: 0.82rem; color: var(--text-dim); }
+  .code { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 14px; }
+  .code-label { background: var(--surface); padding: 6px 14px; font-size: 0.7rem; font-weight: 600; color: var(--text-dim); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.05em; }
+  pre { background: #0a0a0a; padding: 16px; margin: 0; font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; overflow-x: auto; font-family: var(--mono); }
+  .table-wrap { overflow-x: auto; margin-bottom: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th { text-align: left; padding: 10px 14px; background: var(--surface); color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 14px; border-bottom: 1px solid var(--border); color: var(--text-muted); }
+  td code, th code { color: var(--accent); font-size: 0.78rem; }
+  ul { list-style: none; padding: 0; }
+  ul li { padding: 6px 0 6px 18px; position: relative; color: var(--text-muted); font-size: 0.88rem; }
+  ul li::before { content: ''; position: absolute; left: 0; top: 14px; width: 5px; height: 5px; background: var(--accent); border-radius: 50%; }
+
+  @media (max-width: 768px) {
+    .docs { padding: 32px 16px; }
+    h1 { font-size: 1.5rem; }
+    pre { font-size: 0.75rem; padding: 12px; }
+  }
+</style>

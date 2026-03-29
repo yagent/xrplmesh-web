@@ -1,5 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
 import { getSessionFromCookie } from '../lib/auth';
 
 const session = getSessionFromCookie(Astro.request);
@@ -63,20 +65,8 @@ const wsEndpoint = `wss://s1.xrplmesh.com/e/${key}`;
 ---
 
 <Base title="Dashboard - XRPL Mesh">
+  <Header />
   <div class="dash">
-    <div class="dash-header">
-      <div class="user">
-        <img src={session.picture} alt="" class="avatar" />
-        <div>
-          <div class="user-name">{session.name}</div>
-          <div class="user-email">{session.email}</div>
-        </div>
-      </div>
-      <div class="dash-actions">
-        <a href="/" class="btn-sm">Home</a>
-        <a href="/api/auth/logout" class="btn-sm">Sign Out</a>
-      </div>
-    </div>
 
     <div class="section">
       <div class="section-top">
@@ -129,6 +119,7 @@ const wsEndpoint = `wss://s1.xrplmesh.com/e/${key}`;
       </div>
     )}
   </div>
+  <Footer />
 </Base>
 
 <script is:inline>
@@ -190,14 +181,6 @@ const wsEndpoint = `wss://s1.xrplmesh.com/e/${key}`;
 
 <style>
   .dash { max-width: 700px; margin: 0 auto; padding: 40px 24px; }
-  .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
-  .user { display: flex; align-items: center; gap: 12px; }
-  .avatar { width: 40px; height: 40px; border-radius: 50%; }
-  .user-name { font-weight: 600; font-size: 0.95rem; }
-  .user-email { color: var(--text-muted); font-size: 0.8rem; }
-  .dash-actions { display: flex; gap: 8px; }
-  .btn-sm { padding: 6px 14px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem; color: var(--text-muted); transition: all 0.2s; }
-  .btn-sm:hover { border-color: var(--accent); color: var(--text); text-decoration: none; }
   .section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 16px; }
   .section-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
   .section h2 { font-size: 1rem; font-weight: 600; margin-bottom: 0; }

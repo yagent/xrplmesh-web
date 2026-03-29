@@ -1,0 +1,261 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+const CF_API_TOKEN = import.meta.env.CF_API_TOKEN || '';
+const CF_ZONE_ID = import.meta.env.CF_ZONE_ID || '';
+
+function fmt(n: number) {
+  if (n >= 1e9) return (n/1e9).toFixed(1) + 'B';
+  if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
+  return String(n);
+}
+function fmtBytes(b: number) {
+  if (b >= 1e12) return (b/1e12).toFixed(2) + ' TB';
+  if (b >= 1e9) return (b/1e9).toFixed(1) + ' GB';
+  if (b >= 1e6) return (b/1e6).toFixed(1) + ' MB';
+  if (b >= 1e3) return (b/1e3).toFixed(1) + ' KB';
+  return b + ' B';
+}
+const CN: Record<string,string> = {AF:'Afghanistan',AL:'Albania',DZ:'Algeria',AR:'Argentina',AU:'Australia',AT:'Austria',BD:'Bangladesh',BE:'Belgium',BR:'Brazil',BG:'Bulgaria',CA:'Canada',CL:'Chile',CN:'China',CO:'Colombia',HR:'Croatia',CZ:'Czechia',DK:'Denmark',EG:'Egypt',EE:'Estonia',FI:'Finland',FR:'France',DE:'Germany',GR:'Greece',HK:'Hong Kong',HU:'Hungary',IN:'India',ID:'Indonesia',IR:'Iran',IE:'Ireland',IL:'Israel',IT:'Italy',JP:'Japan',KE:'Kenya',KR:'South Korea',LV:'Latvia',LT:'Lithuania',MY:'Malaysia',MX:'Mexico',NL:'Netherlands',NZ:'New Zealand',NG:'Nigeria',NO:'Norway',PK:'Pakistan',PH:'Philippines',PL:'Poland',PT:'Portugal',RO:'Romania',RU:'Russia',SA:'Saudi Arabia',SG:'Singapore',SK:'Slovakia',ZA:'South Africa',ES:'Spain',SE:'Sweden',CH:'Switzerland',TW:'Taiwan',TH:'Thailand',TR:'Turkey',UA:'Ukraine',AE:'UAE',GB:'United Kingdom',US:'United States',VN:'Vietnam'};
+
+let data: any = null;
+if (CF_API_TOKEN && CF_ZONE_ID) {
+  const now = new Date();
+  const since24h = new Date(now.getTime() - 24*60*60*1000).toISOString();
+  const since7d = new Date(now.getTime() - 7*24*60*60*1000).toISOString();
+  const since30d = new Date(now.getTime() - 30*24*60*60*1000).toISOString();
+  const query = `{ viewer { zones(filter:{zoneTag:"${CF_ZONE_ID}"}) {
+    last24h:httpRequests1hGroups(limit:24,filter:{datetime_geq:"${since24h}"},orderBy:[datetime_ASC]){dimensions{datetime}sum{requests cachedRequests bytes cachedBytes threats}uniq{uniques}}
+    last7d:httpRequests1dGroups(limit:7,filter:{date_geq:"${since7d.slice(0,10)}"},orderBy:[date_ASC]){dimensions{date}sum{requests cachedRequests bytes cachedBytes}uniq{uniques}}
+    last30d:httpRequests1dGroups(limit:30,filter:{date_geq:"${since30d.slice(0,10)}"},orderBy:[date_ASC]){dimensions{date}sum{requests cachedRequests bytes cachedBytes}uniq{uniques}}
+    countries:httpRequests1dGroups(limit:1,filter:{date_geq:"${since7d.slice(0,10)}"}){sum{countryMap{clientCountryName requests bytes}}}
+    statusCodes:httpRequests1dGroups(limit:1,filter:{date_geq:"${since24h.slice(0,10)}"}){sum{responseStatusMap{edgeResponseStatus requests}}}
+  }}}`;
+  try {
+    const resp = await fetch('https://api.cloudflare.com/client/v4/graphql', {
+      method: 'POST', headers: { 'Authorization': `Bearer ${CF_API_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query }), signal: AbortSignal.timeout(10000),
+    });
+    if (resp.ok) {
+      const json = await resp.json();
+      const zone = json.data?.viewer?.zones?.[0];
+      if (zone) {
+        const sum = (arr: any[], fn: (h: any) => any) => arr.reduce((a, h) => { const v = fn(h); for (const k in v) a[k] = (a[k]||0) + v[k]; return a; }, {} as any);
+        data = {
+          t24h: sum(zone.last24h, (h: any) => ({ requests: h.sum.requests, cached: h.sum.cachedRequests, bytes: h.sum.bytes, threats: h.sum.threats, uniques: h.uniq.uniques })),
+          t7d: sum(zone.last7d, (d: any) => ({ requests: d.sum.requests, cached: d.sum.cachedRequests, bytes: d.sum.bytes, uniques: d.uniq.uniques })),
+          hourly: zone.last24h.map((h: any) => ({ time: h.dimensions.datetime, requests: h.sum.requests, cached: h.sum.cachedRequests })),
+          daily: zone.last30d.map((d: any) => ({ date: d.dimensions.date, requests: d.sum.requests, cached: d.sum.cachedRequests })),
+          countries: (zone.countries?.[0]?.sum?.countryMap || []).sort((a: any, b: any) => b.requests - a.requests).slice(0, 20),
+          statusCodes: (zone.statusCodes?.[0]?.sum?.responseStatusMap || []).sort((a: any, b: any) => b.requests - a.requests),
+          updated: now.toISOString(),
+        };
+      }
+    }
+  } catch {}
+}
+
+const cacheRate = data?.t24h.requests > 0 ? ((data.t24h.cached / data.t24h.requests) * 100).toFixed(1) + '%' : '0%';
+const maxCountryReq = data?.countries?.[0]?.requests || 1;
+const maxCodeReq = data?.statusCodes?.[0]?.requests || 1;
+
+function codeColor(code: number) {
+  if (code < 300) return '#238636';
+  if (code < 400) return '#58a6ff';
+  if (code < 500) return '#d29922';
+  return '#f85149';
+}
+---
+
+<Base title="Network Stats - XRPL Mesh" description="Live traffic and performance metrics for the XRPL Mesh network.">
+  <Header />
+
+  <div class="container">
+    <div class="page-header">
+      <div>
+        <h1>Network Stats</h1>
+        <p class="page-sub">Real-time traffic analytics</p>
+      </div>
+    </div>
+
+    {data ? (
+      <Fragment>
+        <div class="cards-primary">
+          <div class="card card-lg">
+            <span class="card-label">Requests</span>
+            <span class="card-value mono">{fmt(data.t24h.requests)}</span>
+            <span class="card-sub">last 24 hours</span>
+          </div>
+          <div class="card card-lg">
+            <span class="card-label">Bandwidth</span>
+            <span class="card-value mono">{fmtBytes(data.t24h.bytes)}</span>
+            <span class="card-sub">last 24 hours</span>
+          </div>
+          <div class="card card-lg">
+            <span class="card-label">Edge Served</span>
+            <span class="card-value mono">{cacheRate}</span>
+            <span class="card-sub">requests served from edge</span>
+          </div>
+        </div>
+
+        <div class="cards-secondary">
+          <div class="card">
+            <span class="card-label">Unique Visitors (24h)</span>
+            <span class="card-value mono">{fmt(data.t24h.uniques)}</span>
+          </div>
+          <div class="card">
+            <span class="card-label">Requests (7d)</span>
+            <span class="card-value mono">{fmt(data.t7d.requests)}</span>
+          </div>
+          <div class="card">
+            <span class="card-label">Threats Blocked (24h)</span>
+            <span class="card-value mono">{fmt(data.t24h.threats)}</span>
+          </div>
+        </div>
+
+        <div class="chart-row">
+          <div class="chart-box">
+            <div class="chart-header">
+              <h3>Requests (24h)</h3>
+              <div class="chart-legend">
+                <span class="legend-item"><span class="legend-dot served"></span>Served</span>
+                <span class="legend-item"><span class="legend-dot upstream"></span>Upstream</span>
+              </div>
+            </div>
+            <canvas id="chart-hourly" height="180"></canvas>
+          </div>
+          <div class="chart-box">
+            <div class="chart-header">
+              <h3>Requests (30d)</h3>
+              <div class="chart-legend">
+                <span class="legend-item"><span class="legend-dot served"></span>Served</span>
+                <span class="legend-item"><span class="legend-dot upstream"></span>Upstream</span>
+              </div>
+            </div>
+            <canvas id="chart-daily" height="180"></canvas>
+          </div>
+        </div>
+
+        <div class="bottom-grid">
+          <div class="chart-box">
+            <h3>Top Countries <span class="h3-sub">(7d)</span></h3>
+            <table class="data-table">
+              <thead><tr><th class="col-rank">#</th><th>Country</th><th class="col-num">Requests</th><th class="col-num">Bandwidth</th></tr></thead>
+              <tbody>
+                {data.countries.map((c: any, i: number) => (
+                  <tr>
+                    <td class="col-rank">{i + 1}</td>
+                    <td>{CN[c.clientCountryName] || c.clientCountryName}</td>
+                    <td class="col-num">{fmt(c.requests)}</td>
+                    <td class="col-num">{fmtBytes(c.bytes)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div class="chart-box">
+            <h3>Response Codes <span class="h3-sub">(24h)</span></h3>
+            <table class="data-table">
+              <thead><tr><th class="col-code">Code</th><th>Distribution</th><th class="col-num">Requests</th></tr></thead>
+              <tbody>
+                {data.statusCodes.map((c: any) => (
+                  <tr>
+                    <td class="col-code" style={`color:${codeColor(c.edgeResponseStatus)}`}>{c.edgeResponseStatus}</td>
+                    <td><div class="bar-bg"><div class="bar-fill" style={`width:${(c.requests/maxCodeReq*100).toFixed(0)}%;background:${codeColor(c.edgeResponseStatus)}`}></div></div></td>
+                    <td class="col-num">{fmt(c.requests)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </Fragment>
+    ) : (
+      <div class="empty-state"><p>Stats not available.</p></div>
+    )}
+  </div>
+
+  {data && (
+    <script is:inline define:vars={{ hourly: data.hourly, daily: data.daily }}>
+    function fmt(n){if(n>=1e9)return(n/1e9).toFixed(1)+'B';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return String(n)}
+    function drawChart(id,labels,ds){
+      var c=document.getElementById(id);if(!c)return;var ctx=c.getContext('2d');
+      var dpr=window.devicePixelRatio||1,r=c.getBoundingClientRect();
+      c.width=r.width*dpr;c.height=r.height*dpr;ctx.scale(dpr,dpr);
+      var w=r.width,h=r.height,p={t:20,r:16,b:32,l:52},cw=w-p.l-p.r,ch=h-p.t-p.b;
+      var mx=Math.max(1,...labels.map(function(_,i){return ds.reduce(function(s,d){return s+d.data[i]},0)}));
+      var bw=Math.max(3,cw/labels.length*0.65);
+      ctx.textAlign='right';ctx.textBaseline='middle';
+      for(var i=0;i<=4;i++){var y=p.t+ch*(i/4);ctx.strokeStyle='rgba(88,166,255,0.05)';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(p.l,y);ctx.lineTo(w-p.r,y);ctx.stroke();ctx.fillStyle='rgba(139,148,158,0.4)';ctx.font='10px system-ui';ctx.fillText(fmt(mx*(1-i/4)),p.l-8,y)}
+      labels.forEach(function(_,i){var sy=p.t+ch,x=p.l+i*(cw/labels.length)+(cw/labels.length-bw)/2;ds.forEach(function(d){var bh=d.data[i]/mx*ch;sy-=bh;ctx.fillStyle=d.color;ctx.beginPath();ctx.roundRect(x,sy,bw,bh,[2,2,0,0]);ctx.fill()})});
+      ctx.fillStyle='rgba(139,148,158,0.5)';ctx.font='10px system-ui';ctx.textAlign='center';ctx.textBaseline='top';
+      var st=Math.max(1,Math.floor(labels.length/10));labels.forEach(function(l,i){if(i%st===0)ctx.fillText(l,p.l+i*(cw/labels.length)+cw/labels.length/2,h-18)})
+    }
+    drawChart('chart-hourly',hourly.map(function(h){return new Date(h.time).getHours()+':00'}),[{data:hourly.map(function(h){return h.requests-h.cached}),color:'rgba(88,166,255,0.12)'},{data:hourly.map(function(h){return h.cached}),color:'rgba(88,166,255,0.55)'}]);
+    drawChart('chart-daily',daily.map(function(d){var dt=new Date(d.date);return(dt.getMonth()+1)+'/'+dt.getDate()}),[{data:daily.map(function(d){return d.requests-d.cached}),color:'rgba(88,166,255,0.12)'},{data:daily.map(function(d){return d.cached}),color:'rgba(88,166,255,0.55)'}]);
+    window.addEventListener('resize',function(){drawChart('chart-hourly',hourly.map(function(h){return new Date(h.time).getHours()+':00'}),[{data:hourly.map(function(h){return h.requests-h.cached}),color:'rgba(88,166,255,0.12)'},{data:hourly.map(function(h){return h.cached}),color:'rgba(88,166,255,0.55)'}]);drawChart('chart-daily',daily.map(function(d){var dt=new Date(d.date);return(dt.getMonth()+1)+'/'+dt.getDate()}),[{data:daily.map(function(d){return d.requests-d.cached}),color:'rgba(88,166,255,0.12)'},{data:daily.map(function(d){return d.cached}),color:'rgba(88,166,255,0.55)'}])});
+    </script>
+  )}
+  <Footer />
+</Base>
+
+<style>
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px 40px 48px; }
+  .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+  .page-header h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
+  .page-sub { font-size: 0.82rem; color: var(--text-dim); }
+  .mono { font-family: var(--mono); }
+
+  .cards-primary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 20px; display: flex; flex-direction: column; gap: 2px; }
+  .card-lg .card-value { font-size: 1.6rem; }
+  .card-label { font-size: 0.68rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+  .card-value { font-size: 1.3rem; font-weight: 700; color: var(--text); }
+  .card-sub { font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; }
+
+  .cards-secondary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
+
+  .chart-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 22px; }
+  .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .chart-box h3 { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0; }
+  .h3-sub { font-weight: 400; color: var(--text-dim); font-size: 0.75rem; }
+  .chart-box canvas { width: 100%; }
+  .chart-legend { display: flex; gap: 16px; font-size: 0.72rem; color: var(--text-dim); }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+  .legend-dot.served { background: rgba(88,166,255,0.55); }
+  .legend-dot.upstream { background: rgba(88,166,255,0.12); }
+
+  .bottom-grid { display: grid; grid-template-columns: 3fr 2fr; gap: 10px; }
+
+  .data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .data-table th { text-align: left; padding: 8px 12px; color: var(--text-dim); font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border); }
+  .data-table td { padding: 9px 12px; border-bottom: 1px solid rgba(88,166,255,0.04); color: var(--text-muted); }
+  .data-table tbody tr:last-child td { border-bottom: none; }
+  .col-rank { width: 36px; text-align: center !important; color: var(--text-dim) !important; font-family: var(--mono); font-size: 0.75rem; }
+  .col-num { text-align: right !important; font-family: var(--mono); font-weight: 500; white-space: nowrap; }
+  .col-code { width: 50px; font-family: var(--mono); font-weight: 700; font-size: 0.82rem; }
+  .bar-bg { height: 4px; background: rgba(88,166,255,0.04); border-radius: 3px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; }
+
+  .empty-state { text-align: center; padding: 80px 20px; color: var(--text-dim); font-size: 0.9rem; }
+
+  @media (max-width: 768px) {
+    .container { padding: 20px 16px 48px; }
+    .cards-primary, .cards-secondary { grid-template-columns: 1fr 1fr 1fr; }
+    .chart-row, .bottom-grid { grid-template-columns: 1fr; }
+    .page-header { flex-direction: column; gap: 8px; }
+    .card-lg .card-value { font-size: 1.4rem; }
+    .chart-box { padding: 14px; }
+  }
+  @media (max-width: 480px) {
+    .cards-secondary { grid-template-columns: 1fr 1fr; }
+    .card { padding: 14px 16px; }
+    .card-lg .card-value { font-size: 1.5rem; }
+    .card-value { font-size: 1.1rem; }
+  }
+</style>
