@@ -2,41 +2,505 @@
 import Base from '../layouts/Base.astro';
 import Stats from '../components/Stats.astro';
 import ApiDocs from '../components/ApiDocs.astro';
+import NetworkMap from '../components/NetworkMap.astro';
+import Pricing from '../components/Pricing.astro';
+import { Zap, Globe, ShieldCheck, RefreshCw, Cable, KeyRound } from 'lucide-astro';
+import { getSessionFromCookie } from '../lib/auth';
 
-const API_URL = import.meta.env.API_URL || 'https://api.xrplmesh.com';
+const session = getSessionFromCookie(Astro.request);
 
+const API_URL = import.meta.env.API_URL || 'https://s1.xrplmesh.com';
+// SSR: fetch from local node (same server), fallback to public API
+const SSR_URL = import.meta.env.SSR_API_URL || 'http://127.0.0.1:9000';
 let network = {
   nodes_total: 0, nodes_online: 0, latest_ledger: 0,
   total_requests_served: 0, regions: {},
 };
 
 try {
-  const res = await fetch(`${API_URL}/network`, { signal: AbortSignal.timeout(5000) });
-  if (res.ok) network = await res.json();
+  const res = await fetch(`${SSR_URL}/network`, { signal: AbortSignal.timeout(3000) });
+  if (res.ok) {
+    const d = await res.json();
+    if (d.nodes_total && d.latest_ledger) network = d;
+  }
 } catch {}
+if (!network.nodes_total) {
+  try {
+    const res = await fetch(`${API_URL}/network`, { signal: AbortSignal.timeout(5000) });
+    if (res.ok) {
+      const d = await res.json();
+      if (d.nodes_total && d.latest_ledger) network = d;
+    }
+  } catch {}
+}
+
+const regionCount = Object.keys(network.regions || {}).length;
 ---
 
-<Base title="XRPL Mesh - Distributed XRPL Proxy Network">
-  <div class="container">
-    <header>
+<Base title="XRPL Mesh — Full History XRP Ledger Node API Endpoint" description="Free XRP Ledger full history node endpoint. 21 nodes across 9 regions. WebSocket and JSON-RPC API. Get started in seconds.">
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo"><span class="accent">XRPL</span> Mesh</a>
+      <div class="nav-links">
+        <a href="#pricing">Pricing</a>
+        <a href="/docs">Docs</a>
+        <a href="/agents">Agents</a>
+        <a href="/stats">Stats</a>
+        <a href="/status">Status</a>
+        {session ? <a href="/dashboard" class="nav-cta">Dashboard</a> : <a href="/api/auth/login" class="nav-cta">Sign In</a>}
+      </div>
+    </div>
+  </nav>
+  <div class="hero">
+    <canvas id="cmd-flow" class="grid-canvas"></canvas>
+    <div class="hero-glow"></div>
+    <div class="hero-glow hero-glow-2"></div>
+    <div class="hero-scanline"></div>
+    <div class="container">
+      <div class="hero-badge"><span class="badge-dot"></span> XRP Ledger Full History Nodes</div>
       <h1><span class="accent">XRPL</span> Mesh</h1>
-      <p class="subtitle">Distributed XRPL proxy network with edge caching across multiple regions.</p>
-    </header>
+      <p class="subtitle">Full history XRP Ledger API endpoint. Build faster with instant access to every transaction since genesis.</p>
 
-    <Stats network={network} />
-    <ApiDocs />
+      <div class="hero-data-strip">
+        <div class="data-cell">
+          <span class="data-label">LEDGER</span>
+          <span class="data-value mono" id="hero-ledger">{network.latest_ledger?.toLocaleString() || '---'}</span>
+        </div>
+        <div class="data-sep"></div>
+        <div class="data-cell">
+          <span class="data-label">NODES</span>
+          <span class="data-value mono"><span class="data-green">{network.nodes_online}</span>/{network.nodes_total}</span>
+        </div>
+        <div class="data-sep"></div>
+        <div class="data-cell">
+          <span class="data-label">REGIONS</span>
+          <span class="data-value mono">{regionCount}</span>
+        </div>
+      </div>
+
+      <div class="hero-actions">
+        <a href="#quickstart" class="btn btn-primary">Get Started</a>
+        <a href="#api" class="btn btn-ghost">View API</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <NetworkMap network={network} />
+
+    <section class="features-grid">
+      <div class="feature">
+        <div class="feature-icon"><Zap size={22} /></div>
+        <h3>Full Ledger History</h3>
+        <p>Access every transaction and ledger since genesis. No archive add-ons, no restrictions.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon"><Globe size={22} /></div>
+        <h3>Globally Distributed</h3>
+        <p>{network.nodes_total} nodes across {regionCount} countries. Your queries are served from the nearest location.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon"><ShieldCheck size={22} /></div>
+        <h3>Always Accurate</h3>
+        <p>Only validated, finalized data is served. No stale results, no inconsistencies.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon"><RefreshCw size={22} /></div>
+        <h3>Highly Available</h3>
+        <p>Redundant infrastructure with automatic failover. The network self-heals and rebalances.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon"><Cable size={22} /></div>
+        <h3>Drop-in Compatible</h3>
+        <p>Works with every XRPL client library. Swap one URL. xrpl.js, ripple-lib, any SDK.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon"><KeyRound size={22} /></div>
+        <h3>Free Tier Included</h3>
+        <p>Sign up with Google, get your endpoint in seconds. 10M credits free every month.</p>
+      </div>
+    </section>
+
+    <Pricing />
+
+    <div id="quickstart">
+      <ApiDocs />
+    </div>
+
+    <script is:inline>
+    // --- XRPL Command Flow ---
+    (function() {
+      const c = document.getElementById('cmd-flow');
+      if (!c) return;
+      const ctx = c.getContext('2d');
+      let w, h;
+
+      // Real XRPL rippled commands and data fragments
+      const commands = [
+        'account_info', 'account_lines', 'account_tx', 'account_offers',
+        'account_currencies', 'account_channels', 'account_objects',
+        'tx', 'submit', 'subscribe', 'ledger', 'ledger_closed',
+        'ledger_current', 'ledger_data', 'ledger_entry',
+        'server_info', 'server_state', 'fee', 'manifest',
+        'book_offers', 'book_changes', 'path_find', 'ripple_path_find',
+        'gateway_balances', 'channel_authorize', 'channel_verify',
+        'nft_info', 'nft_buy_offers', 'nft_sell_offers', 'nfts_by_issuer',
+        'deposit_authorized', 'noripple_check', 'random',
+      ];
+
+      // Data fragments that flash by — realistic XRPL payloads
+      const fragments = [
+        '"validated":true', '"ledger_index":103200841',
+        '"type":"Payment"', '"status":"success"',
+        '"fee":"12"', '"sequence":84291053',
+        '"result":"tesSUCCESS"', '"type":"OfferCreate"',
+        '"XRP":"1000000"', '"hash":"A3F1..."',
+        '"owner_count":7', '"balance":"42891.204"',
+        '"flags":0', '"limit":"100000000"',
+        '"quality":"0.00000291"', '"taker_pays":{}',
+        '"close_time":783241920', '"txn_count":47',
+        '"reserve_base":10', '"load_factor":1',
+        '"account":"r..."', '"destination":"r..."',
+        '"delivered_amount":"500"', '"ledger_hash":"E7B2..."',
+      ];
+
+      const allText = [...commands, ...fragments];
+
+      // Columns of flowing text
+      let columns = [];
+      const colWidth = 160;
+
+      function makeItem(col, startY) {
+        const isCmd = Math.random() > 0.4;
+        const text = isCmd
+          ? commands[Math.floor(Math.random() * commands.length)]
+          : fragments[Math.floor(Math.random() * fragments.length)];
+        return {
+          text,
+          isCmd,
+          x: col * colWidth + (Math.random() * 60 - 30),
+          y: startY !== undefined ? startY : -(Math.random() * h),
+          speed: 0.3 + Math.random() * 0.7,
+          alpha: 0,
+          maxAlpha: isCmd ? 0.25 + Math.random() * 0.15 : 0.12 + Math.random() * 0.10,
+          size: isCmd ? 13 : 11,
+        };
+      }
+
+      function init() {
+        w = c.width = c.parentElement.offsetWidth;
+        h = c.height = c.parentElement.offsetHeight * 2;
+        const numCols = Math.ceil(w / colWidth) + 1;
+        columns = [];
+        for (let col = 0; col < numCols; col++) {
+          const itemCount = 6 + Math.floor(Math.random() * 5);
+          for (let i = 0; i < itemCount; i++) {
+            const item = makeItem(col);
+            item.y = Math.random() * h; // Spread on init
+            item.alpha = item.maxAlpha * Math.random();
+            columns.push(item);
+          }
+        }
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, w, h);
+
+        // Subtle grid underlay
+        ctx.strokeStyle = 'rgba(88,166,255,0.025)';
+        ctx.lineWidth = 0.5;
+        for (let x = 0; x < w; x += 60) {
+          ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+        }
+
+        for (let i = 0; i < columns.length; i++) {
+          const item = columns[i];
+          item.y += item.speed;
+
+          // Fade in at top, fade out at bottom
+          const fadeIn = Math.min(1, item.y / 100);
+          const fadeOut = Math.max(0, 1 - item.y / (h * 0.85));
+          item.alpha = item.maxAlpha * fadeIn * fadeOut;
+
+          if (item.alpha > 0.01) {
+            const hue = item.isCmd ? 210 : 200;
+            const sat = item.isCmd ? 80 : 40;
+            const light = item.isCmd ? 65 : 55;
+            ctx.font = (item.isCmd ? '600 ' : '400 ') + item.size + 'px "SF Mono", Consolas, "Liberation Mono", monospace';
+            ctx.fillStyle = `hsla(${hue},${sat}%,${light}%,${item.alpha.toFixed(3)})`;
+            ctx.fillText(item.text, item.x, item.y);
+          }
+
+          // Recycle when off-screen
+          if (item.y > h) {
+            const col = Math.floor((item.x + 30) / colWidth);
+            Object.assign(item, makeItem(col, -(10 + Math.random() * 80)));
+          }
+        }
+
+        requestAnimationFrame(draw);
+      }
+
+      init();
+      draw();
+      window.addEventListener('resize', init);
+    })();
+
+    // --- Live data ticker ---
+    (function() {
+      const ledgerEl = document.getElementById('hero-ledger');
+      if (!ledgerEl) return;
+      async function tick() {
+        try {
+          const r = await fetch('/api/stats');
+          if (!r.ok) return;
+          const d = await r.json();
+          if (d.latest_ledger) ledgerEl.textContent = d.latest_ledger.toLocaleString();
+        } catch {}
+      }
+      setInterval(tick, 4000);
+    })();
+    </script>
 
     <footer>
-      XRPL Mesh &middot; Open distributed XRPL infrastructure
+      <div class="footer-inner">
+        <span>XRPL Mesh</span>
+        <span class="sep"></span>
+        <span>Open distributed XRPL infrastructure</span>
+      </div>
     </footer>
   </div>
 </Base>
 
 <style>
-  .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
-  header { margin-bottom: 40px; }
-  h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 8px; }
-  .accent { color: var(--accent); }
-  .subtitle { color: var(--text-muted); font-size: 1.1rem; }
-  footer { color: var(--text-dim); font-size: 0.85rem; margin-top: 40px; text-align: center; }
+  .nav { position: sticky; top: 0; z-index: 100; background: rgba(0,0,0,0.8); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+  .nav-inner { max-width: 1400px; margin: 0 auto; padding: 12px 40px; display: flex; justify-content: space-between; align-items: center; }
+  .nav-logo { font-weight: 700; font-size: 1rem; color: var(--text); }
+  .nav-logo:hover { text-decoration: none; }
+  .nav-links { display: flex; align-items: center; gap: 24px; font-size: 0.85rem; }
+  .nav-links a { color: var(--text-muted); transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text); text-decoration: none; }
+  .nav-cta { padding: 6px 16px; border: 1px solid var(--border); border-radius: 6px; color: var(--text) !important; }
+  .nav-cta:hover { border-color: var(--accent); }
+  .grid-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 200%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .hero-scanline {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 100%;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(88,166,255,0.008) 2px,
+      rgba(88,166,255,0.008) 4px
+    );
+    pointer-events: none;
+    z-index: 2;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 250px;
+    background: linear-gradient(to bottom, transparent, #000 85%);
+    z-index: 3;
+    pointer-events: none;
+  }
+  .hero {
+    position: relative;
+    overflow: visible;
+    border-bottom: none;
+    padding: 120px 0 160px;
+    text-align: center;
+    margin-bottom: 0;
+  }
+  .hero-glow {
+    position: absolute;
+    top: -120px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 700px;
+    height: 500px;
+    background: radial-gradient(ellipse, rgba(88,166,255,0.10) 0%, rgba(140,80,255,0.04) 40%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .hero-glow-2 {
+    top: -60px;
+    width: 500px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(200,60,255,0.06) 0%, transparent 60%);
+  }
+  .container { max-width: 1400px; margin: 0 auto; padding: 0 40px; position: relative; z-index: 4; box-sizing: content-box; }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--accent);
+    border: 1px solid rgba(88,166,255,0.2);
+    background: rgba(88,166,255,0.05);
+    border-radius: 20px;
+    padding: 5px 16px;
+    margin-bottom: 24px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    background: #238636;
+    border-radius: 50%;
+    box-shadow: 0 0 6px #238636;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; box-shadow: 0 0 6px #238636; }
+    50% { opacity: 0.5; box-shadow: 0 0 12px #238636; }
+  }
+  h1 {
+    font-size: 3.8rem;
+    font-weight: 800;
+    margin-bottom: 18px;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+  .accent { color: var(--accent); text-shadow: 0 0 40px rgba(88,166,255,0.3); }
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    line-height: 1.7;
+    max-width: 520px;
+    margin: 0 auto 32px;
+  }
+
+  /* Data strip */
+  .hero-data-strip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .data-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 24px;
+  }
+  .data-label {
+    font-size: 0.58rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .data-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .data-value.mono { font-family: var(--mono); font-size: 0.95rem; }
+  .data-green { color: #3fb950; }
+  .data-sep {
+    width: 1px;
+    height: 28px;
+    background: linear-gradient(to bottom, transparent, rgba(88,166,255,0.2), transparent);
+  }
+
+  .hero-actions { display: flex; gap: 12px; justify-content: center; }
+  .btn {
+    display: inline-block;
+    padding: 11px 28px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #0a0e17;
+    box-shadow: 0 0 20px rgba(88,166,255,0.2), 0 0 60px rgba(88,166,255,0.08);
+  }
+  .btn-primary:hover { background: #79c0ff; text-decoration: none; box-shadow: 0 0 30px rgba(88,166,255,0.35), 0 0 80px rgba(88,166,255,0.12); }
+  .btn-ghost {
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    background: transparent;
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--text); text-decoration: none; }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 56px;
+  }
+  .feature {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .feature:hover { border-color: rgba(88,166,255,0.3); transform: translateY(-2px); }
+  .feature-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(88,166,255,0.08);
+    border: 1px solid rgba(88,166,255,0.15);
+    border-radius: 10px;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .feature h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+  .feature p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.55; }
+
+  footer { margin: 56px 0 36px; }
+  @media (max-width: 768px) {
+    .nav-inner { padding: 10px 16px; }
+    .nav-links { gap: 14px; font-size: 0.8rem; }
+    .container { padding: 0 16px; }
+    .hero { padding: 80px 0 60px; margin-bottom: 36px; }
+    h1 { font-size: 2.4rem; }
+    .subtitle { font-size: 0.95rem; }
+    .btn { padding: 9px 20px; font-size: 0.85rem; }
+    .features-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 36px; }
+    .feature { padding: 20px; }
+    .hero-data-strip { gap: 0; }
+    .data-cell { padding: 6px 14px; }
+    .data-value.mono { font-size: 0.82rem; }
+    .data-sep { height: 22px; }
+  }
+  @media (max-width: 480px) {
+    h1 { font-size: 1.9rem; }
+    .subtitle { font-size: 0.88rem; }
+    .hero-actions { flex-direction: column; align-items: center; }
+    .nav-links a:not(.nav-cta) { display: none; }
+    .hero-data-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+    .data-sep { display: none; }
+    .data-cell { padding: 8px 12px; background: rgba(88,166,255,0.03); border-radius: 8px; border: 1px solid rgba(88,166,255,0.06); }
+  }
+  .footer-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--text-dim);
+    font-size: 0.82rem;
+  }
+  .sep { width: 3px; height: 3px; background: var(--text-dim); border-radius: 50%; }
 </style>
