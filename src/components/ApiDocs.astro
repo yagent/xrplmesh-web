@@ -146,7 +146,8 @@ import { Copy, Play, ArrowRight } from 'lucide-astro';
     transition: border-color 0.2s;
   }
   .endpoint:hover { border-color: rgba(88,166,255,0.3); }
-  .endpoint-header { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .endpoint-header { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; min-width: 0; }
+  .endpoint { overflow: hidden; }
   .method {
     display: inline-block;
     font-size: 0.65rem;
@@ -159,7 +160,7 @@ import { Copy, Play, ArrowRight } from 'lucide-astro';
   }
   .method.post { background: var(--green); }
   .method.ws { background: #8957e5; }
-  .url { color: var(--accent); font-size: 0.85rem; }
+  .url { color: var(--accent); font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
   .desc { color: var(--text-muted); font-size: 0.82rem; margin: 0; padding-left: 52px; }
 
   /* Quick Start */
