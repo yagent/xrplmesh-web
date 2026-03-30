@@ -12,7 +12,6 @@ interface Props {
 
 const { network } = Astro.props;
 
-// Read SVG and extract all paths
 let mapPaths = '';
 try {
   const svg = fs.readFileSync(path.join(process.cwd(), 'public', 'world-map.svg'), 'utf8');
@@ -20,7 +19,6 @@ try {
   if (match) mapPaths = match[1];
 } catch {}
 
-// Node positions in the SVG coordinate space (viewBox: 30.767 241.591 784.077 458.627)
 const regionCoords: Record<string, { x: number; y: number; label: string; country: string; latency: string; cached: string; flag: string }> = {
   'US West':      { x: 157, y: 406, label: 'US West',      country: 'US', latency: '<10ms', cached: '98%', flag: 'US' },
   'US Southwest': { x: 142, y: 430, label: 'US Southwest', country: 'US', latency: '<10ms', cached: '98%', flag: 'US' },
@@ -34,11 +32,11 @@ const regionCoords: Record<string, { x: number; y: number; label: string; countr
 };
 
 const regions = Object.entries(network.regions || {}).map(([name, r]) => ({
-  name,
-  ...r,
+  name, ...r,
   coords: regionCoords[name] || { x: 400, y: 200, label: name },
 }));
 
+// Build mesh connections (all pairs)
 const connections: { x1: number; y1: number; x2: number; y2: number }[] = [];
 for (let i = 0; i < regions.length; i++) {
   for (let j = i + 1; j < regions.length; j++) {
@@ -48,16 +46,30 @@ for (let i = 0; i < regions.length; i++) {
     });
   }
 }
+
+// Query simulation: alternate between US and EU entry points
+const usIdx = regions.map((r, i) => r.coords.label?.startsWith('US') ? i : -1).filter(i => i >= 0);
+const euIdx = regions.map((r, i) => r.coords.label?.startsWith('EU') ? i : -1).filter(i => i >= 0);
+const queryOrder = [];
+const maxLen = Math.max(usIdx.length, euIdx.length);
+for (let i = 0; i < maxLen; i++) {
+  if (usIdx[i] !== undefined) queryOrder.push(usIdx[i]);
+  if (euIdx[i] !== undefined) queryOrder.push(euIdx[i]);
+}
+
+const totalDur = queryOrder.length * 4; // full cycle duration
+const queryPaths = queryOrder.map((entry, qi) => {
+  // Fan out to 2-3 nearby nodes
+  const nearby = regions.map((_, i) => i).filter(i => i !== entry).sort((a, b) => {
+    const da = Math.hypot(regions[a].coords.x - regions[entry].coords.x, regions[a].coords.y - regions[entry].coords.y);
+    const db = Math.hypot(regions[b].coords.x - regions[entry].coords.x, regions[b].coords.y - regions[entry].coords.y);
+    return da - db;
+  }).slice(0, 3);
+  return { entry, targets: nearby, delay: qi * 4 };
+});
 ---
 
 <section class="map-section">
-  <div class="map-header">
-    <h2>Network Topology</h2>
-    <div class="map-status">
-      <span class="pulse"></span>
-      <span>{network.nodes_online === network.nodes_total ? 'All regions operational' : network.nodes_online + '/' + network.nodes_total + ' regions online'}</span>
-    </div>
-  </div>
 
   <div class="map-container">
     <svg class="map-svg" viewBox="30.767 241.591 784.077 458.627" xmlns="http://www.w3.org/2000/svg">
@@ -66,42 +78,89 @@ for (let i = 0; i < regions.length; i++) {
           <stop offset="0%" stop-color="rgba(88,166,255,0.3)" />
           <stop offset="100%" stop-color="transparent" />
         </radialGradient>
+        <radialGradient id="query-glow">
+          <stop offset="0%" stop-color="rgba(46,204,113,0.4)" />
+          <stop offset="100%" stop-color="transparent" />
+        </radialGradient>
         <filter id="glow">
           <feGaussianBlur stdDeviation="2" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
+          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
         </filter>
-        <linearGradient id="conn-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="rgba(88,166,255,0.5)" />
-          <stop offset="50%" stop-color="rgba(88,166,255,0.15)" />
-          <stop offset="100%" stop-color="rgba(88,166,255,0.5)" />
-        </linearGradient>
       </defs>
 
-      <!-- World map outline -->
+      <!-- World map -->
       <g class="world-paths" set:html={mapPaths} />
 
-      <!-- Connection lines with data packets -->
-      {connections.map((c, i) => (
-        <g>
-          <line x1={c.x1} y1={c.y1} x2={c.x2} y2={c.y2} class="connection" style={`animation-delay: ${i * 0.4}s`} />
-          <circle r="1.5" class="packet">
-            <animateMotion dur={`${2 + (i % 3)}s`} repeatCount="indefinite" begin={`${i * 0.7}s`}>
-              <mpath href={`#conn-path-${i}`} />
-            </animateMotion>
-          </circle>
-          <circle r="1.5" class="packet">
-            <animateMotion dur={`${2.5 + (i % 2)}s`} repeatCount="indefinite" begin={`${i * 0.7 + 1.2}s`} keyPoints="1;0" keyTimes="0;1">
-              <mpath href={`#conn-path-${i}`} />
-            </animateMotion>
-          </circle>
-          <path id={`conn-path-${i}`} d={`M${c.x1},${c.y1} L${c.x2},${c.y2}`} fill="none" stroke="none" />
-        </g>
-      ))}
+      <!-- Mesh connections hidden for clean look -->
 
-      <!-- Node SVG markers (glow + core only) -->
+      <!-- Query simulation: user request arrives, propagates through mesh -->
+      {queryPaths.map((q, qi) => {
+        const entry = regions[q.entry]?.coords;
+        if (!entry) return null;
+        // User dot approaches from outside
+        // Users query from real countries around the world
+        const origins = [
+          [287, 618],  // Brazil
+          [709, 426],  // Japan
+          [673, 609],  // Australia
+          [134, 434],  // Mexico
+          [520, 458],  // Saudi Arabia
+          [594, 386],  // China
+          [475, 596],  // South Africa
+          [696, 410],  // South Korea
+          [554, 455],  // Pakistan
+        ];
+        const [userX, userY] = origins[qi % origins.length];
+        return (
+          <g class="query-group">
+            {/* User request incoming — vary direction per query */}
+            <path id={`qpath-in-${qi}`} d={`M${userX},${userY} L${entry.x},${entry.y}`} fill="none" stroke="none" />
+            {/* Request trail line */}
+            <line x1={userX} y1={userY} x2={entry.x} y2={entry.y} class="request-trail">
+              <animate attributeName="opacity" values="0;0.3;0" dur="1.5s" repeatCount="indefinite" begin={`${q.delay}s`} />
+            </line>
+            <circle r="2.5" class="query-packet">
+              <animateMotion dur="1.5s" repeatCount="indefinite" begin={`${q.delay}s`} fill="freeze">
+                <mpath href={`#qpath-in-${qi}`} />
+              </animateMotion>
+              <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.8;1" dur="1.5s" repeatCount="indefinite" begin={`${q.delay}s`} />
+            </circle>
+
+            {/* Entry node flash on receive */}
+            <circle cx={entry.x} cy={entry.y} r="3" class="node-flash">
+              <animate attributeName="r" values="3;12;3" dur="1.5s" repeatCount="indefinite" begin={`${q.delay + 0.7}s`} />
+              <animate attributeName="opacity" values="0;0.6;0" dur="1.5s" repeatCount="indefinite" begin={`${q.delay + 0.7}s`} />
+            </circle>
+
+            {/* Propagation to peer nodes */}
+            {q.targets.map((t, ti) => {
+              const target = regions[t]?.coords;
+              if (!target) return null;
+              const pathId = `qpath-${qi}-${ti}`;
+              return (
+                <g>
+                  <path id={pathId} d={`M${entry.x},${entry.y} L${target.x},${target.y}`} fill="none" stroke="none" />
+                  {/* Node flash on propagation */}
+                  <circle cx={target.x} cy={target.y} r="3" class="node-flash">
+                    <animate attributeName="r" values="3;10;3" dur="1s" repeatCount="indefinite" begin={`${q.delay + 1.2 + ti * 0.2}s`} />
+                    <animate attributeName="opacity" values="0;0.4;0" dur="1s" repeatCount="indefinite" begin={`${q.delay + 1.2 + ti * 0.2}s`} />
+                  </circle>
+                </g>
+              );
+            })}
+
+            {/* Response back to user */}
+            <circle r="2.5" class="resp-packet-user">
+              <animateMotion dur="1s" repeatCount="indefinite" begin={`${q.delay + 3}s`} keyPoints="1;0" keyTimes="0;1" fill="freeze">
+                <mpath href={`#qpath-in-${qi}`} />
+              </animateMotion>
+              <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.8;1" dur="1s" repeatCount="indefinite" begin={`${q.delay + 3}s`} />
+            </circle>
+          </g>
+        );
+      })}
+
+      <!-- Node markers -->
       {regions.map((r, i) => (
         <g>
           <circle cx={r.coords.x} cy={r.coords.y} r="20" fill="url(#node-glow)" />
@@ -111,13 +170,11 @@ for (let i = 0; i < regions.length; i++) {
         </g>
       ))}
 
-      <!-- Scanline -->
       <rect class="scanline" x="30" y="241" width="784" height="1.5" />
     </svg>
 
-    <!-- HTML overlay for tooltips -->
+    <!-- Tooltips -->
     {regions.map((r) => {
-      // Convert SVG coords to percentage positions
       const xPct = ((r.coords.x - 30.767) / 784.077) * 100;
       const yPct = ((r.coords.y - 241.591) / 458.627) * 100;
       return (
@@ -147,9 +204,7 @@ for (let i = 0; i < regions.length; i++) {
                   <span class="tt-value">99.9%</span>
                 </div>
               </div>
-              <div class="tt-bar">
-                <div class="tt-bar-fill" style={`width: ${r.coords.cached}`}></div>
-              </div>
+              <div class="tt-bar"><div class="tt-bar-fill" style={`width: ${r.coords.cached}`}></div></div>
             </div>
           </div>
         </div>
@@ -160,202 +215,68 @@ for (let i = 0; i < regions.length; i++) {
 
 <style>
   .map-section { margin-bottom: 48px; }
-  .map-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .map-header h2 { font-size: 1.15rem; font-weight: 700; }
-  .map-status {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.8rem;
-    color: var(--text-muted);
-  }
-  .pulse {
-    width: 8px; height: 8px;
-    background: #238636;
-    border-radius: 50%;
-    box-shadow: 0 0 8px rgba(35,134,54,0.6);
-    animation: pulse-glow 2s ease-in-out infinite;
-  }
+  .map-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .map-header h2 { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; }
+  .map-stats { display: flex; align-items: center; gap: 20px; }
+  .map-stat { display: flex; align-items: center; gap: 6px; }
+  .stat-val { font-family: var(--mono); font-size: 0.85rem; font-weight: 700; color: #2ecc71; }
+  .stat-label { font-size: 0.72rem; color: var(--text-dim); }
+  .pulse { width: 7px; height: 7px; background: #2ecc71; border-radius: 50%; box-shadow: 0 0 8px rgba(46,204,113,0.6); animation: pulse-glow 2s ease-in-out infinite; }
 
-  .map-container {
-    overflow: hidden;
-    background: transparent;
-    position: relative;
-    margin: 0 -32px;
-  }
-  .map-svg {
-    display: block;
-    width: 100%;
-    height: auto;
-    min-height: 250px;
-  }
-  @media (max-width: 768px) {
-    .map-container { margin: 0 -16px; }
-    .map-header h2 { font-size: 1rem; }
-    .map-status { font-size: 0.7rem; }
-  }
+  .map-container { overflow: hidden; background: transparent; position: relative; margin: 0 -32px; }
+  .map-svg { display: block; width: 100%; height: auto; min-height: 250px; }
+  @media (max-width: 768px) { .map-container { margin: 0 -16px; border-radius: 8px; } .map-header h2 { font-size: 1rem; } .map-stats { gap: 12px; } .stat-val { font-size: 0.75rem; } .stat-label { font-size: 0.65rem; } }
+  @media (max-width: 480px) { .map-stats { display: none; } }
 
-  /* World map countries */
-  .map-svg :global(.world-paths path) {
-    fill: rgba(88,166,255,0.03);
-    stroke: rgba(88,166,255,0.3);
-    stroke-width: 0.4;
-  }
+  .map-svg :global(.world-paths path) { fill: rgba(88,166,255,0.03); stroke: rgba(88,166,255,0.35); stroke-width: 0.4; }
 
-  /* Connections */
-  .connection {
-    stroke: url(#conn-grad);
-    stroke-width: 0.6;
-    stroke-dasharray: 4 3;
-    animation: dash-flow 10s linear infinite;
-  }
+  /* Mesh lines — subtle network backbone */
+  .mesh-line { stroke: rgba(88,166,255,0.05); stroke-width: 0.3; }
 
   /* Nodes */
-  .node-ring {
-    fill: none;
-    stroke: rgba(88,166,255,0.5);
-    stroke-width: 0.8;
-  }
-  .node-core {
-    fill: #58a6ff;
-  }
-  .node-pulse-ring {
-    fill: none;
-    stroke: rgba(88,166,255,0.3);
-    stroke-width: 0.5;
-    animation: svg-ripple 3s ease-out infinite;
-  }
-  .node-label {
-    text-anchor: middle;
-    font-size: 7px;
-    font-weight: 600;
-    fill: rgba(88,166,255,0.85);
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    font-family: var(--font);
-  }
-  .node-count {
-    text-anchor: middle;
-    font-size: 6px;
-    fill: var(--text-dim);
-    font-family: var(--mono);
-  }
+  .node-ring { fill: none; stroke: rgba(88,166,255,0.4); stroke-width: 0.6; }
+  .node-core { fill: #58a6ff; }
+  .node-pulse-ring { fill: none; stroke: rgba(88,166,255,0.25); stroke-width: 0.4; animation: svg-ripple 3s ease-out infinite; }
+  .node-flash { fill: rgba(46,204,113,0.3); }
 
-  .scanline {
-    fill: rgba(88,166,255,0.04);
-    animation: scan 5s linear infinite;
-  }
+  /* Request trail */
+  .request-trail { stroke: rgba(46,204,113,0.2); stroke-width: 0.5; stroke-dasharray: 2 2; }
+  /* Propagation trail flash */
+  .prop-trail { stroke: rgba(0,212,255,0.15); stroke-width: 0.8; }
 
-  /* Data packets */
-  .packet {
-    fill: var(--accent);
-    opacity: 0.8;
-    filter: url(#glow);
-  }
+  /* Query packets — green incoming user requests */
+  .query-packet { fill: #2ecc71; filter: url(#glow); }
+  /* Propagation — cyan spreading through mesh */
+  .prop-packet { fill: #00d4ff; filter: url(#glow); }
+  /* Response — soft white returning */
+  .resp-packet { fill: rgba(255,255,255,0.6); }
+  .resp-packet-user { fill: #2ecc71; filter: url(#glow); }
 
-  /* HTML overlay nodes + tooltips */
-  .node-overlay {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    z-index: 10;
-  }
-  .node-hitarea {
-    width: 36px;
-    height: 36px;
-    cursor: pointer;
-    position: relative;
-  }
-  .node-tooltip {
-    position: absolute;
-    top: 40px;
-    left: 50%;
-    transform: translateX(-50%) scale(0.9);
-    background: rgba(13,17,23,0.95);
-    border: 1px solid rgba(88,166,255,0.25);
-    border-radius: 10px;
-    padding: 14px 16px;
-    width: 190px;
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.2s ease;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(88,166,255,0.08);
-    z-index: 20;
-  }
-  .node-hitarea:hover .node-tooltip,
-  .node-hitarea:active .node-tooltip {
-    opacity: 1;
-    transform: translateX(-50%) scale(1);
-    pointer-events: auto;
-  }
-  @media (max-width: 768px) {
-    .node-hitarea { width: 44px; height: 44px; }
-    .node-tooltip { width: 170px; padding: 10px 12px; }
-    .tt-header { margin-bottom: 8px; padding-bottom: 8px; }
-    .tt-grid { gap: 6px; }
-    .tt-name { font-size: 0.75rem; }
-    .tt-value { font-size: 0.75rem; }
-  }
-  .tt-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid rgba(88,166,255,0.1);
-  }
-  .tt-flag {
-    font-size: 0.65rem;
-    font-weight: 700;
-    color: var(--text-muted);
-    background: rgba(88,166,255,0.08);
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-family: var(--mono);
-  }
-  .tt-name {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--text);
-    flex: 1;
-  }
-  .tt-status {
-    font-size: 0.6rem;
-    font-weight: 700;
-    color: #238636;
-    letter-spacing: 0.05em;
-  }
-  .tt-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 10px;
-  }
+  .scanline { fill: rgba(88,166,255,0.03); animation: scan 6s linear infinite; }
+
+  /* Tooltips */
+  .node-overlay { position: absolute; transform: translate(-50%, -50%); z-index: 10; }
+  .node-hitarea { width: 36px; height: 36px; cursor: pointer; position: relative; }
+  .node-tooltip { position: absolute; top: 40px; left: 50%; transform: translateX(-50%) scale(0.9); background: rgba(13,17,23,0.95); border: 1px solid rgba(88,166,255,0.25); border-radius: 10px; padding: 14px 16px; width: 190px; opacity: 0; pointer-events: none; transition: all 0.2s ease; backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(88,166,255,0.08); z-index: 20; }
+  .node-hitarea:hover .node-tooltip, .node-hitarea:active .node-tooltip { opacity: 1; transform: translateX(-50%) scale(1); pointer-events: auto; }
+  @media (max-width: 768px) { .node-hitarea { width: 44px; height: 44px; } .node-tooltip { width: 170px; padding: 10px 12px; } .tt-header { margin-bottom: 8px; padding-bottom: 8px; } .tt-grid { gap: 6px; } .tt-name { font-size: 0.75rem; } .tt-value { font-size: 0.75rem; } }
+
+  .tt-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(88,166,255,0.1); }
+  .tt-flag { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); background: rgba(88,166,255,0.08); padding: 2px 6px; border-radius: 3px; font-family: var(--mono); }
+  .tt-name { font-size: 0.82rem; font-weight: 600; color: var(--text); flex: 1; }
+  .tt-status { font-size: 0.6rem; font-weight: 700; color: #238636; letter-spacing: 0.05em; }
+  .tt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
   .tt-item { display: flex; flex-direction: column; }
   .tt-label { font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
   .tt-value { font-size: 0.82rem; font-weight: 600; color: var(--accent); font-family: var(--mono); }
-  .tt-bar {
-    height: 3px;
-    background: rgba(88,166,255,0.1);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-  .tt-bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent), #79c0ff);
-    border-radius: 2px;
-  }
+  .tt-bar { height: 3px; background: rgba(88,166,255,0.1); border-radius: 2px; overflow: hidden; }
+  .tt-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #79c0ff); border-radius: 2px; }
 
   @media (max-width: 768px) {
     .map-svg :global(.world-paths path) { stroke-width: 0.8; stroke: rgba(88,166,255,0.25); }
     .node-ring { stroke-width: 1.2; }
     .node-core { r: 4; }
-    .connection { stroke-width: 0.8; }
+    .mesh-line { stroke-width: 0.6; }
   }
   @media (max-width: 480px) {
     .map-section { margin-bottom: 32px; }
@@ -363,24 +284,11 @@ for (let i = 0; i < regions.length; i++) {
     .map-svg :global(.world-paths path) { stroke-width: 1.2; stroke: rgba(88,166,255,0.3); }
     .node-ring { stroke-width: 1.5; }
     .node-core { r: 5; }
-    .connection { stroke-width: 1; }
+    .mesh-line { stroke-width: 0.8; }
     .node-overlay { display: none; }
   }
 
-  @keyframes pulse-glow {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-  }
-  @keyframes svg-ripple {
-    0% { r: 6; opacity: 0.4; }
-    100% { r: 18; opacity: 0; }
-  }
-  @keyframes dash-flow {
-    0% { stroke-dashoffset: 0; }
-    100% { stroke-dashoffset: -40; }
-  }
-  @keyframes scan {
-    0% { y: 241; }
-    100% { y: 700; }
-  }
+  @keyframes pulse-glow { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  @keyframes svg-ripple { 0% { r: 6; opacity: 0.4; } 100% { r: 18; opacity: 0; } }
+  @keyframes scan { 0% { y: 241; } 100% { y: 700; } }
 </style>

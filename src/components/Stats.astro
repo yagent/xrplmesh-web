@@ -1,4 +1,6 @@
 ---
+import { Server, Layers, Activity, MapPin } from 'lucide-astro';
+
 interface Props {
   network: {
     nodes_total: number;
@@ -11,39 +13,95 @@ interface Props {
 
 const { network } = Astro.props;
 const regionCount = Object.keys(network.regions || {}).length;
+const countryMap: Record<string, string> = { 'Salt Lake City': 'US Central', 'New York': 'US Northeast', 'Los Angeles': 'US West', 'US': 'US East', 'Miami': 'US South', 'Roubaix': 'France', 'Limburg': 'Germany', 'Milan': 'Italy', 'Helsinki': 'Finland' };
+
+const stats = [
+  { icon: Layers, value: network.latest_ledger?.toLocaleString() || '0', label: 'Latest Ledger', key: 'ledger' },
+  { icon: Server, value: `${network.nodes_online}/${network.nodes_total}`, label: 'Nodes Online', key: 'nodes' },
+  { icon: MapPin, value: String(regionCount), label: 'Regions', key: 'regions' },
+  { icon: Activity, value: '<50ms', label: 'Avg Response', key: 'response' },
+];
 ---
 
 <section class="stats">
-  <div class="stat">
-    <div class="stat-value">{network.nodes_online}/{network.nodes_total}</div>
-    <div class="stat-label">Nodes Online</div>
-  </div>
-  <div class="stat">
-    <div class="stat-value">{network.latest_ledger?.toLocaleString()}</div>
-    <div class="stat-label">Latest Ledger</div>
-  </div>
-  <div class="stat">
-    <div class="stat-value">{network.total_requests_served?.toLocaleString()}</div>
-    <div class="stat-label">Requests Served</div>
-  </div>
-  <div class="stat">
-    <div class="stat-value">{regionCount}</div>
-    <div class="stat-label">Regions</div>
-  </div>
+  {stats.map(s => (
+    <div class="stat">
+      <div class="stat-icon"><s.icon size={18} /></div>
+      <div class="stat-content">
+        <div class="stat-value" data-stat={s.key}>{s.value}</div>
+        <div class="stat-label">{s.label}</div>
+      </div>
+    </div>
+  ))}
 </section>
 
 <div class="regions">
   {Object.entries(network.regions || {}).map(([name, r]) => (
-    <div class="region"><span class="count">{r.online}/{r.nodes}</span> {name}</div>
+    <div class="region">
+      <span class="region-dot"></span>
+      <span class="count">{r.online}/{r.nodes}</span>
+      <span class="region-name">{countryMap[name] || name}</span>
+    </div>
   ))}
 </div>
 
+<script is:inline>
+async function refreshStats() {
+  try {
+    const r = await fetch('/api/stats');
+    if (!r.ok) return;
+    const d = await r.json();
+    if (!d.nodes_total || !d.latest_ledger) return; // Skip bad data
+    document.querySelector('[data-stat="nodes"]').textContent = `${d.nodes_online}/${d.nodes_total}`;
+    document.querySelector('[data-stat="ledger"]').textContent = d.latest_ledger.toLocaleString();
+    document.querySelector('[data-stat="regions"]').textContent = Object.keys(d.regions || {}).length;
+  } catch {}
+}
+setInterval(refreshStats, 5000);
+</script>
+
 <style>
-  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
-  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
-  .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
-  .stat-label { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
-  .regions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
-  .region { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; font-size: 0.85rem; }
-  .region .count { color: var(--accent); font-weight: 700; }
+  .stats { display: flex; justify-content: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 8px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: border-color 0.2s;
+  }
+  .stat:hover { border-color: rgba(88,166,255,0.2); }
+  .stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: rgba(88,166,255,0.06);
+    border: 1px solid rgba(88,166,255,0.1);
+    border-radius: 6px;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .stat-icon :global(svg) { width: 14px; height: 14px; }
+  .stat-value { font-size: 0.9rem; font-weight: 700; color: var(--text); line-height: 1; }
+  .stat-label { color: var(--text-dim); font-size: 0.65rem; }
+  .regions { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 32px; justify-content: center; }
+  .region {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.78rem;
+    transition: border-color 0.2s;
+  }
+  .region:hover { border-color: rgba(88,166,255,0.2); }
+  .region-dot { width: 5px; height: 5px; background: #238636; border-radius: 50%; flex-shrink: 0; }
+  .count { color: var(--accent); font-weight: 600; font-family: var(--mono); font-size: 0.75rem; }
+  .region-name { color: var(--text-muted); }
 </style>

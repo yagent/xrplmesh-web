@@ -172,6 +172,75 @@ print(resp.json()['result']['account_data'])</pre>
         <li>No archive add-ons required</li>
       </ul>
     </section>
+
+    <section id="full-history">
+      <h2>Full History & Clio</h2>
+      <p>XRPL Mesh provides access to the complete XRP Ledger history — every transaction and ledger close since <a href="https://xrpl.org/docs/concepts/networks-and-servers/ledger-history" target="_blank" rel="noopener">ledger #32570</a> (the earliest available). Unlike most public endpoints that only keep recent history, XRPL Mesh serves validated data from genesis.</p>
+      <p>Our infrastructure leverages <a href="https://xrpl.org/blog/2022/introducing-clio" target="_blank" rel="noopener">Clio</a>, an XRP Ledger API server optimized for HTTP and WebSocket API calls. Clio stores validated ledger data in a space-efficient format, enabling significantly faster lookups for NFT data, account history, and ledger objects compared to the core <code>rippled</code> server. Learn more about the <a href="https://github.com/XRPLF/clio" target="_blank" rel="noopener">Clio project on GitHub</a>.</p>
+      <p>Queries that require the current open ledger state (like <code>fee</code>, <code>submit</code>, <code>ledger_current</code>) are automatically routed to <code>rippled</code> nodes, while historical and NFT queries are served by Clio for optimal performance. This hybrid routing is transparent — you use the same endpoint for everything.</p>
+    </section>
+
+    <section id="supported-commands">
+      <h2>Supported Commands</h2>
+      <p>XRPL Mesh supports every public XRPL API command. For the complete reference, see the <a href="https://xrpl.org/docs/references/http-websocket-apis/public-api-methods" target="_blank" rel="noopener">official XRPL API documentation</a>.</p>
+
+      <h3>Account Methods</h3>
+      <p><code>account_info</code> <code>account_lines</code> <code>account_channels</code> <code>account_currencies</code> <code>account_nfts</code> <code>account_objects</code> <code>account_offers</code> <code>account_tx</code> <code>gateway_balances</code> <code>noripple_check</code></p>
+
+      <h3>Ledger Methods</h3>
+      <p><code>ledger</code> <code>ledger_closed</code> <code>ledger_current</code> <code>ledger_data</code> <code>ledger_entry</code></p>
+
+      <h3>Transaction Methods</h3>
+      <p><code>tx</code> <code>transaction_entry</code> <code>submit</code> <code>submit_multisigned</code></p>
+
+      <h3>Order Book & Path</h3>
+      <p><code>book_offers</code> <code>book_changes</code> <code>deposit_authorized</code> <code>ripple_path_find</code> <code>amm_info</code></p>
+
+      <h3>NFT Methods (via Clio)</h3>
+      <p><code>nft_info</code> <code>nft_buy_offers</code> <code>nft_sell_offers</code> <code>nft_history</code> <code>nfts_by_issuer</code></p>
+
+      <h3>Server Methods</h3>
+      <p><code>server_info</code> <code>server_state</code> <code>server_definitions</code> <code>fee</code> <code>manifest</code></p>
+
+      <h3>Subscriptions (WebSocket)</h3>
+      <p><code>subscribe</code> <code>unsubscribe</code> — streams: <code>ledger</code>, <code>transactions</code>, <code>transactions_proposed</code>, account activity, order books</p>
+    </section>
+
+    <section id="rate-limits">
+      <h2>Rate Limits & Fair Use</h2>
+      <p>All plans are subject to rate limits that ensure consistent performance across the network.</p>
+      <ul>
+        <li><strong>Throttling</strong> — Requests exceeding your plan's rate limit return HTTP <code>429</code> with <code>rate_limited</code>. Check <code>X-RateLimit-Remaining</code> and <code>Retry-After</code> headers.</li>
+        <li><strong>Burst allowance</strong> — Short bursts above the sustained limit are permitted. Prolonged high-throughput traffic should align with your plan tier.</li>
+        <li><strong>Abuse prevention</strong> — Patterns consistent with scraping or denial-of-service result in temporary IP-level blocks.</li>
+        <li><strong>No authentication required</strong> for the free public tier — just send requests. Create a free API key for higher limits.</li>
+      </ul>
+    </section>
+
+    <section id="networks">
+      <h2>Networks</h2>
+      <p>XRPL Mesh supports the XRP Ledger mainnet. Testnet and devnet support is coming soon.</p>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Network</th><th>Endpoint</th><th>Status</th></tr>
+          <tr><td>Mainnet</td><td><code>https://s1.xrplmesh.com</code></td><td>Live</td></tr>
+          <tr><td>Testnet</td><td><code>https://testnet.xrplmesh.com</code></td><td>Coming soon</td></tr>
+          <tr><td>Devnet</td><td><code>https://devnet.xrplmesh.com</code></td><td>Coming soon</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section id="resources">
+      <h2>Resources</h2>
+      <ul>
+        <li><a href="https://xrpl.org/docs/references/http-websocket-apis/public-api-methods" target="_blank" rel="noopener">XRPL API Reference</a> — complete command documentation</li>
+        <li><a href="https://xrpl.org/docs/concepts/networks-and-servers/ledger-history" target="_blank" rel="noopener">Ledger History</a> — how XRPL stores and serves historical data</li>
+        <li><a href="https://xrpl.org/blog/2022/introducing-clio" target="_blank" rel="noopener">Introducing Clio</a> — the optimized XRPL API server</li>
+        <li><a href="https://github.com/XRPLF/clio" target="_blank" rel="noopener">Clio on GitHub</a> — source code and documentation</li>
+        <li><a href="https://js.xrpl.org/" target="_blank" rel="noopener">xrpl.js</a> — JavaScript/TypeScript client library</li>
+        <li><a href="https://xrpl-py.readthedocs.io/" target="_blank" rel="noopener">xrpl-py</a> — Python client library</li>
+      </ul>
+    </section>
   </div>
   <Footer />
 </Base>
