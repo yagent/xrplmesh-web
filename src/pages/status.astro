@@ -188,5 +188,10 @@ function statusColor(s: string) {
     .banner-meta { border-left: none; padding: 0; text-align: left; }
     .nodes-row { grid-template-columns: 1fr 1fr; }
   }
-  @media (max-width: 480px) { .nodes-row { grid-template-columns: 1fr; } }
+  @media (max-width: 480px) {
+    .container { padding: 12px 12px 32px; }
+    .banner { padding: 14px; gap: 8px; }
+    .nodes-row { grid-template-columns: 1fr; }
+    .nd-val { font-size: 0.72rem; }
+  }
 </style>

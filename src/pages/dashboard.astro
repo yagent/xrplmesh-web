@@ -212,4 +212,13 @@ const wsEndpoint = `wss://s1.xrplmesh.com/e/${key}`;
   .up-name { font-size: 0.9rem; font-weight: 700; color: var(--text); }
   .up-price { font-size: 1.1rem; font-weight: 800; color: var(--accent); }
   .up-detail { font-size: 0.7rem; color: var(--text-dim); }
+
+  @media (max-width: 480px) {
+    .dash { padding: 24px 12px; }
+    .section { padding: 18px 14px; }
+    .ep-row { flex-wrap: wrap; gap: 6px; }
+    .ep-url { font-size: 0.7rem; }
+    .usage-used { font-size: 1.4rem; }
+    .upgrade-grid { grid-template-columns: 1fr; }
+  }
 </style>

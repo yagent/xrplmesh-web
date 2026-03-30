@@ -246,16 +246,20 @@ function codeColor(code: number) {
 
   @media (max-width: 768px) {
     .container { padding: 20px 16px 48px; }
-    .cards-primary, .cards-secondary { grid-template-columns: 1fr 1fr 1fr; }
+    .cards-primary { grid-template-columns: 1fr 1fr; }
+    .cards-secondary { grid-template-columns: 1fr 1fr 1fr; }
     .chart-row, .bottom-grid { grid-template-columns: 1fr; }
     .page-header { flex-direction: column; gap: 8px; }
     .card-lg .card-value { font-size: 1.4rem; }
     .chart-box { padding: 14px; }
   }
   @media (max-width: 480px) {
+    .container { padding: 16px 12px 40px; }
+    .cards-primary { grid-template-columns: 1fr; }
     .cards-secondary { grid-template-columns: 1fr 1fr; }
-    .card { padding: 14px 16px; }
-    .card-lg .card-value { font-size: 1.5rem; }
-    .card-value { font-size: 1.1rem; }
+    .card { padding: 14px 12px; }
+    .card-lg .card-value { font-size: 1.3rem; }
+    .card-value { font-size: 1rem; }
+    .col-num { font-size: 0.75rem; }
   }
 </style>
