@@ -22,15 +22,15 @@ try {
 
 // Node positions in the SVG coordinate space (viewBox: 30.767 241.591 784.077 458.627)
 const regionCoords: Record<string, { x: number; y: number; label: string; country: string; latency: string; cached: string; flag: string }> = {
-  'US West':      { x: 120, y: 385, label: 'US West',      country: 'US', latency: '<10ms', cached: '98%', flag: 'US' },
-  'US Southwest': { x: 115, y: 410, label: 'US Southwest', country: 'US', latency: '<10ms', cached: '98%', flag: 'US' },
-  'US Central':   { x: 175, y: 395, label: 'US Central',   country: 'US', latency: '<10ms', cached: '98%', flag: 'US' },
-  'US Northeast': { x: 225, y: 375, label: 'US Northeast', country: 'US', latency: '<10ms', cached: '98%', flag: 'US' },
-  'US Southeast': { x: 210, y: 415, label: 'US Southeast', country: 'US', latency: '<10ms', cached: '98%', flag: 'US' },
-  'EU West':      { x: 430, y: 365, label: 'EU West',      country: 'EU', latency: '<5ms',  cached: '98%', flag: 'FR' },
-  'EU Central':   { x: 443, y: 360, label: 'EU Central',   country: 'EU', latency: '<5ms',  cached: '98%', flag: 'DE' },
-  'EU South':     { x: 446, y: 378, label: 'EU South',     country: 'EU', latency: '<5ms',  cached: '98%', flag: 'IT' },
-  'EU North':     { x: 470, y: 338, label: 'EU North',     country: 'EU', latency: '<5ms',  cached: '98%', flag: 'FI' },
+  'US West':      { x: 157, y: 406, label: 'US West',      country: 'US', latency: '<10ms', cached: '98%', flag: 'US' },
+  'US Southwest': { x: 142, y: 430, label: 'US Southwest', country: 'US', latency: '<10ms', cached: '98%', flag: 'US' },
+  'US Central':   { x: 195, y: 412, label: 'US Central',   country: 'US', latency: '<10ms', cached: '98%', flag: 'US' },
+  'US Northeast': { x: 244, y: 406, label: 'US Northeast', country: 'US', latency: '<10ms', cached: '98%', flag: 'US' },
+  'US Southeast': { x: 230, y: 459, label: 'US Southeast', country: 'US', latency: '<10ms', cached: '98%', flag: 'US' },
+  'EU West':      { x: 413, y: 394, label: 'EU West',      country: 'EU', latency: '<5ms',  cached: '98%', flag: 'FR' },
+  'EU Central':   { x: 422, y: 384, label: 'EU Central',   country: 'EU', latency: '<5ms',  cached: '98%', flag: 'DE' },
+  'EU South':     { x: 423, y: 409, label: 'EU South',     country: 'EU', latency: '<5ms',  cached: '98%', flag: 'IT' },
+  'EU North':     { x: 453, y: 340, label: 'EU North',     country: 'EU', latency: '<5ms',  cached: '98%', flag: 'FI' },
 };
 
 const regions = Object.entries(network.regions || {}).map(([name, r]) => ({
