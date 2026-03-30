@@ -43,8 +43,6 @@ export const GET: APIRoute = async () => {
           const h = await resp.json();
           return {
             ...node, status: 'online', latency, ledger: h.latest_ledger || 0,
-            upstreams: h.upstreams?.length || 0,
-            requests: h.requests_served || 0,
             cache_hit: h.cache?.hit_rate || '0%',
             response_p50: h.latency_ms?.overall?.p50 || 0,
             response_p95: h.latency_ms?.overall?.p95 || 0,

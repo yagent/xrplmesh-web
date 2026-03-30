@@ -96,12 +96,8 @@ function statusColor(s: string) {
         <span class="banner-label">Nodes Online</span>
       </div>
       <div class="banner-meta">
-        <span class="banner-val mono" id="b-p50">{avgP50}ms</span>
-        <span class="banner-label">Avg Response p50</span>
-      </div>
-      <div class="banner-meta">
-        <span class="banner-val mono" id="b-ups">{totalUpstreams}</span>
-        <span class="banner-label">XRPL Upstreams</span>
+        <span class="banner-val mono" id="b-p50">{avgP50 < 1 ? '<1' : avgP50}ms</span>
+        <span class="banner-label">Avg Response</span>
       </div>
     </div>
 
@@ -124,10 +120,10 @@ function statusColor(s: string) {
                   <span class="node-status" data-node-status={n.label} style={`color:${statusColor(n.status)}`}>{n.status}</span>
                 </div>
                 <div class="node-detail">
-                  <span class="nd-item"><span class="nd-label">Response p50</span><span class="nd-val" data-node-p50={n.label}>{n.response_p50 || '--'}ms</span></span>
-                  <span class="nd-item"><span class="nd-label">p95</span><span class="nd-val" data-node-p95={n.label}>{n.response_p95 || '--'}ms</span></span>
+                  <span class="nd-item"><span class="nd-label">Response</span><span class="nd-val" data-node-p50={n.label}>{!n.response_p50 ? '--' : parseFloat(n.response_p50) < 1 ? '<1ms' : n.response_p50 + 'ms'}</span></span>
+                  <span class="nd-item"><span class="nd-label">p95</span><span class="nd-val" data-node-p95={n.label}>{!n.response_p95 ? '--' : parseFloat(n.response_p95) < 1 ? '<1ms' : n.response_p95 + 'ms'}</span></span>
                   <span class="nd-item"><span class="nd-label">Cache</span><span class="nd-val" data-node-cache={n.label}>{n.cache_hit || '--'}</span></span>
-                  <span class="nd-item"><span class="nd-label">Upstreams</span><span class="nd-val" data-node-ups={n.label}>{n.upstreams || '--'}</span></span>
+                  <span class="nd-item"><span class="nd-label">Uptime</span><span class="nd-val" data-node-uptime={n.label}>{n.uptime ? (n.uptime > 86400 ? Math.floor(n.uptime/86400)+'d' : n.uptime > 3600 ? Math.floor(n.uptime/3600)+'h' : Math.floor(n.uptime/60)+'m') : '--'}</span></span>
                 </div>
               </div>
             ))}
@@ -159,13 +155,13 @@ function statusColor(s: string) {
         var st=document.querySelector('[data-node-status="'+n.label+'"]');
         if(st){st.textContent=n.status;st.style.color=nc}
         var p50=document.querySelector('[data-node-p50="'+n.label+'"]');
-        if(p50)p50.textContent=(n.response_p50||'--')+'ms';
+        if(p50)p50.textContent=!n.response_p50?'--':parseFloat(n.response_p50)<1?'<1ms':n.response_p50+'ms';
         var p95=document.querySelector('[data-node-p95="'+n.label+'"]');
-        if(p95)p95.textContent=(n.response_p95||'--')+'ms';
+        if(p95)p95.textContent=!n.response_p95?'--':parseFloat(n.response_p95)<1?'<1ms':n.response_p95+'ms';
         var ch=document.querySelector('[data-node-cache="'+n.label+'"]');
         if(ch)ch.textContent=n.cache_hit||'--';
-        var ups=document.querySelector('[data-node-ups="'+n.label+'"]');
-        if(ups)ups.textContent=n.upstreams||'--';
+        var ut=document.querySelector('[data-node-uptime="'+n.label+'"]');
+        if(ut)ut.textContent=n.uptime?(n.uptime>86400?Math.floor(n.uptime/86400)+'d':n.uptime>3600?Math.floor(n.uptime/3600)+'h':Math.floor(n.uptime/60)+'m'):'--';
       });
       for(var reg in regions){
         var rc=regions[reg].online===regions[reg].total?'#238636':'#d29922';
