@@ -16,6 +16,18 @@ async function patchKey(body: Record<string, unknown>) {
   });
 }
 
+async function createKey(plan: string, owner: string, name: string) {
+  const resp = await fetch(`${API_URL}/admin/keys`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Proxy-Token': ADMIN_TOKEN },
+    body: JSON.stringify({ plan, owner, label: name ? `${name}'s endpoint` : '' }),
+    signal: AbortSignal.timeout(5000),
+  });
+  if (!resp.ok) return null;
+  const data = await resp.json();
+  return data.key as string;
+}
+
 async function findKeyBySubscription(subscriptionId: string): Promise<string | null> {
   try {
     const resp = await fetch(`${API_URL}/admin/keys`, {
@@ -47,19 +59,26 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(JSON.stringify({ error: 'invalid_signature' }), { status: 400 });
     }
   } else {
-    // No webhook secret = reject (don't accept unsigned events)
     return new Response(JSON.stringify({ error: 'webhook_secret_not_configured' }), { status: 503 });
   }
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
-    const key = session.metadata?.api_key;
-    const plan = session.metadata?.plan;
+    const plan = session.metadata?.plan || 'builder';
+    const owner = session.metadata?.owner || '';
+    const name = session.metadata?.name || '';
+    let key = session.metadata?.api_key;
+
+    // Create key if this is a new subscription (no existing key passed)
+    if (!key) {
+      key = await createKey(plan, owner, name);
+    }
+
     if (key) {
       await patchKey({
         key,
         active: true,
-        ...(plan && { plan }),
+        plan,
         ...(session.customer && { stripeCustomerId: session.customer }),
         ...(session.subscription && { stripeSubscriptionId: session.subscription }),
       });
@@ -78,7 +97,6 @@ export const POST: APIRoute = async ({ request }) => {
     const sub = event.data.object as Stripe.Subscription;
     const key = await findKeyBySubscription(sub.id);
     if (key && sub.status !== 'active' && sub.status !== 'trialing') {
-      // past_due, unpaid, canceled, incomplete_expired
       await patchKey({ key, active: false });
     }
   }

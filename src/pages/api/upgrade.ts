@@ -4,8 +4,8 @@ import { getSessionFromCookie } from '../../lib/auth';
 
 const STRIPE_KEY = import.meta.env.STRIPE_SECRET_KEY || '';
 const stripe = STRIPE_KEY ? new Stripe(STRIPE_KEY) : null;
-const API_URL = import.meta.env.API_URL || 'https://s1.xrplmesh.com';
 const SITE_URL = import.meta.env.SITE_URL || 'https://xrplmesh.com';
+const API_URL = import.meta.env.API_URL || 'https://s1.xrplmesh.com';
 const ADMIN_TOKEN = import.meta.env.ADMIN_TOKEN || '';
 
 const PRICE_MAP: Record<string, string> = {
@@ -15,23 +15,15 @@ const PRICE_MAP: Record<string, string> = {
 };
 
 export const POST: APIRoute = async ({ request }) => {
-  if (!stripe) {
-    return new Response(JSON.stringify({ error: 'billing_not_configured' }), { status: 503 });
-  }
-
   const session = getSessionFromCookie(request);
-  if (!session) {
-    return new Response(JSON.stringify({ error: 'login_required', redirect: '/api/auth/login' }), { status: 401 });
-  }
+  if (!session) return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401 });
+  if (!stripe) return new Response(JSON.stringify({ error: 'billing_not_configured' }), { status: 503 });
 
-  const { plan } = await request.json();
+  const { plan, key } = await request.json();
   const priceId = PRICE_MAP[plan];
-  if (!priceId) {
-    return new Response(JSON.stringify({ error: 'invalid_plan' }), { status: 400 });
-  }
+  if (!priceId) return new Response(JSON.stringify({ error: 'invalid_plan' }), { status: 400 });
 
-  // Check if user already has an active key - pass it so webhook upgrades instead of creating new
-  let existingKey = '';
+  // Verify key belongs to this user
   try {
     const keysResp = await fetch(`${API_URL}/admin/keys`, {
       headers: { 'X-Proxy-Token': ADMIN_TOKEN },
@@ -39,26 +31,25 @@ export const POST: APIRoute = async ({ request }) => {
     });
     if (keysResp.ok) {
       const allKeys = await keysResp.json();
-      const existing = allKeys.find((k: any) => k.owner === session.email && k.active);
-      if (existing) existingKey = existing.key;
+      const match = allKeys.find((k: any) => k.key === key && k.owner === session.email);
+      if (!match) return new Response(JSON.stringify({ error: 'key_not_found' }), { status: 403 });
     }
   } catch {}
 
-  // Reuse existing Stripe customer to avoid duplicates
+  // Reuse existing Stripe customer
   let customer: string | undefined;
   try {
     const customers = await stripe.customers.list({ email: session.email, limit: 1 });
     if (customers.data.length > 0) customer = customers.data[0].id;
   } catch {}
 
-  // Don't create key here - webhook creates it after payment succeeds
   const checkoutSession = await stripe.checkout.sessions.create({
     mode: 'subscription',
     ...(customer ? { customer } : { customer_email: session.email }),
     line_items: [{ price: priceId, quantity: 1 }],
-    metadata: { api_key: existingKey, plan, owner: session.email, name: session.name },
-    success_url: `${SITE_URL}/dashboard`,
-    cancel_url: `${SITE_URL}/#pricing`,
+    metadata: { api_key: key, plan, email: session.email },
+    success_url: `${SITE_URL}/dashboard?upgraded=${plan}`,
+    cancel_url: `${SITE_URL}/dashboard`,
   });
 
   return new Response(JSON.stringify({ url: checkoutSession.url }), { status: 200 });
