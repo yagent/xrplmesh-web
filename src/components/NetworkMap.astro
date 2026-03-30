@@ -22,15 +22,15 @@ try {
 
 // Node positions in the SVG coordinate space (viewBox: 30.767 241.591 784.077 458.627)
 const regionCoords: Record<string, { x: number; y: number; label: string; country: string; latency: string; cached: string; flag: string }> = {
-  'Salt Lake City': { x: 157, y: 406, label: 'Salt Lake City', country: 'US', latency: '~3ms', cached: '97.5%', flag: 'US' },
-  'New York': { x: 244, y: 406, label: 'New York',       country: 'US', latency: '~10ms', cached: '95.5%', flag: 'US' },
-  'Los Angeles': { x: 142, y: 430, label: 'Los Angeles', country: 'US', latency: '~5ms',  cached: '97.1%', flag: 'US' },
-  'US':       { x: 237, y: 412, label: 'US East',        country: 'US', latency: '~12ms', cached: '94.2%', flag: 'US' },
-  'Miami':    { x: 230, y: 459, label: 'Miami',          country: 'US', latency: '~8ms',  cached: '95.1%', flag: 'US' },
-  'Roubaix':  { x: 430, y: 365, label: 'France',         country: 'FR', latency: '~38ms', cached: '91.7%', flag: 'FR' },
-  'Limburg':  { x: 440, y: 363, label: 'Germany',        country: 'DE', latency: '~44ms', cached: '89.3%', flag: 'DE' },
-  'Milan':    { x: 443, y: 378, label: 'Italy',           country: 'IT', latency: '~52ms', cached: '90.1%', flag: 'IT' },
-  'Helsinki': { x: 468, y: 340, label: 'Finland',         country: 'FI', latency: '~6ms',  cached: '96.8%', flag: 'FI' },
+  'Salt Lake City': { x: 157, y: 406, label: 'United States', country: 'US', latency: '<10ms', cached: '98%', flag: 'US' },
+  'New York': { x: 244, y: 406, label: 'United States',       country: 'US', latency: '<10ms', cached: '98%', flag: 'US' },
+  'Los Angeles': { x: 142, y: 430, label: 'United States', country: 'US', latency: '<10ms',  cached: '98%', flag: 'US' },
+  'US':       { x: 237, y: 412, label: 'United States',        country: 'US', latency: '<10ms', cached: '98%', flag: 'US' },
+  'Miami':    { x: 230, y: 459, label: 'United States',          country: 'US', latency: '<10ms',  cached: '98%', flag: 'US' },
+  'Roubaix':  { x: 430, y: 365, label: 'Europe',         country: 'EU', latency: '<5ms', cached: '98%', flag: 'FR' },
+  'Limburg':  { x: 440, y: 363, label: 'Europe',        country: 'EU', latency: '<5ms', cached: '98%', flag: 'DE' },
+  'Milan':    { x: 443, y: 378, label: 'Europe',           country: 'EU', latency: '<5ms', cached: '98%', flag: 'IT' },
+  'Helsinki': { x: 468, y: 340, label: 'Europe',         country: 'EU', latency: '<5ms',  cached: '98%', flag: 'FI' },
 };
 
 const regions = Object.entries(network.regions || {}).map(([name, r]) => ({
@@ -55,7 +55,7 @@ for (let i = 0; i < regions.length; i++) {
     <h2>Network Topology</h2>
     <div class="map-status">
       <span class="pulse"></span>
-      <span>{network.nodes_online} nodes live</span>
+      <span>{network.nodes_online === network.nodes_total ? 'All regions operational' : network.nodes_online + '/' + network.nodes_total + ' regions online'}</span>
     </div>
   </div>
 
@@ -131,8 +131,8 @@ for (let i = 0; i < regions.length; i++) {
               </div>
               <div class="tt-grid">
                 <div class="tt-item">
-                  <span class="tt-label">Nodes</span>
-                  <span class="tt-value">{r.online}/{r.nodes}</span>
+                  <span class="tt-label">Status</span>
+                  <span class="tt-value">{r.online === r.nodes ? 'Operational' : 'Degraded'}</span>
                 </div>
                 <div class="tt-item">
                   <span class="tt-label">Latency</span>

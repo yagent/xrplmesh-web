@@ -55,7 +55,7 @@ if (!network.nodes_total) {
 const regionCount = Object.keys(network.regions || {}).length;
 ---
 
-<Base title="XRPL Mesh — Full History XRP Ledger Node API Endpoint" description="Free XRP Ledger full history node endpoint. 21 nodes across 9 regions. WebSocket and JSON-RPC API. Get started in seconds.">
+<Base title="XRPL Mesh — Full History XRP Ledger API" description="Free XRP Ledger full history API. Global edge network. WebSocket and JSON-RPC. Get started in seconds.">
   <Header />
   <div class="hero">
     <canvas id="cmd-flow" class="grid-canvas"></canvas>
@@ -103,7 +103,7 @@ const regionCount = Object.keys(network.regions || {}).length;
       <div class="feature">
         <div class="feature-icon"><Globe size={22} /></div>
         <h3>Globally Distributed</h3>
-        <p>{network.nodes_total} nodes across {regionCount} countries. Your queries are served from the nearest location.</p>
+        <p>Global edge network across {regionCount} regions. Your queries are served from the nearest location.</p>
       </div>
       <div class="feature">
         <div class="feature-icon"><ShieldCheck size={22} /></div>

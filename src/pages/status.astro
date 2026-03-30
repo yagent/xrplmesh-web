@@ -37,7 +37,6 @@ const results = await Promise.all(
         const h = await resp.json();
         return {
           label: `Node ${idx + 1}`, region: node.region, status: 'online' as const, latency, ledger: h.latest_ledger || 0,
-          upstreams: h.upstreams?.length || 0,
           requests: h.requests_served || 0,
           cache_hit: h.cache?.hit_rate || '0%',
           response_p50: h.latency_ms?.overall?.p50 || 0,
@@ -62,7 +61,6 @@ const overallLabel = overall === 'operational' ? 'All Systems Operational' : ove
 const onlineNodes = results.filter((n: any) => n.status === 'online' && n.response_p50);
 const avgP50 = onlineNodes.length ? Math.round(onlineNodes.reduce((s: number, n: any) => s + parseFloat(n.response_p50), 0) / onlineNodes.length) : 0;
 const avgP95 = onlineNodes.length ? Math.round(onlineNodes.reduce((s: number, n: any) => s + parseFloat(n.response_p95), 0) / onlineNodes.length) : 0;
-const totalUpstreams = onlineNodes.reduce((s: number, n: any) => s + (n.upstreams || 0), 0);
 const totalRequests = onlineNodes.reduce((s: number, n: any) => s + (n.requests || 0), 0);
 
 // Group by region
@@ -77,7 +75,7 @@ function statusColor(s: string) {
 }
 ---
 
-<Base title="Network Status - XRPL Mesh" description="Real-time health status of all XRPL Mesh nodes across 9 regions.">
+<Base title="Network Status - XRPL Mesh" description="Real-time health and performance status of the XRPL Mesh global network.">
   <Header />
 
   <div class="container">
