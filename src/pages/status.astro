@@ -35,7 +35,15 @@ const results = await Promise.all(
       const latency = Date.now() - t0;
       if (resp.ok) {
         const h = await resp.json();
-        return { label: `Node ${idx + 1}`, region: node.region, status: 'online' as const, latency, ledger: h.latest_ledger || 0 };
+        return {
+          label: `Node ${idx + 1}`, region: node.region, status: 'online' as const, latency, ledger: h.latest_ledger || 0,
+          upstreams: h.upstreams?.length || 0,
+          requests: h.requests_served || 0,
+          cache_hit: h.cache?.hit_rate || '0%',
+          response_p50: h.latency_ms?.overall?.p50 || 0,
+          response_p95: h.latency_ms?.overall?.p95 || 0,
+          uptime: h.uptime || 0,
+        };
       }
       return { label: `Node ${idx + 1}`, region: node.region, status: 'degraded' as const, latency, ledger: 0 };
     } catch {
@@ -51,6 +59,11 @@ const allSynced = ledgers.length > 0 && ledgers.every(l => Math.abs(l - latestLe
 const overall = online === results.length ? 'operational' : online > results.length * 0.8 ? 'degraded' : 'outage';
 const overallColor = overall === 'operational' ? '#238636' : overall === 'degraded' ? '#d29922' : '#f85149';
 const overallLabel = overall === 'operational' ? 'All Systems Operational' : overall === 'degraded' ? 'Partial Degradation' : 'Service Disruption';
+const onlineNodes = results.filter((n: any) => n.status === 'online' && n.response_p50);
+const avgP50 = onlineNodes.length ? Math.round(onlineNodes.reduce((s: number, n: any) => s + parseFloat(n.response_p50), 0) / onlineNodes.length) : 0;
+const avgP95 = onlineNodes.length ? Math.round(onlineNodes.reduce((s: number, n: any) => s + parseFloat(n.response_p95), 0) / onlineNodes.length) : 0;
+const totalUpstreams = onlineNodes.reduce((s: number, n: any) => s + (n.upstreams || 0), 0);
+const totalRequests = onlineNodes.reduce((s: number, n: any) => s + (n.requests || 0), 0);
 
 // Group by region
 const regionMap = new Map<string, typeof results>();
@@ -82,6 +95,14 @@ function statusColor(s: string) {
         <span class="banner-val mono" id="b-count">{online}/{results.length}</span>
         <span class="banner-label">Nodes Online</span>
       </div>
+      <div class="banner-meta">
+        <span class="banner-val mono" id="b-p50">{avgP50}ms</span>
+        <span class="banner-label">Avg Response p50</span>
+      </div>
+      <div class="banner-meta">
+        <span class="banner-val mono" id="b-ups">{totalUpstreams}</span>
+        <span class="banner-label">XRPL Upstreams</span>
+      </div>
     </div>
 
     {[...regionMap.entries()].map(([region, nodes]) => {
@@ -103,8 +124,10 @@ function statusColor(s: string) {
                   <span class="node-status" data-node-status={n.label} style={`color:${statusColor(n.status)}`}>{n.status}</span>
                 </div>
                 <div class="node-detail">
-                  <span class="nd-item"><span class="nd-label">Latency</span><span class="nd-val" data-node-latency={n.label}>{n.latency}ms</span></span>
-                  <span class="nd-item"><span class="nd-label">Ledger</span><span class="nd-val" data-node-ledger={n.label}>{n.ledger ? n.ledger.toLocaleString() : '--'}</span></span>
+                  <span class="nd-item"><span class="nd-label">Response p50</span><span class="nd-val" data-node-p50={n.label}>{n.response_p50 || '--'}ms</span></span>
+                  <span class="nd-item"><span class="nd-label">p95</span><span class="nd-val" data-node-p95={n.label}>{n.response_p95 || '--'}ms</span></span>
+                  <span class="nd-item"><span class="nd-label">Cache</span><span class="nd-val" data-node-cache={n.label}>{n.cache_hit || '--'}</span></span>
+                  <span class="nd-item"><span class="nd-label">Upstreams</span><span class="nd-val" data-node-ups={n.label}>{n.upstreams || '--'}</span></span>
                 </div>
               </div>
             ))}
@@ -135,10 +158,14 @@ function statusColor(s: string) {
         if(dot){dot.style.background=nc;dot.style.boxShadow='0 0 4px '+nc}
         var st=document.querySelector('[data-node-status="'+n.label+'"]');
         if(st){st.textContent=n.status;st.style.color=nc}
-        var lat=document.querySelector('[data-node-latency="'+n.label+'"]');
-        if(lat)lat.textContent=n.latency+'ms';
-        var led=document.querySelector('[data-node-ledger="'+n.label+'"]');
-        if(led)led.textContent=n.ledger?n.ledger.toLocaleString():'--';
+        var p50=document.querySelector('[data-node-p50="'+n.label+'"]');
+        if(p50)p50.textContent=(n.response_p50||'--')+'ms';
+        var p95=document.querySelector('[data-node-p95="'+n.label+'"]');
+        if(p95)p95.textContent=(n.response_p95||'--')+'ms';
+        var ch=document.querySelector('[data-node-cache="'+n.label+'"]');
+        if(ch)ch.textContent=n.cache_hit||'--';
+        var ups=document.querySelector('[data-node-ups="'+n.label+'"]');
+        if(ups)ups.textContent=n.upstreams||'--';
       });
       for(var reg in regions){
         var rc=regions[reg].online===regions[reg].total?'#238636':'#d29922';
