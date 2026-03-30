@@ -1,0 +1,386 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+
+interface Props {
+  network: {
+    regions: Record<string, { nodes: number; online: number }>;
+    nodes_online: number;
+    nodes_total: number;
+  };
+}
+
+const { network } = Astro.props;
+
+// Read SVG and extract all paths
+let mapPaths = '';
+try {
+  const svg = fs.readFileSync(path.join(process.cwd(), 'public', 'world-map.svg'), 'utf8');
+  const match = svg.match(/<g[^>]*>([\s\S]*)<\/g>/);
+  if (match) mapPaths = match[1];
+} catch {}
+
+// Node positions in the SVG coordinate space (viewBox: 30.767 241.591 784.077 458.627)
+const regionCoords: Record<string, { x: number; y: number; label: string; country: string; latency: string; cached: string; flag: string }> = {
+  'Salt Lake City': { x: 157, y: 406, label: 'Salt Lake City', country: 'US', latency: '~3ms', cached: '97.5%', flag: 'US' },
+  'New York': { x: 244, y: 406, label: 'New York',       country: 'US', latency: '~10ms', cached: '95.5%', flag: 'US' },
+  'Los Angeles': { x: 142, y: 430, label: 'Los Angeles', country: 'US', latency: '~5ms',  cached: '97.1%', flag: 'US' },
+  'US':       { x: 237, y: 412, label: 'US East',        country: 'US', latency: '~12ms', cached: '94.2%', flag: 'US' },
+  'Miami':    { x: 230, y: 459, label: 'Miami',          country: 'US', latency: '~8ms',  cached: '95.1%', flag: 'US' },
+  'Roubaix':  { x: 430, y: 365, label: 'France',         country: 'FR', latency: '~38ms', cached: '91.7%', flag: 'FR' },
+  'Limburg':  { x: 440, y: 363, label: 'Germany',        country: 'DE', latency: '~44ms', cached: '89.3%', flag: 'DE' },
+  'Milan':    { x: 443, y: 378, label: 'Italy',           country: 'IT', latency: '~52ms', cached: '90.1%', flag: 'IT' },
+  'Helsinki': { x: 468, y: 340, label: 'Finland',         country: 'FI', latency: '~6ms',  cached: '96.8%', flag: 'FI' },
+};
+
+const regions = Object.entries(network.regions || {}).map(([name, r]) => ({
+  name,
+  ...r,
+  coords: regionCoords[name] || { x: 400, y: 200, label: name },
+}));
+
+const connections: { x1: number; y1: number; x2: number; y2: number }[] = [];
+for (let i = 0; i < regions.length; i++) {
+  for (let j = i + 1; j < regions.length; j++) {
+    connections.push({
+      x1: regions[i].coords.x, y1: regions[i].coords.y,
+      x2: regions[j].coords.x, y2: regions[j].coords.y,
+    });
+  }
+}
+---
+
+<section class="map-section">
+  <div class="map-header">
+    <h2>Network Topology</h2>
+    <div class="map-status">
+      <span class="pulse"></span>
+      <span>{network.nodes_online} nodes live</span>
+    </div>
+  </div>
+
+  <div class="map-container">
+    <svg class="map-svg" viewBox="30.767 241.591 784.077 458.627" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="node-glow">
+          <stop offset="0%" stop-color="rgba(88,166,255,0.3)" />
+          <stop offset="100%" stop-color="transparent" />
+        </radialGradient>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="2" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+        <linearGradient id="conn-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="rgba(88,166,255,0.5)" />
+          <stop offset="50%" stop-color="rgba(88,166,255,0.15)" />
+          <stop offset="100%" stop-color="rgba(88,166,255,0.5)" />
+        </linearGradient>
+      </defs>
+
+      <!-- World map outline -->
+      <g class="world-paths" set:html={mapPaths} />
+
+      <!-- Connection lines with data packets -->
+      {connections.map((c, i) => (
+        <g>
+          <line x1={c.x1} y1={c.y1} x2={c.x2} y2={c.y2} class="connection" style={`animation-delay: ${i * 0.4}s`} />
+          <circle r="1.5" class="packet">
+            <animateMotion dur={`${2 + (i % 3)}s`} repeatCount="indefinite" begin={`${i * 0.7}s`}>
+              <mpath href={`#conn-path-${i}`} />
+            </animateMotion>
+          </circle>
+          <circle r="1.5" class="packet">
+            <animateMotion dur={`${2.5 + (i % 2)}s`} repeatCount="indefinite" begin={`${i * 0.7 + 1.2}s`} keyPoints="1;0" keyTimes="0;1">
+              <mpath href={`#conn-path-${i}`} />
+            </animateMotion>
+          </circle>
+          <path id={`conn-path-${i}`} d={`M${c.x1},${c.y1} L${c.x2},${c.y2}`} fill="none" stroke="none" />
+        </g>
+      ))}
+
+      <!-- Node SVG markers (glow + core only) -->
+      {regions.map((r, i) => (
+        <g>
+          <circle cx={r.coords.x} cy={r.coords.y} r="20" fill="url(#node-glow)" />
+          <circle cx={r.coords.x} cy={r.coords.y} r="6" class="node-pulse-ring" style={`animation-delay: ${i * 0.5}s`} />
+          <circle cx={r.coords.x} cy={r.coords.y} r="6" class="node-ring" />
+          <circle cx={r.coords.x} cy={r.coords.y} r="3" class="node-core" filter="url(#glow)" />
+        </g>
+      ))}
+
+      <!-- Scanline -->
+      <rect class="scanline" x="30" y="241" width="784" height="1.5" />
+    </svg>
+
+    <!-- HTML overlay for tooltips -->
+    {regions.map((r) => {
+      // Convert SVG coords to percentage positions
+      const xPct = ((r.coords.x - 30.767) / 784.077) * 100;
+      const yPct = ((r.coords.y - 241.591) / 458.627) * 100;
+      return (
+        <div class="node-overlay" style={`left: ${xPct}%; top: ${yPct}%`}>
+          <div class="node-hitarea">
+            <div class="node-tooltip">
+              <div class="tt-header">
+                <span class="tt-flag">{r.coords.flag}</span>
+                <span class="tt-name">{r.coords.label}</span>
+                <span class="tt-status">ONLINE</span>
+              </div>
+              <div class="tt-grid">
+                <div class="tt-item">
+                  <span class="tt-label">Nodes</span>
+                  <span class="tt-value">{r.online}/{r.nodes}</span>
+                </div>
+                <div class="tt-item">
+                  <span class="tt-label">Latency</span>
+                  <span class="tt-value">{r.coords.latency}</span>
+                </div>
+                <div class="tt-item">
+                  <span class="tt-label">Cache Hit</span>
+                  <span class="tt-value">{r.coords.cached}</span>
+                </div>
+                <div class="tt-item">
+                  <span class="tt-label">Uptime</span>
+                  <span class="tt-value">99.9%</span>
+                </div>
+              </div>
+              <div class="tt-bar">
+                <div class="tt-bar-fill" style={`width: ${r.coords.cached}`}></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</section>
+
+<style>
+  .map-section { margin-bottom: 48px; }
+  .map-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .map-header h2 { font-size: 1.15rem; font-weight: 700; }
+  .map-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+  .pulse {
+    width: 8px; height: 8px;
+    background: #238636;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(35,134,54,0.6);
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .map-container {
+    overflow: hidden;
+    background: transparent;
+    position: relative;
+    margin: 0 -32px;
+  }
+  .map-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 250px;
+  }
+  @media (max-width: 768px) {
+    .map-container { margin: 0 -16px; }
+    .map-header h2 { font-size: 1rem; }
+    .map-status { font-size: 0.7rem; }
+  }
+
+  /* World map countries */
+  .map-svg :global(.world-paths path) {
+    fill: rgba(88,166,255,0.03);
+    stroke: rgba(88,166,255,0.3);
+    stroke-width: 0.4;
+  }
+
+  /* Connections */
+  .connection {
+    stroke: url(#conn-grad);
+    stroke-width: 0.6;
+    stroke-dasharray: 4 3;
+    animation: dash-flow 10s linear infinite;
+  }
+
+  /* Nodes */
+  .node-ring {
+    fill: none;
+    stroke: rgba(88,166,255,0.5);
+    stroke-width: 0.8;
+  }
+  .node-core {
+    fill: #58a6ff;
+  }
+  .node-pulse-ring {
+    fill: none;
+    stroke: rgba(88,166,255,0.3);
+    stroke-width: 0.5;
+    animation: svg-ripple 3s ease-out infinite;
+  }
+  .node-label {
+    text-anchor: middle;
+    font-size: 7px;
+    font-weight: 600;
+    fill: rgba(88,166,255,0.85);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-family: var(--font);
+  }
+  .node-count {
+    text-anchor: middle;
+    font-size: 6px;
+    fill: var(--text-dim);
+    font-family: var(--mono);
+  }
+
+  .scanline {
+    fill: rgba(88,166,255,0.04);
+    animation: scan 5s linear infinite;
+  }
+
+  /* Data packets */
+  .packet {
+    fill: var(--accent);
+    opacity: 0.8;
+    filter: url(#glow);
+  }
+
+  /* HTML overlay nodes + tooltips */
+  .node-overlay {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+  }
+  .node-hitarea {
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    position: relative;
+  }
+  .node-tooltip {
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    background: rgba(13,17,23,0.95);
+    border: 1px solid rgba(88,166,255,0.25);
+    border-radius: 10px;
+    padding: 14px 16px;
+    width: 190px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(88,166,255,0.08);
+    z-index: 20;
+  }
+  .node-hitarea:hover .node-tooltip,
+  .node-hitarea:active .node-tooltip {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+    pointer-events: auto;
+  }
+  @media (max-width: 768px) {
+    .node-hitarea { width: 44px; height: 44px; }
+    .node-tooltip { width: 170px; padding: 10px 12px; }
+    .tt-header { margin-bottom: 8px; padding-bottom: 8px; }
+    .tt-grid { gap: 6px; }
+    .tt-name { font-size: 0.75rem; }
+    .tt-value { font-size: 0.75rem; }
+  }
+  .tt-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(88,166,255,0.1);
+  }
+  .tt-flag {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: rgba(88,166,255,0.08);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: var(--mono);
+  }
+  .tt-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+  }
+  .tt-status {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #238636;
+    letter-spacing: 0.05em;
+  }
+  .tt-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .tt-item { display: flex; flex-direction: column; }
+  .tt-label { font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+  .tt-value { font-size: 0.82rem; font-weight: 600; color: var(--accent); font-family: var(--mono); }
+  .tt-bar {
+    height: 3px;
+    background: rgba(88,166,255,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .tt-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #79c0ff);
+    border-radius: 2px;
+  }
+
+  @media (max-width: 768px) {
+    .map-svg :global(.world-paths path) { stroke-width: 0.8; stroke: rgba(88,166,255,0.25); }
+    .node-ring { stroke-width: 1.2; }
+    .node-core { r: 4; }
+    .connection { stroke-width: 0.8; }
+  }
+  @media (max-width: 480px) {
+    .map-section { margin-bottom: 32px; }
+    .map-container { margin: 0 -12px; }
+    .map-svg :global(.world-paths path) { stroke-width: 1.2; stroke: rgba(88,166,255,0.3); }
+    .node-ring { stroke-width: 1.5; }
+    .node-core { r: 5; }
+    .connection { stroke-width: 1; }
+    .node-overlay { display: none; }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  @keyframes svg-ripple {
+    0% { r: 6; opacity: 0.4; }
+    100% { r: 18; opacity: 0; }
+  }
+  @keyframes dash-flow {
+    0% { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: -40; }
+  }
+  @keyframes scan {
+    0% { y: 241; }
+    100% { y: 700; }
+  }
+</style>

@@ -193,4 +193,14 @@ function isDisabled(plan: string) {
   .plan-cta:disabled { opacity: 0.4; cursor: not-allowed; }
   .plan-cta:disabled:hover { border-color: var(--border); color: var(--text); }
   .pricing-note { text-align: center; color: var(--text-dim); font-size: 0.78rem; margin-top: 20px; }
+
+  @media (max-width: 768px) {
+    .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+    .price { font-size: 1.8rem; }
+    .plan { padding: 22px 18px; }
+  }
+  @media (max-width: 480px) {
+    .pricing-grid { grid-template-columns: 1fr; gap: 12px; }
+    .pricing-sub { font-size: 0.85rem; }
+  }
 </style>
