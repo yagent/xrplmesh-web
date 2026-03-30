@@ -3,8 +3,8 @@ import type { APIRoute } from 'astro';
 const NODES = [
   { id: 'slc-2', region: 'US West', ip: '144.225.144.34' },
   { id: 'slc-1', region: 'US West', ip: '144.225.144.33' },
-  { id: 'nyc-1', region: 'US East', ip: '157.254.224.90' },
   { id: 'lax-1', region: 'US West', ip: '172.99.249.123' },
+  { id: 'nyc-1', region: 'US East', ip: '157.254.224.90' },
   { id: 'mia-1', region: 'US East', ip: '69.166.231.61' },
   { id: 'us-1', region: 'US East', ip: '74.208.76.39' },
   { id: 'us-2', region: 'US East', ip: '74.208.76.45' },

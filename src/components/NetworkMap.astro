@@ -22,15 +22,12 @@ try {
 
 // Node positions in the SVG coordinate space (viewBox: 30.767 241.591 784.077 458.627)
 const regionCoords: Record<string, { x: number; y: number; label: string; country: string; latency: string; cached: string; flag: string }> = {
-  'Salt Lake City': { x: 155, y: 408, label: 'US West', country: 'US', latency: '<10ms', cached: '98%', flag: 'US' },
-  'New York': { x: 195, y: 415, label: 'US Central', country: 'US', latency: '<10ms', cached: '98%', flag: 'US' },
-  'Los Angeles': { x: 155, y: 408, label: 'US West', country: 'US', latency: '<10ms',  cached: '98%', flag: 'US' },
-  'US':       { x: 195, y: 415, label: 'US Central',        country: 'US', latency: '<10ms', cached: '98%', flag: 'US' },
-  'Miami':    { x: 195, y: 415, label: 'US Central',          country: 'US', latency: '<10ms',  cached: '98%', flag: 'US' },
-  'Roubaix':  { x: 430, y: 365, label: 'Europe',         country: 'EU', latency: '<5ms', cached: '98%', flag: 'FR' },
-  'Limburg':  { x: 440, y: 363, label: 'Europe',        country: 'EU', latency: '<5ms', cached: '98%', flag: 'DE' },
-  'Milan':    { x: 443, y: 378, label: 'Europe',           country: 'EU', latency: '<5ms', cached: '98%', flag: 'IT' },
-  'Helsinki': { x: 468, y: 340, label: 'Europe',         country: 'EU', latency: '<5ms',  cached: '98%', flag: 'FI' },
+  'US West':    { x: 155, y: 408, label: 'US West',    country: 'US', latency: '<10ms', cached: '98%', flag: 'US' },
+  'US East':    { x: 195, y: 415, label: 'US East',    country: 'US', latency: '<10ms', cached: '98%', flag: 'US' },
+  'EU West':    { x: 430, y: 365, label: 'EU West',    country: 'EU', latency: '<5ms',  cached: '98%', flag: 'FR' },
+  'EU Central': { x: 440, y: 363, label: 'EU Central', country: 'EU', latency: '<5ms',  cached: '98%', flag: 'DE' },
+  'EU South':   { x: 443, y: 378, label: 'EU South',   country: 'EU', latency: '<5ms',  cached: '98%', flag: 'IT' },
+  'EU North':   { x: 468, y: 340, label: 'EU North',   country: 'EU', latency: '<5ms',  cached: '98%', flag: 'FI' },
 };
 
 const regions = Object.entries(network.regions || {}).map(([name, r]) => ({
