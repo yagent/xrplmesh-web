@@ -68,6 +68,14 @@ const wsEndpoint = `wss://s1.xrplmesh.com/e/${key}`;
   <Header />
   <div class="dash">
 
+    <div class="dash-header">
+      <div class="user-info">
+        <img src={session.picture} alt="" class="avatar" />
+        <span class="user-email">{session.email}</span>
+      </div>
+      <a href="/api/auth/logout" class="logout-btn">Log out</a>
+    </div>
+
     <div class="section">
       <div class="section-top">
         <h2>Your Endpoint</h2>
@@ -138,8 +146,9 @@ const wsEndpoint = `wss://s1.xrplmesh.com/e/${key}`;
       body: JSON.stringify({ plan, key }),
     });
     const data = await resp.json();
-    if (data.url) window.location.href = data.url;
-    else alert(data.error || 'Failed');
+    if (data.upgraded) { window.location.reload(); return; }
+    if (data.url) { window.location.href = data.url; return; }
+    alert(data.error || 'Failed');
   }
 
   // Live usage polling
@@ -181,6 +190,12 @@ const wsEndpoint = `wss://s1.xrplmesh.com/e/${key}`;
 
 <style>
   .dash { max-width: 700px; margin: 0 auto; padding: 40px 24px; }
+  .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .user-info { display: flex; align-items: center; gap: 10px; }
+  .avatar { width: 28px; height: 28px; border-radius: 50%; }
+  .user-email { font-size: 0.82rem; color: var(--text-muted); }
+  .logout-btn { font-size: 0.75rem; color: var(--text-dim); border: 1px solid var(--border); padding: 5px 14px; border-radius: 6px; transition: all 0.2s; }
+  .logout-btn:hover { color: var(--text); border-color: var(--text-muted); text-decoration: none; }
   .section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 16px; }
   .section-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
   .section h2 { font-size: 1rem; font-weight: 600; margin-bottom: 0; }
