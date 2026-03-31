@@ -23,7 +23,8 @@ export const POST: APIRoute = async ({ request }) => {
   const priceId = PRICE_MAP[plan];
   if (!priceId) return new Response(JSON.stringify({ error: 'invalid_plan' }), { status: 400 });
 
-  // Verify key belongs to this user
+  // Verify key belongs to this user and get existing subscription ID
+  let match: any = null;
   try {
     const keysResp = await fetch(`${API_URL}/admin/keys`, {
       headers: { 'X-Proxy-Token': ADMIN_TOKEN },
@@ -31,12 +32,38 @@ export const POST: APIRoute = async ({ request }) => {
     });
     if (keysResp.ok) {
       const allKeys = await keysResp.json();
-      const match = allKeys.find((k: any) => k.key === key && k.owner === session.email);
+      match = allKeys.find((k: any) => k.key === key && k.owner === session.email);
       if (!match) return new Response(JSON.stringify({ error: 'key_not_found' }), { status: 403 });
     }
   } catch {}
 
-  // Reuse existing Stripe customer
+  // If user has an existing Stripe subscription, update it in-place (prorated)
+  if (match?.stripeSubscriptionId) {
+    try {
+      const sub = await stripe.subscriptions.retrieve(match.stripeSubscriptionId);
+      if (sub.status === 'active' || sub.status === 'trialing') {
+        // Update the existing subscription's price - Stripe prorates automatically
+        await stripe.subscriptions.update(sub.id, {
+          items: [{ id: sub.items.data[0].id, price: priceId }],
+          proration_behavior: 'create_prorations',
+        });
+
+        // Update key plan immediately
+        await fetch(`${API_URL}/admin/keys`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'X-Proxy-Token': ADMIN_TOKEN },
+          body: JSON.stringify({ key, plan }),
+          signal: AbortSignal.timeout(5000),
+        });
+
+        return new Response(JSON.stringify({ upgraded: true, plan }), { status: 200 });
+      }
+    } catch {
+      // Subscription not found or expired - fall through to new checkout
+    }
+  }
+
+  // No existing subscription - create new checkout session
   let customer: string | undefined;
   try {
     const customers = await stripe.customers.list({ email: session.email, limit: 1 });
