@@ -4,14 +4,15 @@ import { getSessionFromCookie } from '../../lib/auth';
 
 const STRIPE_KEY = import.meta.env.STRIPE_SECRET_KEY || '';
 const stripe = STRIPE_KEY ? new Stripe(STRIPE_KEY) : null;
-const SITE_URL = import.meta.env.SITE_URL || 'https://xrplmesh.com';
-const API_URL = import.meta.env.API_URL || 'https://s1.xrplmesh.com';
+const SITE_URL = import.meta.env.SITE_URL || 'https://xrpl.stream';
+const API_URL = import.meta.env.API_URL || 'https://s1.xrpl.stream';
 const ADMIN_TOKEN = import.meta.env.ADMIN_TOKEN || '';
 
 const PRICE_MAP: Record<string, string> = {
   builder: 'price_1TFxtmKGdeOOrl7Lv5wrxwY8',
   pro: 'price_1TFxtnKGdeOOrl7LgxFEmdlR',
   scale: 'price_1TFxtoKGdeOOrl7LiTo6TayY',
+  enterprise: import.meta.env.STRIPE_ENTERPRISE_PRICE || '',
 };
 
 export const POST: APIRoute = async ({ request }) => {
@@ -64,18 +65,25 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   // No existing subscription - create new checkout session
+  const isEmail = session.email.includes('@');
   let customer: string | undefined;
   try {
-    const customers = await stripe.customers.list({ email: session.email, limit: 1 });
-    if (customers.data.length > 0) customer = customers.data[0].id;
+    if (isEmail) {
+      const customers = await stripe.customers.list({ email: session.email, limit: 1 });
+      if (customers.data.length > 0) customer = customers.data[0].id;
+    }
   } catch {}
+
+  const customerFields: Record<string, any> = {};
+  if (customer) customerFields.customer = customer;
+  else if (isEmail) customerFields.customer_email = session.email;
 
   const checkoutSession = await stripe.checkout.sessions.create({
     mode: 'subscription',
-    ...(customer ? { customer } : { customer_email: session.email }),
+    ...customerFields,
     line_items: [{ price: priceId, quantity: 1 }],
-    metadata: { api_key: key, plan, email: session.email },
-    success_url: `${SITE_URL}/dashboard?upgraded=${plan}`,
+    metadata: { api_key: key, plan, owner: session.email },
+    success_url: `${SITE_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${SITE_URL}/dashboard`,
   });
 

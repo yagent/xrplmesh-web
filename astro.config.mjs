@@ -1,9 +1,14 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import cloudflare from '@astrojs/cloudflare';
+import node from '@astrojs/node';
 
 export default defineConfig({
   output: 'server',
-  adapter: cloudflare(),
+  adapter: node({ mode: 'standalone' }),
   site: 'https://xrplmesh.com',
+  vite: {
+    build: {
+      cssCodeSplit: false, // Bundle all CSS into one file (eliminates chain)
+    },
+  },
 });

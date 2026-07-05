@@ -18,7 +18,10 @@ const results = await Promise.all(
   NODES.map(async (node, idx) => {
     const t0 = Date.now();
     try {
-      const resp = await fetch(`http://${node.ip}:9000/health`, { signal: AbortSignal.timeout(5000) });
+      const resp = await fetch(`http://${node.ip}:9000/health`, {
+        signal: AbortSignal.timeout(5000),
+        headers: import.meta.env.PROXY_TOKEN ? { 'X-Proxy-Token': import.meta.env.PROXY_TOKEN } : {},
+      });
       const latency = Date.now() - t0;
       if (resp.ok) {
         const h = await resp.json();
@@ -53,6 +56,7 @@ const results = await Promise.all(
           swap_pct: res.swap_pct || 0,
           mem_pressure: res.mem_pressure || 0,
           entropy: res.entropy || 0,
+          services: h.services || null,
         };
       }
       return { label: `Node ${idx + 1}`, region: node.region, provider: node.provider, ip: node.ip, cost: node.cost, status: 'degraded' as const, latency, ledger: 0 };
@@ -225,6 +229,21 @@ function statusColor(s: string) {
                     {n.mem_pressure > 0 && <span class="res-tag" style="color:#f85149" data-node-psi={n.label}>PSI {n.mem_pressure}%</span>}
                     {n.entropy < 200 && <span class="res-tag" style="color:#f85149" data-node-ent={n.label}>ENT {n.entropy}</span>}
                   </div>
+                  {(n as any).services && (
+                  <div class="node-services">
+                    <span class="svc-heading">Running</span>
+                    <div class="svc-tags">
+                      {(n as any).services.pm2.map((s: any) => (
+                        <span class={`svc-tag ${s.status === 'online' ? 'svc-on' : 'svc-off'}`} title={`pm2 · ${s.restarts} restarts · up ${s.uptime_h}h · ${s.cpu_pct}% cpu`}>
+                          {s.name}{s.status === 'online' ? ` ${s.mem_mb}MB` : ` (${s.status})`}
+                        </span>
+                      ))}
+                      {(n as any).services.system.map((s: any) => (
+                        <span class="svc-tag svc-sys" title={`system · ${s.procs} proc · ${s.cpu_pct}% cpu`}>{s.name} {s.mem_mb}MB</span>
+                      ))}
+                    </div>
+                  </div>
+                  )}
                 </div>
                 )}
               </div>
@@ -361,6 +380,13 @@ function statusColor(s: string) {
   .res-val { font-size: 0.68rem; font-family: var(--mono); color: var(--text-muted); width: 110px; text-align: right; flex-shrink: 0; white-space: nowrap; }
   .res-tags { display: flex; flex-wrap: wrap; gap: 4px 8px; margin-top: 4px; }
   .res-tag { font-size: 0.6rem; font-family: var(--mono); color: var(--text-muted); background: rgba(255,255,255,0.03); padding: 1px 5px; border-radius: 3px; white-space: nowrap; }
+  .node-services { margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.05); }
+  .svc-heading { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); display: block; margin-bottom: 3px; }
+  .svc-tags { display: flex; flex-wrap: wrap; gap: 3px 6px; }
+  .svc-tag { font-size: 0.6rem; font-family: var(--mono); padding: 1px 5px; border-radius: 3px; white-space: nowrap; background: rgba(255,255,255,0.03); }
+  .svc-on { color: #3fb950; }
+  .svc-off { color: var(--text-dim); text-decoration: line-through; }
+  .svc-sys { color: #d29922; }
 
   @media (max-width: 768px) {
     .container { padding: 16px 16px 40px; }

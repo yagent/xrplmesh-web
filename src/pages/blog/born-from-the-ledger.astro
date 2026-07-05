@@ -1,0 +1,155 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { ArrowLeft } from 'lucide-astro';
+---
+
+<Base title="Born from the Ledger: Why We Built XRPL Stream" description="We built XRPL Stream to supply reliable, full-history data to our analytics app and toolkit xrpl.to. Once it was running, we opened it to everyone.">
+  <Header />
+
+  <article class="post">
+    <div class="post-header">
+      <a href="/blog" class="back-link"><ArrowLeft size={14} /> Back to Blog</a>
+      <div class="post-meta">
+        <span class="post-tag">Origin Story</span>
+        <time>April 2, 2026</time>
+      </div>
+      <h1>Born from the Ledger: Why We Built XRPL Stream</h1>
+      <p class="post-lead">We built XRPL Stream to supply reliable, full-history data to our analytics app and toolkit <a href="https://xrpl.to">xrpl.to</a>. Once the infrastructure was running, we opened it to every developer building on the XRP Ledger.</p>
+    </div>
+
+    <div class="post-body">
+      <h2>The problem we hit</h2>
+      <p><a href="https://xrpl.to">xrpl.to</a> is an XRP Ledger token screener, DEX trading interface, and developer toolkit. It tracks live prices, charts, and trading volume for thousands of tokens on the XRPL's native decentralized exchange, and provides a public API that other developers build on top of. Behind the scenes, all of this depends on constant, high-volume access to on-chain data: order books, trade history, account balances, NFT state, and real-time ledger streams.</p>
+
+      <p>We have always run our own validator node with a decent amount of history. But accessing full-history data beyond what we were storing locally has always been a challenge. As xrpl.to grew, that limitation became impossible to ignore.</p>
+
+      <h2>What broke</h2>
+      <p>Our validator handled recent data well, but for anything beyond its local history we depended on external sources. As usage scaled, that dependency kept hitting the same walls:</p>
+
+      <ul>
+        <li><strong>Throttled when it mattered most.</strong> During high-activity periods like NFT mints, token launches, and market volatility, our historical and cross-referenced queries would get throttled or dropped exactly when our users needed data most.</li>
+        <li><strong>Gaps in availability.</strong> When external sources went down, any query touching data outside our local range would fail. For a real-time trading interface, even brief gaps are visible to users.</li>
+        <li><strong>Unreliable data extraction.</strong> The few full-history nodes available are heavily rate limited. Extracting historical data for analysis meant constant throttling, failed queries, and incomplete datasets. Tasks that should take hours would stretch into months. Building serious analytics under those conditions is impossible.</li>
+        <li><strong>No control over configuration.</strong> We needed specific rippled configurations tuned for our trading experience and reliable data extraction for our analysts. A single node setup couldn't give us the flexibility or redundancy we required.</li>
+      </ul>
+
+      <p>We could keep working around these limitations, or we could solve the problem properly.</p>
+
+      <h2>What we built</h2>
+      <p>XRPL Stream started as internal infrastructure for xrpl.to. The requirements were simple:</p>
+
+      <ol>
+        <li>Full ledger history: every transaction since genesis.</li>
+        <li>Low latency: fast responses from the nearest region.</li>
+        <li>High availability: no single point of failure, automatic failover.</li>
+        <li>Predictable throughput: no rate limiting surprises under load.</li>
+      </ol>
+
+      <p>We built a distributed infrastructure designed for speed and reliability. The entire stack is purpose-built and fully under our control.</p>
+
+      <h2>Why we opened it up</h2>
+      <p>Once we had reliable infrastructure running for xrpl.to, the question was obvious: why keep it private?</p>
+
+      <p>Every XRPL developer and analyst faces the same problems we did. The DEX trader building a bot. The wallet team displaying balances. The analytics platform indexing payment flows. The compliance tool auditing account history. They all need the same thing: fast, reliable, full-history access to the XRP Ledger.</p>
+
+      <p>XRPL Stream is that infrastructure, open to anyone. Free tier included. No credit card, no approval process. Sign in with Google, get your endpoint, swap one URL in your code.</p>
+
+      <h2>No external funding</h2>
+      <p>XRPL Stream is fully self-funded. No grants, no VC rounds, no foundation backing. The project exists because we needed it for our own product and decided to share it. Revenue comes from paid plans for teams that need higher throughput, not from investor expectations.</p>
+
+      <p>Early on, we explored partnerships with existing infrastructure providers. The conversations started as collaboration but quickly turned into sales pitches. As a bootstrapped project, those costs were not realistic. It also became clear that some providers offering free access to certain teams for strategic advantage were charging smaller projects for the same thing. That confirmed our decision to build our own.</p>
+
+      <p>XRPL Stream is built and maintained by a single developer. Every node, every line of code, every deployment. This keeps the project lean, decisions fast, and the focus on what matters: reliable infrastructure.</p>
+
+      <p>This matters because it means our incentives are aligned with our users. We make money when the infrastructure is good enough that people choose to pay for more of it. Not when we hit growth metrics for a board deck.</p>
+
+      <h2>What's available today</h2>
+
+      <div class="feature-list">
+        <div class="fl-item">
+          <h3>Full history since genesis</h3>
+          <p>Every transaction, every ledger, every account state change. Ledger 32570 through the latest close. No gaps.</p>
+        </div>
+        <div class="fl-item">
+          <h3>WebSocket and JSON-RPC</h3>
+          <p>Both protocols on every endpoint. Live subscriptions for ledger closes, transactions, and account activity.</p>
+        </div>
+        <div class="fl-item">
+          <h3>Drop-in compatible</h3>
+          <p>Works with xrpl.js, xrpl-py, xrpl4j, ripple-lib, and every other XRPL client library. Swap one URL.</p>
+        </div>
+        <div class="fl-item">
+          <h3>Global edge network</h3>
+          <p>Automatic routing to the nearest node. Sub-50ms cached responses. Failover and rebalancing built in.</p>
+        </div>
+        <div class="fl-item">
+          <h3>Usage dashboard</h3>
+          <p>Monitor your API usage, track credits, and manage your endpoints from a single dashboard.</p>
+        </div>
+        <div class="fl-item">
+          <h3>Free to start</h3>
+          <p>Generous free tier with no credit card required. Paid plans for teams that need higher throughput.</p>
+        </div>
+      </div>
+
+      <h2>Looking forward</h2>
+      <p>The XRPL ecosystem is growing. New tokens launch daily on the DEX. AI agents are starting to interact with on-chain data for automated trading, real-time analytics, and machine learning models trained on ledger history. These workloads generate sustained, high-volume request loads that limited infrastructure was never designed to handle.</p>
+
+      <p>We built XRPL Stream because we needed it. We opened it because the ecosystem needs it. And we're going to keep improving it because our own product depends on it every second of every day.</p>
+
+      <h2>Get in touch</h2>
+      <p>If you are interested in funding, partnerships, or supporting the project, reach out at <a href="mailto:hello@xrpl.to">hello@xrpl.to</a>.</p>
+
+      <div class="post-cta">
+        <a href="/api/auth/login" class="btn btn-primary">Get Started Free</a>
+        <a href="/docs" class="btn btn-ghost">Read the Docs</a>
+      </div>
+    </div>
+  </article>
+
+  <Footer />
+</Base>
+
+<style>
+  .post { max-width: 1400px; margin: 0 auto; padding: 48px 40px 64px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 24px; transition: color 0.2s; }
+  .back-link:hover { color: var(--accent); text-decoration: none; }
+  .post-header { margin-bottom: 40px; }
+  .post-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .post-tag { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); padding: 3px 10px; border-radius: 6px; }
+  time { font-size: 0.8rem; color: var(--text-dim); }
+  h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; }
+  .post-lead { font-size: 1.1rem; color: var(--text-muted); line-height: 1.7; }
+  .post-lead a { color: var(--accent); }
+
+  .post-body h2 { font-size: 1.25rem; font-weight: 700; margin: 40px 0 12px; color: var(--text); }
+  .post-body p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 16px; }
+  .post-body a { color: var(--accent); }
+  .post-body code { font-family: var(--mono); font-size: 0.85em; background: rgba(88,166,255,0.08); padding: 2px 6px; border-radius: 4px; color: var(--accent); }
+  .post-body ul, .post-body ol { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin: 0 0 16px 20px; }
+  .post-body li { margin-bottom: 8px; }
+  .post-body li strong { color: var(--text); }
+
+  .feature-list { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0 32px; }
+  .fl-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .fl-item h3 { font-size: 0.88rem; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+  .fl-item p { font-size: 0.82rem; color: var(--text-muted); line-height: 1.55; margin: 0; }
+
+  .post-cta { display: flex; gap: 12px; margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
+  .btn { display: inline-block; padding: 11px 28px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; cursor: pointer; }
+  .btn-primary { background: var(--accent); color: #fff; font-weight: 700; }
+  .btn-primary:hover { background: #79c0ff; text-decoration: none; }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text-muted); background: transparent; }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--text); text-decoration: none; }
+
+  @media (max-width: 600px) {
+    .post { padding: 24px 16px 48px; }
+    h1 { font-size: 1.6rem; }
+    .post-lead { font-size: 1rem; }
+    .feature-list { grid-template-columns: 1fr; }
+    .post-cta { flex-direction: column; }
+    .btn { text-align: center; }
+  }
+</style>

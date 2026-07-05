@@ -1,0 +1,111 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+---
+
+<Base title="What is XRP? The Complete Guide to XRP and the XRP Ledger | XRPL Stream" description="What is XRP? How the XRP Ledger works, what makes XRP different from Bitcoin and Ethereum, use cases, tokenomics, history, and how developers build on it.">
+  <Header />
+  <article class="post">
+    <div class="post-header">
+      <a href="/blog" class="back-link">Back to Blog</a>
+      <div class="post-meta">
+        <span class="post-tag">Beginner</span>
+        <span class="post-tag">XRP</span>
+        <time>April 13, 2026</time>
+      </div>
+      <h1>What is XRP?</h1>
+      <p class="post-lead">XRP is the native cryptocurrency of the XRP Ledger, a decentralized blockchain designed for fast, low-cost payments and financial applications. It has been running continuously since 2012, making it one of the oldest and most reliable blockchains in existence.</p>
+    </div>
+    <div class="post-body">
+      <h2>XRP in 30 seconds</h2>
+      <p>XRP is a digital asset that settles transactions in 3-5 seconds with fees under $0.01. It runs on the XRP Ledger (XRPL), an open-source blockchain with a built-in decentralized exchange, native token issuance, NFT support, and automated market maker pools. Over 100 million ledgers have been validated since launch, processing more than 2.8 billion transactions with zero network outages.</p>
+
+      <h2>How XRP works</h2>
+      <p>Unlike Bitcoin which uses energy-intensive mining, or Ethereum which uses staking, the XRP Ledger uses a unique federated consensus protocol. A network of approximately 150+ independent validators agree on which transactions to include in each ledger. They do not compete for block rewards -- they participate because they have a stake in the network operating correctly (exchanges, institutions, developers).</p>
+      <p>This consensus mechanism enables several key properties:</p>
+      <ul>
+        <li><strong>3-5 second finality:</strong> Transactions are confirmed and irreversible within seconds, not minutes or hours</li>
+        <li><strong>No mining:</strong> No energy waste, no mining hardware, no environmental concerns</li>
+        <li><strong>Fixed supply:</strong> 100 billion XRP were created at genesis. No new XRP can ever be created</li>
+        <li><strong>Deflationary:</strong> Transaction fees are permanently destroyed, reducing the total supply over time</li>
+      </ul>
+
+      <h2>XRP vs Bitcoin vs Ethereum</h2>
+      <p>Each blockchain serves different purposes:</p>
+      <ul>
+        <li><strong>Bitcoin:</strong> Digital gold, store of value. 10 minute blocks, high fees during congestion, proof-of-work mining</li>
+        <li><strong>Ethereum:</strong> Smart contract platform. 12 second blocks, variable gas fees, proof-of-stake. Powers DeFi, NFTs, and dApps</li>
+        <li><strong>XRP Ledger:</strong> Payment and financial infrastructure. 3-5 second settlement, near-zero fees, built-in DEX. Designed for moving value efficiently</li>
+      </ul>
+      <p>Bitcoin is for holding. Ethereum is for programming. XRP is for moving money.</p>
+
+      <h2>What is the XRP Ledger</h2>
+      <p>The XRP Ledger (XRPL) is the blockchain that XRP runs on. But it is much more than just a payment network. The XRPL includes:</p>
+      <ul>
+        <li><strong>Decentralized exchange (DEX):</strong> A native order book exchange built into the protocol. Any token on the XRPL can be traded against any other token without third-party smart contracts</li>
+        <li><strong>Token issuance:</strong> Anyone can issue tokens representing any asset -- stablecoins, securities, loyalty points, wrapped crypto. Trust lines give issuers compliance controls (freezing, clawback, authorized access)</li>
+        <li><strong>NFTs (XLS-20):</strong> Native NFT minting and trading at the protocol level with built-in royalty enforcement</li>
+        <li><strong>Automated Market Maker (AMM):</strong> Liquidity pools operating alongside the order book DEX</li>
+        <li><strong>Payment channels:</strong> Off-ledger payment streams for micropayments and high-frequency transfers</li>
+        <li><strong>Escrow:</strong> Time-locked and condition-locked XRP holds built into the protocol</li>
+        <li><strong>Multi-signing:</strong> Native multi-signature support requiring M-of-N approvals for transactions</li>
+      </ul>
+
+      <h2>XRP tokenomics</h2>
+      <p>XRP has a fixed supply of 100 billion tokens created at genesis in 2012. No new XRP can ever be minted. Of the total supply:</p>
+      <ul>
+        <li><strong>~57 billion:</strong> In circulation, held by individuals, institutions, and exchanges</li>
+        <li><strong>~43 billion:</strong> Held by Ripple, mostly in cryptographic escrow that releases a maximum of 1 billion XRP per month. Unused portions are returned to escrow</li>
+        <li><strong>~12 million:</strong> Permanently destroyed through transaction fees since 2012</li>
+      </ul>
+      <p>The escrow mechanism ensures predictable, transparent supply release. Ripple publishes quarterly reports on XRP markets and escrow activity.</p>
+
+      <h2>Use cases</h2>
+      <p><strong>Cross-border payments:</strong> XRP's speed and low cost make it ideal for international money transfers. Ripple and its network of financial institutions use XRP for real-time cross-border settlement, replacing the days-long SWIFT process.</p>
+      <p><strong>Stablecoins:</strong> The XRPL hosts multiple stablecoins including Ripple's RLUSD (USD-pegged), GateHub tokens, and Bitstamp EUR. The built-in compliance features make the XRPL attractive for regulated stablecoin issuance.</p>
+      <p><strong>DeFi:</strong> The native DEX and AMM pools enable decentralized trading without smart contract risk. The EVM sidechain adds Ethereum-compatible DeFi for more complex protocols.</p>
+      <p><strong>NFTs and digital assets:</strong> Native NFT support with enforced royalties, low minting costs, and instant transferability.</p>
+      <p><strong>Enterprise and institutional:</strong> Tokenization of real-world assets, CBDC pilots, and compliance-ready token issuance for regulated entities.</p>
+
+      <h2>History</h2>
+      <p>The XRP Ledger was created by Jed McCaleb, Arthur Britto, and David Schwartz. The first public ledger (ledger 32,570) was validated in January 2013. Ripple Labs (now Ripple) was founded to build commercial applications on top of the XRPL.</p>
+      <p>Key milestones include the 2017-2018 adoption wave, the 2020 SEC lawsuit (settled in 2024), the 2022 XLS-20 NFT amendment, the 2023 AMM amendment, and ongoing developments including RLUSD, the EVM sidechain, and XRP ETF filings.</p>
+      <p>Throughout all of this, the XRP Ledger has operated continuously without a single prolonged outage -- over 13 years of uninterrupted service.</p>
+
+      <h2>How to get started</h2>
+      <p>If you are a developer building on the XRP Ledger, you need reliable API access to the network. XRPL Stream provides full-history endpoints covering every transaction since 2013, WebSocket subscriptions for real-time data, and support for mainnet, testnet, and devnet -- all from a single endpoint with a free tier.</p>
+      <p>If you are new to XRP, start with a wallet like <a href="/guides/best-xrpl-wallets">Xaman or Crossmark</a>, explore the network with an <a href="/guides/best-xrpl-explorers">XRPL explorer</a>, and learn about <a href="/guides/xrpl-trust-lines">trust lines</a> to understand how tokens work.</p>
+
+      <div class="post-cta">
+        <a href="/login" class="btn btn-primary">Get Free API Access</a>
+        <a href="/guides/xrpl-api" class="btn btn-ghost">XRPL API Guide</a>
+      </div>
+    </div>
+  </article>
+  <Footer />
+</Base>
+
+<style>
+  .post { max-width: 1400px; margin: 0 auto; padding: 48px 40px 64px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 24px; transition: color 0.2s; }
+  .back-link:hover { color: var(--accent); text-decoration: none; }
+  .post-header { margin-bottom: 40px; }
+  .post-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .post-tag { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); padding: 3px 10px; border-radius: 6px; }
+  time { font-size: 0.8rem; color: var(--text-dim); }
+  h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; }
+  .post-lead { font-size: 1.1rem; color: var(--text-muted); line-height: 1.7; }
+  .post-body h2 { font-size: 1.25rem; font-weight: 700; margin: 40px 0 12px; color: var(--text); }
+  .post-body p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 16px; }
+  .post-body a { color: var(--accent); }
+  .post-body ul { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin: 0 0 16px 20px; }
+  .post-body li { margin-bottom: 8px; }
+  .post-body li strong { color: var(--text); }
+  .post-cta { display: flex; gap: 12px; margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
+  .btn { display: inline-block; padding: 11px 28px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
+  .btn-primary { background: var(--accent); color: #fff; font-weight: 700; }
+  .btn-primary:hover { text-decoration: none; }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text-muted); }
+  .btn-ghost:hover { border-color: var(--accent); text-decoration: none; color: var(--text); }
+</style>

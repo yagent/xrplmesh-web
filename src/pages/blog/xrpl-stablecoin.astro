@@ -1,0 +1,92 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+---
+
+<Base title="XRPL Stablecoins - Stablecoins on the XRP Ledger Including RLUSD | XRPL Stream" description="Complete guide to stablecoins on the XRP Ledger. RLUSD, Bitstamp EUR, GateHub tokens, how they work via trust lines, and how to query them via API.">
+  <Header />
+  <article class="post">
+    <div class="post-header">
+      <a href="/blog" class="back-link">Back to Blog</a>
+      <div class="post-meta">
+        <span class="post-tag">Stablecoin</span>
+        <span class="post-tag">RLUSD</span>
+        <time>April 13, 2026</time>
+      </div>
+      <h1>XRPL Stablecoins</h1>
+      <p class="post-lead">The XRP Ledger hosts a growing ecosystem of stablecoins. From Ripple's RLUSD to community-issued fiat tokens, stablecoins are one of the most active use cases on the XRPL.</p>
+    </div>
+    <div class="post-body">
+      <h2>How stablecoins work on the XRPL</h2>
+      <p>Stablecoins on the XRP Ledger are issued tokens backed by fiat reserves. They use the trust line system -- an issuer creates the token, and holders opt in by setting up a trust line to the issuer. The XRPL's built-in compliance features (authorized trust lines, freezing, clawback) make it well-suited for regulated stablecoin issuance.</p>
+      <p>Unlike Ethereum where stablecoins are ERC-20 smart contracts, XRPL stablecoins are native protocol-level tokens. This means they settle in 3-5 seconds, cost virtually nothing to transfer, and are tradeable on the built-in DEX from the moment they are issued.</p>
+
+      <h2>RLUSD</h2>
+      <p>RLUSD is Ripple's USD-pegged stablecoin. Backed 1:1 by USD deposits and short-term US Treasury bills, RLUSD is designed for institutional use cases including cross-border payments, DeFi collateral, and enterprise settlement. It is issued on both the XRP Ledger and Ethereum.</p>
+      <p>On the XRPL, RLUSD benefits from the native DEX -- instant XRP/RLUSD trading without needing a third-party exchange. Combined with the XRPL's 3-5 second settlement and near-zero fees, RLUSD enables efficient fiat on/off ramps for institutional flows.</p>
+
+      <h2>GateHub stablecoins</h2>
+      <p>GateHub is one of the oldest XRPL gateway operators, issuing tokens representing USD, EUR, BTC, ETH, and other assets. The GateHub USD issuer (rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq) has tens of thousands of trust lines and is one of the most traded tokens on the XRPL DEX.</p>
+      <p>GateHub tokens are backed by reserves held at the gateway. Users can deposit fiat or crypto to receive XRPL tokens, and redeem tokens back to fiat through the GateHub platform.</p>
+
+      <h2>Bitstamp EUR and USD</h2>
+      <p>Bitstamp, the regulated European exchange, issues EUR and USD tokens on the XRPL. These gateway tokens enable fiat trading directly on the XRPL DEX. Bitstamp's XRPL tokens are backed by customer deposits at the exchange.</p>
+
+      <h2>Why XRPL for stablecoins</h2>
+      <p>The XRP Ledger has several advantages for stablecoin issuance compared to other chains:</p>
+      <ul>
+        <li><strong>Built-in compliance:</strong> Authorized trust lines for KYC, freezing for enforcement, clawback for regulatory requirements</li>
+        <li><strong>Native DEX liquidity:</strong> Every stablecoin is instantly tradeable against XRP and all other XRPL tokens</li>
+        <li><strong>3-5 second settlement:</strong> Faster than Ethereum (12-15 seconds) and most other chains</li>
+        <li><strong>Negligible fees:</strong> Transfer costs under $0.0001, enabling micropayments and high-frequency settlement</li>
+        <li><strong>13+ years uptime:</strong> No outages means stablecoin transfers never fail due to network issues</li>
+        <li><strong>Cross-currency payments:</strong> The XRPL can automatically convert between stablecoins using DEX liquidity during payment</li>
+      </ul>
+
+      <h2>Stablecoins and CBDCs</h2>
+      <p>Several central banks have explored the XRP Ledger for CBDC (Central Bank Digital Currency) pilots. The trust line model with authorized access, freezing, and clawback maps directly to the controls that central banks need. A CBDC on the XRPL would function similarly to a stablecoin but with the central bank as issuer and full regulatory control over the token.</p>
+
+      <h2>Querying stablecoin data</h2>
+      <p>XRPL Stream provides full API access to stablecoin data on the XRP Ledger:</p>
+      <ul>
+        <li><strong>gateway_balances:</strong> See total outstanding supply for any stablecoin issuer</li>
+        <li><strong>account_lines:</strong> Query trust lines and balances for any holder</li>
+        <li><strong>book_offers:</strong> Get live order book data for any stablecoin pair</li>
+        <li><strong>account_tx:</strong> Full transfer history for any stablecoin account</li>
+        <li><strong>subscribe:</strong> Real-time streaming of stablecoin transfers and DEX trades</li>
+      </ul>
+      <p>With full history from 2013, you can analyze the complete lifecycle of any stablecoin on the XRPL -- from first issuance to current distribution.</p>
+
+      <div class="post-cta">
+        <a href="/login" class="btn btn-primary">Get API Access</a>
+        <a href="/guides/xrpl-trust-lines" class="btn btn-ghost">Trust Lines Guide</a>
+      </div>
+    </div>
+  </article>
+  <Footer />
+</Base>
+
+<style>
+  .post { max-width: 1400px; margin: 0 auto; padding: 48px 40px 64px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 24px; transition: color 0.2s; }
+  .back-link:hover { color: var(--accent); text-decoration: none; }
+  .post-header { margin-bottom: 40px; }
+  .post-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .post-tag { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); padding: 3px 10px; border-radius: 6px; }
+  time { font-size: 0.8rem; color: var(--text-dim); }
+  h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; }
+  .post-lead { font-size: 1.1rem; color: var(--text-muted); line-height: 1.7; }
+  .post-body h2 { font-size: 1.25rem; font-weight: 700; margin: 40px 0 12px; color: var(--text); }
+  .post-body p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 16px; }
+  .post-body a { color: var(--accent); }
+  .post-body ul { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin: 0 0 16px 20px; }
+  .post-body li { margin-bottom: 8px; }
+  .post-body li strong { color: var(--text); }
+  .post-cta { display: flex; gap: 12px; margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
+  .btn { display: inline-block; padding: 11px 28px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
+  .btn-primary { background: var(--accent); color: #fff; font-weight: 700; }
+  .btn-primary:hover { text-decoration: none; }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text-muted); }
+  .btn-ghost:hover { border-color: var(--accent); text-decoration: none; color: var(--text); }
+</style>

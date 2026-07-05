@@ -1,0 +1,92 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+---
+
+<Base title="Best XRPL Explorers - Top XRP Ledger Block Explorers Compared | XRPL Stream" description="Compare the best XRP Ledger block explorers. XRPSCAN, Bithomp, xrpl.to, XRP Scan, and Livenet features, strengths, and use cases.">
+  <Header />
+  <article class="post">
+    <div class="post-header">
+      <a href="/guides" class="back-link">Back to Guides</a>
+      <div class="post-meta">
+        <span class="post-tag">Tools</span>
+        <span class="post-tag">Explorer</span>
+        <time>April 13, 2026</time>
+      </div>
+      <h1>Best XRPL Explorers</h1>
+      <p class="post-lead">A comparison of the top XRP Ledger block explorers. Each has different strengths depending on whether you are a developer, trader, or casual user.</p>
+    </div>
+    <div class="post-body">
+      <h2>What is an XRPL explorer</h2>
+      <p>A block explorer lets you browse the XRP Ledger -- look up accounts, transactions, tokens, NFTs, and network state. Think of it as a search engine for the blockchain. Every transaction on the XRPL is public, and explorers make that data human-readable.</p>
+
+      <h2>XRPSCAN</h2>
+      <p><strong>Best for:</strong> General-purpose exploration, account lookups, validator monitoring.</p>
+      <p>XRPSCAN is one of the most popular XRPL explorers. It provides clean account pages showing balances, transaction history, trust lines, and NFTs. It also has a validator registry showing the health and voting status of all XRPL validators. The interface is straightforward and loads quickly. XRPSCAN is a good default choice for most users.</p>
+      <p><strong>Strengths:</strong> Clean UI, fast, validator monitoring, amendment tracking. <strong>Weaknesses:</strong> Limited DEX analytics, no token charts.</p>
+
+      <h2>Bithomp</h2>
+      <p><strong>Best for:</strong> Account analysis, rich list, XRPL services directory.</p>
+      <p>Bithomp offers detailed account analysis including transaction breakdowns by type, historical balance charts, and a rich list showing the largest XRP holders. It also maintains a directory of known XRPL accounts (exchanges, validators, services) which helps identify counterparties in transactions. Bithomp has been around since the early days of the XRPL ecosystem.</p>
+      <p><strong>Strengths:</strong> Rich list, named accounts, historical charts. <strong>Weaknesses:</strong> Slower than some alternatives, dated design.</p>
+
+      <h2>xrpl.to</h2>
+      <p><strong>Best for:</strong> DEX trading, token analytics, price tracking.</p>
+      <p>xrpl.to focuses on the XRPL's decentralized exchange. It provides live token prices, trading volume, order book depth, and chart history for every token pair on the XRPL DEX. Traders use it to discover new tokens, track price movements, and analyze trading activity. It also provides a public API that other applications build on top of.</p>
+      <p><strong>Strengths:</strong> DEX-focused, live prices, token screener, trading charts. <strong>Weaknesses:</strong> Less useful for non-trading exploration.</p>
+
+      <h2>XPMarket</h2>
+      <p><strong>Best for:</strong> NFT exploration, marketplace, collection browsing.</p>
+      <p>XPMarket is primarily an NFT marketplace and explorer for the XRPL. It lets you browse NFT collections, view metadata, check floor prices, and see recent sales. If you are working with XLS-20 NFTs on the XRPL, XPMarket is the go-to explorer for NFT-specific data.</p>
+      <p><strong>Strengths:</strong> NFT focus, marketplace, collection analytics. <strong>Weaknesses:</strong> Limited non-NFT features.</p>
+
+      <h2>Livenet XRPL Explorer</h2>
+      <p><strong>Best for:</strong> Raw ledger data, developer debugging.</p>
+      <p>The Livenet explorer at livenet.xrpl.org is maintained by the XRPL Foundation. It provides a straightforward view of ledger data including raw transaction JSON, ledger headers, and account objects. Developers use it for debugging because it shows the exact on-chain data without interpretation. It also supports testnet and devnet.</p>
+      <p><strong>Strengths:</strong> Raw data view, official, testnet/devnet support. <strong>Weaknesses:</strong> Minimal design, no analytics.</p>
+
+      <h2>Which explorer should you use</h2>
+      <ul>
+        <li><strong>General browsing:</strong> XRPSCAN -- clean, fast, reliable</li>
+        <li><strong>Trading and tokens:</strong> xrpl.to -- live prices, DEX data, token screener</li>
+        <li><strong>NFTs:</strong> XPMarket -- collections, marketplace, floor prices</li>
+        <li><strong>Account analysis:</strong> Bithomp -- rich list, historical data, named accounts</li>
+        <li><strong>Development:</strong> Livenet -- raw data, testnet support</li>
+      </ul>
+
+      <h2>Building your own explorer</h2>
+      <p>If you need custom analytics or want to build your own XRPL explorer, XRPL Stream provides the full-history API access you need. Query any account, transaction, ledger, NFT, or DEX data from genesis to present through a single endpoint. The API supports all XRPL methods including real-time WebSocket subscriptions for live data.</p>
+
+      <div class="post-cta">
+        <a href="/login" class="btn btn-primary">Get API Access</a>
+        <a href="/guides/xrpl-api" class="btn btn-ghost">XRPL API Guide</a>
+      </div>
+    </div>
+  </article>
+  <Footer />
+</Base>
+
+<style>
+  .post { max-width: 1400px; margin: 0 auto; padding: 48px 40px 64px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 24px; transition: color 0.2s; }
+  .back-link:hover { color: var(--accent); text-decoration: none; }
+  .post-header { margin-bottom: 40px; }
+  .post-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .post-tag { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); padding: 3px 10px; border-radius: 6px; }
+  time { font-size: 0.8rem; color: var(--text-dim); }
+  h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; }
+  .post-lead { font-size: 1.1rem; color: var(--text-muted); line-height: 1.7; }
+  .post-body h2 { font-size: 1.25rem; font-weight: 700; margin: 40px 0 12px; color: var(--text); }
+  .post-body p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 16px; }
+  .post-body a { color: var(--accent); }
+  .post-body ul { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin: 0 0 16px 20px; }
+  .post-body li { margin-bottom: 8px; }
+  .post-body li strong { color: var(--text); }
+  .post-cta { display: flex; gap: 12px; margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
+  .btn { display: inline-block; padding: 11px 28px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
+  .btn-primary { background: var(--accent); color: #fff; font-weight: 700; }
+  .btn-primary:hover { text-decoration: none; }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text-muted); }
+  .btn-ghost:hover { border-color: var(--accent); text-decoration: none; color: var(--text); }
+</style>

@@ -1,0 +1,108 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+---
+
+<Base title="XRPL Full History Node - Why Full History Matters | XRPL Stream" description="What is an XRPL full history node, why it matters for developers, the 39TB storage challenge, and how XRPL Stream provides full history without running your own node.">
+  <Header />
+  <article class="post">
+    <div class="post-header">
+      <a href="/blog" class="back-link">Back to Blog</a>
+      <div class="post-meta">
+        <span class="post-tag">Infrastructure</span>
+        <span class="post-tag">Full History</span>
+        <time>April 13, 2026</time>
+      </div>
+      <h1>XRPL Full History Node</h1>
+      <p class="post-lead">A full history node stores every transaction on the XRP Ledger since January 2013. That is over 100 million ledgers and 2.8 billion transactions. Here is why it matters, what it costs, and how to access it without running your own.</p>
+    </div>
+    <div class="post-body">
+      <h2>What is full history</h2>
+      <p>The XRP Ledger has been running continuously since ledger 32,570 in January 2013. A full history node stores every single ledger and every transaction since that first public ledger. This means you can query any account balance at any point in time, look up any transaction ever made, and verify the complete state of the ledger at any historical moment.</p>
+      <p>Most XRPL nodes do not keep full history. A typical stock node stores only recent ledgers -- anywhere from a few days to a few weeks. Once a ledger falls outside the retention window, the data is pruned. These nodes work fine for current-state queries but cannot answer historical questions.</p>
+
+      <h2>Why full history matters</h2>
+      <p>Several critical use cases require access to the complete ledger history:</p>
+      <ul>
+        <li><strong>Analytics and research:</strong> Analyzing trading patterns, token distribution, and network growth requires historical data spanning years</li>
+        <li><strong>Compliance and auditing:</strong> Financial institutions need to trace the complete history of accounts and transactions for regulatory requirements</li>
+        <li><strong>Tax reporting:</strong> Calculating capital gains requires knowing the exact price and time of every trade, potentially going back years</li>
+        <li><strong>Token analysis:</strong> Understanding a token's full distribution history -- who received tokens, when, and from whom</li>
+        <li><strong>Forensics:</strong> Tracing the flow of funds through multiple accounts over time</li>
+        <li><strong>Application data:</strong> Apps that show complete account history, not just recent transactions</li>
+      </ul>
+
+      <h2>The storage challenge</h2>
+      <p>Full XRPL history currently requires approximately <strong>39 TB of storage</strong> and growing by 1-2 TB per month. At NVMe SSD prices, that is $3,000-5,000 in storage hardware alone, plus the server costs to run it.</p>
+      <p>Beyond raw storage, a full history node needs:</p>
+      <ul>
+        <li><strong>64+ GB RAM</strong> for efficient query serving</li>
+        <li><strong>8+ CPU cores</strong> for processing concurrent requests</li>
+        <li><strong>High-bandwidth networking</strong> for serving query results</li>
+        <li><strong>Ongoing maintenance</strong> including software upgrades, storage expansion, and monitoring</li>
+      </ul>
+      <p>Most organizations find it impractical to run their own full history node. The cost and complexity far exceed what a managed API service costs.</p>
+
+      <h2>Full history vs partial history</h2>
+      <p>When you query a partial-history node for data it does not have, you get one of these responses:</p>
+      <ul>
+        <li><strong>account_tx returns incomplete data:</strong> Only recent transactions, missing the full history. The ledger_index_min field shows where history starts.</li>
+        <li><strong>ledger returns lgrNotFound:</strong> The requested ledger has been pruned.</li>
+        <li><strong>account_info at historical ledger fails:</strong> Cannot look up past account state.</li>
+      </ul>
+      <p>This is a silent data quality problem. Your application might work correctly for recent accounts but return incomplete results for older ones. You cannot tell from the response alone whether you received all the data or just a subset.</p>
+
+      <h2>Clio vs rippled for history</h2>
+      <p>There are two types of XRPL server software:</p>
+      <ul>
+        <li><strong>rippled:</strong> The reference server. Stores ledger data in RocksDB. Can maintain full history but the 39 TB requirement is challenging.</li>
+        <li><strong>Clio:</strong> An optimized read-only server. Stores data in Cassandra/ScyllaDB. Designed for high-throughput API serving. Can maintain full history more efficiently through its distributed database backend.</li>
+      </ul>
+      <p>Ripple's public servers (s1.ripple.com, s2.ripple.com) run Clio with full history. XRPL Stream uses both rippled and Clio nodes for different query types, routing each request to the node best suited to answer it.</p>
+
+      <h2>How XRPL Stream provides full history</h2>
+      <p>XRPL Stream runs a 21-node distributed network that maintains complete XRPL history from ledger 32,570 to present. Instead of one massive full history node, the data is distributed across multiple nodes with range-based sharding and peer-to-peer cache sharing.</p>
+      <p>Every API query -- whether it asks for a transaction from 2013 or a balance from 5 seconds ago -- is routed to a node that has the data. The routing is automatic and transparent. You get one endpoint that serves the full history of the XRP Ledger.</p>
+      <ul>
+        <li><strong>account_tx:</strong> Returns complete transaction history from genesis. ledger_index_min is always 32,570.</li>
+        <li><strong>tx:</strong> Look up any transaction by hash, no matter how old.</li>
+        <li><strong>ledger:</strong> Query any historical ledger, including state and transactions.</li>
+        <li><strong>account_info at historical ledger:</strong> See any account's state at any point in time.</li>
+      </ul>
+
+      <h2>Getting started</h2>
+      <p>Sign up for a free XRPL Stream account to get instant access to full XRPL history. No server to run, no storage to manage, no software to maintain. Free tier includes 15 req/s and 1M monthly credits.</p>
+
+      <div class="post-cta">
+        <a href="/login" class="btn btn-primary">Get Full History Access</a>
+        <a href="/blog/xrpl-public-servers" class="btn btn-ghost">Compare Servers</a>
+      </div>
+    </div>
+  </article>
+  <Footer />
+</Base>
+
+<style>
+  .post { max-width: 1400px; margin: 0 auto; padding: 48px 40px 64px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 24px; transition: color 0.2s; }
+  .back-link:hover { color: var(--accent); text-decoration: none; }
+  .post-header { margin-bottom: 40px; }
+  .post-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .post-tag { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); padding: 3px 10px; border-radius: 6px; }
+  time { font-size: 0.8rem; color: var(--text-dim); }
+  h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; }
+  .post-lead { font-size: 1.1rem; color: var(--text-muted); line-height: 1.7; }
+  .post-body h2 { font-size: 1.25rem; font-weight: 700; margin: 40px 0 12px; color: var(--text); }
+  .post-body p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 16px; }
+  .post-body a { color: var(--accent); }
+  .post-body ul { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin: 0 0 16px 20px; }
+  .post-body li { margin-bottom: 8px; }
+  .post-body li strong { color: var(--text); }
+  .post-cta { display: flex; gap: 12px; margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
+  .btn { display: inline-block; padding: 11px 28px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
+  .btn-primary { background: var(--accent); color: #fff; font-weight: 700; }
+  .btn-primary:hover { text-decoration: none; }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text-muted); }
+  .btn-ghost:hover { border-color: var(--accent); text-decoration: none; color: var(--text); }
+</style>

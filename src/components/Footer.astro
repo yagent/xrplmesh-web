@@ -5,23 +5,26 @@ const year = new Date().getFullYear();
 <footer class="site-footer">
   <div class="footer-inner">
     <div class="footer-brand">
-      <a href="/" class="footer-logo"><span class="accent">XRPL</span> Mesh</a>
+      <a href="/" class="footer-logo">
+        <span style="font-family:'SF Mono','Fira Code','JetBrains Mono',monospace;letter-spacing:-0.02em"><span class="accent">xrpl</span><span style="color:var(--accent)">.</span>stream</span>
+      </a>
       <span class="footer-tagline">Open distributed XRPL infrastructure</span>
     </div>
     <div class="footer-links">
       <a href="/docs">Docs</a>
+      <a href="/blog">Blog</a>
+      <a href="/pricing">Pricing</a>
       <a href="/stats">Stats</a>
-      <a href="/status">Status</a>
     </div>
-    <div class="footer-copy">&copy; {year} XRPL Mesh</div>
+    <div class="footer-copy">&copy; {year} XRPL Stream</div>
   </div>
 </footer>
 
 <style>
   .site-footer { border-top: 1px solid var(--border); margin-top: 56px; padding: 32px 40px; }
-  .footer-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .footer-inner { max-width: 1400px; margin: 0 auto; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
   .footer-brand { display: flex; align-items: center; gap: 12px; }
-  .footer-logo { font-weight: 700; font-size: 0.9rem; color: var(--text); }
+  .footer-logo { display: flex; align-items: center; gap: 7px; font-weight: 600; font-size: 0.95rem; color: var(--text); }
   .footer-logo:hover { text-decoration: none; }
   .accent { color: var(--accent); text-shadow: 0 0 40px rgba(88,166,255,0.3); }
   .footer-tagline { color: var(--text-dim); font-size: 0.78rem; }

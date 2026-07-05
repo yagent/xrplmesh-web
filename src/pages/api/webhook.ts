@@ -4,7 +4,7 @@ import Stripe from 'stripe';
 const STRIPE_KEY = import.meta.env.STRIPE_SECRET_KEY || '';
 const WEBHOOK_SECRET = import.meta.env.STRIPE_WEBHOOK_SECRET || '';
 const stripe = STRIPE_KEY ? new Stripe(STRIPE_KEY) : null;
-const API_URL = import.meta.env.API_URL || 'https://s1.xrplmesh.com';
+const API_URL = import.meta.env.API_URL || 'https://s1.xrpl.stream';
 const ADMIN_TOKEN = import.meta.env.ADMIN_TOKEN || '';
 
 async function patchKey(body: Record<string, unknown>) {
@@ -69,7 +69,13 @@ export const POST: APIRoute = async ({ request }) => {
     const name = session.metadata?.name || '';
     let key = session.metadata?.api_key;
 
-    // Create key if this is a new subscription (no existing key passed)
+    // Idempotency: if this subscription already has a key, just patch it
+    const subId = typeof session.subscription === 'string' ? session.subscription : (session.subscription as any)?.id;
+    if (subId) {
+      const existingKey = await findKeyBySubscription(subId);
+      if (existingKey) key = existingKey;
+    }
+
     if (!key) {
       key = await createKey(plan, owner, name);
     }
@@ -80,7 +86,7 @@ export const POST: APIRoute = async ({ request }) => {
         active: true,
         plan,
         ...(session.customer && { stripeCustomerId: session.customer }),
-        ...(session.subscription && { stripeSubscriptionId: session.subscription }),
+        ...(subId && { stripeSubscriptionId: subId }),
       });
     }
   }

@@ -1,12 +1,15 @@
-import { Google } from 'arctic';
+import { Google, GitHub } from 'arctic';
 import fs from 'node:fs';
 import path from 'node:path';
 
 const GOOGLE_CLIENT_ID = import.meta.env.GOOGLE_CLIENT_ID || '';
 const GOOGLE_CLIENT_SECRET = import.meta.env.GOOGLE_CLIENT_SECRET || '';
-const BASE_URL = import.meta.env.SITE_URL || 'https://xrplmesh.com';
+const GITHUB_CLIENT_ID = import.meta.env.GITHUB_CLIENT_ID || '';
+const GITHUB_CLIENT_SECRET = import.meta.env.GITHUB_CLIENT_SECRET || '';
+const BASE_URL = import.meta.env.SITE_URL || 'https://xrpl.stream';
 
 export const google = new Google(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, `${BASE_URL}/api/auth/callback`);
+export const github = new GitHub(GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, `${BASE_URL}/api/auth/github/callback`);
 
 // File-backed session store - survives PM2 restarts
 const SESSION_FILE = path.join(process.cwd(), '.sessions.json');
@@ -47,7 +50,7 @@ export function deleteSession(id: string) {
 
 export function getSessionFromCookie(request: Request) {
   const cookie = request.headers.get('cookie') || '';
-  const match = cookie.match(/session=([^;]+)/);
+  const match = cookie.match(/(^|;\s*)session=([^;]+)/);
   if (!match) return null;
-  return getSession(match[1]);
+  return getSession(match[2]);
 }

@@ -1,0 +1,94 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+---
+
+<Base title="XRP vs Solana - Speed, Fees, Reliability, and Developer Experience Compared | XRPL Stream" description="XRP vs Solana head-to-head comparison. Transaction speed, fees, uptime, DEX, NFTs, developer tools, and which is better for your use case.">
+  <Header />
+  <article class="post">
+    <div class="post-header">
+      <a href="/blog" class="back-link">Back to Blog</a>
+      <div class="post-meta">
+        <span class="post-tag">Comparison</span>
+        <time>April 13, 2026</time>
+      </div>
+      <h1>XRP vs Solana</h1>
+      <p class="post-lead">Two of the fastest blockchains compared head-to-head. Both target high throughput and low fees, but they take fundamentally different approaches to consensus, smart contracts, and reliability.</p>
+    </div>
+    <div class="post-body">
+      <h2>Transaction speed</h2>
+      <p><strong>XRP Ledger:</strong> 3-5 seconds per ledger close with immediate finality. Once a transaction appears in a validated ledger, it is permanent and irreversible. No confirmations needed.</p>
+      <p><strong>Solana:</strong> 400ms block time with optimistic confirmation. Full finality takes approximately 12-13 seconds (32 slots). Transactions can be included in a block quickly but are not truly final until confirmed by supermajority.</p>
+      <p>Both are fast by blockchain standards. The XRPL wins on finality time, while Solana wins on initial inclusion speed. For payments, the XRPL's immediate finality is more practical. For trading, Solana's faster block time enables more rapid order matching.</p>
+
+      <h2>Transaction fees</h2>
+      <p><strong>XRP Ledger:</strong> Base fee of 10 drops (0.00001 XRP), approximately $0.00002. Fees are burned permanently.</p>
+      <p><strong>Solana:</strong> Base fee of 5,000 lamports (0.000005 SOL), approximately $0.001. Priority fees during congestion can increase this significantly.</p>
+      <p>The XRPL is roughly 50x cheaper per transaction. Both are negligible for normal use, but the difference matters at high volume -- millions of transactions per month cost essentially nothing on the XRPL while adding up on Solana.</p>
+
+      <h2>Network reliability</h2>
+      <p><strong>XRP Ledger:</strong> Running continuously since June 2012. Over 13 years with zero prolonged outages. The federated consensus model was designed for uninterrupted operation.</p>
+      <p><strong>Solana:</strong> Launched in 2020. Has experienced 10+ significant outages, some lasting over 17 hours. The network has improved but outages still occur during high-demand events.</p>
+      <p>This is the XRPL's strongest advantage. For applications where downtime is unacceptable -- payments, settlement, enterprise infrastructure -- the XRPL's reliability track record is unmatched.</p>
+
+      <h2>Smart contracts</h2>
+      <p><strong>XRP Ledger:</strong> No Turing-complete smart contracts on mainnet. The XRPL provides built-in protocol features (DEX, NFTs, AMM, escrow, payment channels) instead of general-purpose programmability. The EVM sidechain adds smart contract support for applications that need it.</p>
+      <p><strong>Solana:</strong> Full smart contract support via Rust and Anchor framework. Rich DeFi ecosystem with lending, borrowing, derivatives, and complex automated strategies.</p>
+      <p>Solana wins on programmability. The XRPL wins on simplicity and security -- fewer smart contract attack vectors, no reentrancy bugs, no oracle manipulation. The tradeoff is intentional.</p>
+
+      <h2>Built-in DEX</h2>
+      <p><strong>XRP Ledger:</strong> Native order book DEX and AMM built into the protocol. Any token can be traded against any other token without deploying contracts. Cross-currency payments use automatic path finding.</p>
+      <p><strong>Solana:</strong> DEXes are smart contracts (Raydium, Orca, Jupiter). Powerful but require separate deployments, audits, and carry smart contract risk.</p>
+      <p>The XRPL's native DEX means every token is instantly tradeable from the moment it is issued. No liquidity bootstrapping needed for basic orderbook trading.</p>
+
+      <h2>NFTs</h2>
+      <p><strong>XRP Ledger:</strong> Native XLS-20 NFTs at the protocol level. Minting costs are minimal (standard transaction fee). Built-in royalty enforcement that cannot be bypassed.</p>
+      <p><strong>Solana:</strong> Metaplex standard. Rich NFT ecosystem with marketplaces, tools, and community. Royalty enforcement is optional and marketplace-dependent.</p>
+      <p>Solana has a larger NFT ecosystem today. The XRPL has stronger royalty enforcement and lower minting costs.</p>
+
+      <h2>Developer ecosystem</h2>
+      <p><strong>XRP Ledger:</strong> xrpl.js (JavaScript), xrpl-py (Python), xrpl4j (Java). Smaller but mature ecosystem focused on payments and financial applications. Strong documentation at xrpl.org.</p>
+      <p><strong>Solana:</strong> Anchor (Rust), web3.js, large DeFi and consumer app ecosystem. More developers building but steeper learning curve (Rust).</p>
+
+      <h2>Best use cases</h2>
+      <ul>
+        <li><strong>Choose XRPL for:</strong> Payments, cross-border settlement, token issuance, compliance-heavy applications, anything requiring 100% uptime and instant finality</li>
+        <li><strong>Choose Solana for:</strong> DeFi protocols, consumer apps, gaming, applications requiring complex on-chain logic</li>
+      </ul>
+
+      <h2>Building on the XRP Ledger</h2>
+      <p>If you are building on the XRPL, XRPL Stream provides the API infrastructure. Full history from 2013, 21 globally distributed nodes, WebSocket subscriptions, and dedicated endpoints. Free tier available.</p>
+
+      <div class="post-cta">
+        <a href="/login" class="btn btn-primary">Get Started Free</a>
+        <a href="/guides/xrpl-api" class="btn btn-ghost">XRPL API Guide</a>
+      </div>
+    </div>
+  </article>
+  <Footer />
+</Base>
+
+<style>
+  .post { max-width: 1400px; margin: 0 auto; padding: 48px 40px 64px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 24px; transition: color 0.2s; }
+  .back-link:hover { color: var(--accent); text-decoration: none; }
+  .post-header { margin-bottom: 40px; }
+  .post-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .post-tag { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); padding: 3px 10px; border-radius: 6px; }
+  time { font-size: 0.8rem; color: var(--text-dim); }
+  h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; }
+  .post-lead { font-size: 1.1rem; color: var(--text-muted); line-height: 1.7; }
+  .post-body h2 { font-size: 1.25rem; font-weight: 700; margin: 40px 0 12px; color: var(--text); }
+  .post-body p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 16px; }
+  .post-body a { color: var(--accent); }
+  .post-body ul { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin: 0 0 16px 20px; }
+  .post-body li { margin-bottom: 8px; }
+  .post-body li strong { color: var(--text); }
+  .post-cta { display: flex; gap: 12px; margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
+  .btn { display: inline-block; padding: 11px 28px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
+  .btn-primary { background: var(--accent); color: #fff; font-weight: 700; }
+  .btn-primary:hover { text-decoration: none; }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text-muted); }
+  .btn-ghost:hover { border-color: var(--accent); text-decoration: none; color: var(--text); }
+</style>

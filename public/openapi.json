@@ -1,0 +1,969 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "XRPL Stream API",
+    "version": "1.0.0",
+    "description": "XRPL Stream provides high-performance access to the XRP Ledger via HTTP JSON-RPC, WebSocket, and a REST API. Full history, transaction submission, caching, and global edge routing included.",
+    "contact": {
+      "name": "XRPL Stream",
+      "url": "https://xrpl.stream"
+    }
+  },
+  "servers": [
+    { "url": "https://s1.xrpl.stream", "description": "Mainnet" },
+    { "url": "https://s1.xrpl.stream/testnet", "description": "Testnet" },
+    { "url": "https://s1.xrpl.stream/devnet", "description": "Devnet" }
+  ],
+  "security": [],
+  "paths": {
+    "/": {
+      "post": {
+        "operationId": "xrplJsonRpc",
+        "summary": "XRPL JSON-RPC",
+        "description": "Send any XRPL command via JSON-RPC. Works without authentication (free tier, lower limits) or with an API key for higher limits.",
+        "tags": ["XRPL Proxy"],
+        "security": [
+          {},
+          { "ApiKeyHeader": [] }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/XrplRequest" },
+              "examples": {
+                "server_info": {
+                  "summary": "server_info",
+                  "value": { "command": "server_info" }
+                },
+                "account_info": {
+                  "summary": "account_info",
+                  "value": {
+                    "command": "account_info",
+                    "account": "rN7n3473SoZtKGBB5JnUB29hMcFSfZaV7v",
+                    "ledger_index": "validated"
+                  }
+                },
+                "submit": {
+                  "summary": "submit",
+                  "value": {
+                    "command": "submit",
+                    "tx_blob": "1200002200000000..."
+                  }
+                },
+                "legacy_format": {
+                  "summary": "Legacy method/params format",
+                  "value": {
+                    "method": "account_info",
+                    "params": [{ "account": "rN7n3473SoZtKGBB5JnUB29hMcFSfZaV7v", "ledger_index": "validated" }]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "XRPL response",
+            "headers": {
+              "X-RateLimit-Limit": { "schema": { "type": "integer" }, "description": "Plan's requests per second" },
+              "X-RateLimit-Remaining": { "schema": { "type": "integer" }, "description": "Tokens remaining in current window" },
+              "Cache-Control": { "schema": { "type": "string" }, "description": "`immutable` for validated data" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/XrplResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProxyError" },
+                "examples": {
+                  "invalid_json": { "value": { "error": "invalid_json" } },
+                  "missing_command": { "value": { "error": "missing method or command" } }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid API key",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProxyError" },
+                "example": { "error": "invalid_endpoint" }
+              }
+            }
+          },
+          "403": {
+            "description": "Account deactivated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProxyError" },
+                "example": { "error": "endpoint_disabled" }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited or quota exceeded",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProxyError" },
+                "examples": {
+                  "rate_limited": { "value": { "error": "rate_limited" } },
+                  "quota_exceeded": { "value": { "error": "monthly_quota_exceeded" } }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/e/{token}": {
+      "post": {
+        "operationId": "xrplJsonRpcToken",
+        "summary": "XRPL JSON-RPC (endpoint token)",
+        "description": "Send XRPL commands using your endpoint token in the URL path. Recommended authentication method.",
+        "tags": ["XRPL Proxy"],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "pattern": "^xm_live_" },
+            "description": "Your API endpoint token (e.g. xm_live_abc123)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/XrplRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "XRPL response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/XrplResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/InvalidEndpoint" },
+          "403": { "$ref": "#/components/responses/EndpointDisabled" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/e/{token}/{network}": {
+      "post": {
+        "operationId": "xrplJsonRpcTokenNetwork",
+        "summary": "XRPL JSON-RPC (token + network)",
+        "description": "Send XRPL commands to a specific network using your endpoint token.",
+        "tags": ["XRPL Proxy"],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "pattern": "^xm_live_" },
+            "description": "Your API endpoint token"
+          },
+          {
+            "name": "network",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "enum": ["testnet", "devnet"] },
+            "description": "Target network"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/XrplRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "XRPL response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/XrplResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/InvalidEndpoint" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/v1/tx/{hash}": {
+      "get": {
+        "operationId": "getTransaction",
+        "summary": "Look up transaction by hash",
+        "tags": ["REST API"],
+        "security": [
+          {},
+          { "ApiKeyHeader": [] }
+        ],
+        "parameters": [
+          {
+            "name": "hash",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Transaction hash"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transaction details",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/XrplResponse" } } }
+          },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/v1/ledger/{index}": {
+      "get": {
+        "operationId": "getLedger",
+        "summary": "Look up ledger by index",
+        "tags": ["REST API"],
+        "security": [
+          {},
+          { "ApiKeyHeader": [] }
+        ],
+        "parameters": [
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Ledger index or `validated`"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ledger details",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/XrplResponse" } } }
+          },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/v1/{network}/tx/{hash}": {
+      "get": {
+        "operationId": "getTransactionNetwork",
+        "summary": "Look up transaction on specific network",
+        "tags": ["REST API"],
+        "parameters": [
+          { "name": "network", "in": "path", "required": true, "schema": { "type": "string", "enum": ["testnet", "devnet"] } },
+          { "name": "hash", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Transaction hash" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transaction details",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/XrplResponse" } } }
+          }
+        }
+      }
+    },
+    "/v1/{network}/ledger/{index}": {
+      "get": {
+        "operationId": "getLedgerNetwork",
+        "summary": "Look up ledger on specific network",
+        "tags": ["REST API"],
+        "parameters": [
+          { "name": "network", "in": "path", "required": true, "schema": { "type": "string", "enum": ["testnet", "devnet"] } },
+          { "name": "index", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Ledger index or `validated`" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ledger details",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/XrplResponse" } } }
+          }
+        }
+      }
+    },
+    "/api/stats": {
+      "get": {
+        "operationId": "getNetworkStats",
+        "summary": "Network statistics",
+        "description": "Returns aggregate network statistics from the XRPL Mesh infrastructure.",
+        "tags": ["Platform API"],
+        "responses": {
+          "200": {
+            "description": "Network stats",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          },
+          "503": { "description": "Service unavailable" }
+        }
+      }
+    },
+    "/api/status": {
+      "get": {
+        "operationId": "getStatus",
+        "summary": "Node health status",
+        "description": "Returns health, latency, and ledger sync status for all 21 XRPL Mesh nodes across 6 regions. Cached for 15 seconds.",
+        "tags": ["Platform API"],
+        "responses": {
+          "200": {
+            "description": "Cluster status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "overall": { "type": "string", "enum": ["operational", "degraded", "outage"] },
+                    "nodes_online": { "type": "integer" },
+                    "nodes_total": { "type": "integer" },
+                    "latest_ledger": { "type": "integer" },
+                    "synced": { "type": "boolean" },
+                    "nodes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "region": { "type": "string" },
+                          "id": { "type": "string" },
+                          "status": { "type": "string", "enum": ["online", "degraded", "offline"] },
+                          "latency": { "type": "number" },
+                          "ledger": { "type": "integer" },
+                          "cache_hit": { "type": "string" },
+                          "response_p50": { "type": "number" },
+                          "response_p95": { "type": "number" },
+                          "uptime": { "type": "number" },
+                          "label": { "type": "string" }
+                        }
+                      }
+                    },
+                    "updated_at": { "type": "string", "format": "date-time" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cf-stats": {
+      "get": {
+        "operationId": "getCfStats",
+        "summary": "Cloudflare analytics",
+        "description": "Returns Cloudflare traffic analytics including request counts, cache stats, country breakdown, and status codes. Cached for 5 minutes.",
+        "tags": ["Platform API"],
+        "responses": {
+          "200": {
+            "description": "Cloudflare analytics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "totals": {
+                      "type": "object",
+                      "properties": {
+                        "last24h": {
+                          "type": "object",
+                          "properties": {
+                            "requests": { "type": "integer" },
+                            "cached": { "type": "integer" },
+                            "bytes": { "type": "integer" },
+                            "cachedBytes": { "type": "integer" },
+                            "threats": { "type": "integer" },
+                            "uniques": { "type": "integer" }
+                          }
+                        },
+                        "last7d": { "type": "object" }
+                      }
+                    },
+                    "timeseries": {
+                      "type": "object",
+                      "properties": {
+                        "hourly": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "time": { "type": "string" },
+                              "requests": { "type": "integer" },
+                              "cached": { "type": "integer" },
+                              "bytes": { "type": "integer" }
+                            }
+                          }
+                        },
+                        "daily": { "type": "array", "items": { "type": "object" } }
+                      }
+                    },
+                    "countries": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "clientCountryName": { "type": "string" },
+                          "requests": { "type": "integer" },
+                          "bytes": { "type": "integer" }
+                        }
+                      }
+                    },
+                    "statusCodes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "edgeResponseStatus": { "type": "integer" },
+                          "requests": { "type": "integer" }
+                        }
+                      }
+                    },
+                    "updated_at": { "type": "string", "format": "date-time" }
+                  }
+                }
+              }
+            }
+          },
+          "502": { "description": "Cloudflare API error" },
+          "503": { "description": "Not configured" }
+        }
+      }
+    },
+    "/api/usage": {
+      "get": {
+        "operationId": "getUsage",
+        "summary": "Get your API usage",
+        "description": "Returns monthly credit usage for the authenticated user's API keys.",
+        "tags": ["Account API"],
+        "security": [{ "SessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Usage data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "month": { "type": "string" },
+                    "usage": {
+                      "type": "object",
+                      "additionalProperties": { "type": "integer" },
+                      "description": "Map of email or key ID to credit count"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Not authenticated" }
+        }
+      }
+    },
+    "/api/keys": {
+      "post": {
+        "operationId": "createKey",
+        "summary": "Create an API key",
+        "description": "Creates a new API key. Max 5 keys per account, max 1 free key.",
+        "tags": ["Account API"],
+        "security": [{ "SessionCookie": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "plan": { "type": "string", "enum": ["free", "builder", "pro", "scale"], "default": "free" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Key created",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          },
+          "400": {
+            "description": "Limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" },
+                "examples": {
+                  "max_keys": { "value": { "error": "You already have 5 API keys" } },
+                  "free_limit": { "value": { "error": "Only 1 free key per account" } }
+                }
+              }
+            }
+          },
+          "401": { "description": "Not authenticated" }
+        }
+      }
+    },
+    "/api/checkout": {
+      "post": {
+        "operationId": "createCheckout",
+        "summary": "Create Stripe checkout session",
+        "description": "Creates a Stripe checkout session for purchasing a paid plan.",
+        "tags": ["Billing API"],
+        "security": [{ "SessionCookie": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["plan"],
+                "properties": {
+                  "plan": { "type": "string", "enum": ["builder", "pro", "scale"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Checkout URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "url": { "type": "string", "format": "uri", "description": "Stripe checkout URL" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid plan",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          },
+          "401": { "description": "Not authenticated" },
+          "503": { "description": "Stripe not configured" }
+        }
+      }
+    },
+    "/api/upgrade": {
+      "post": {
+        "operationId": "upgradePlan",
+        "summary": "Upgrade an existing key's plan",
+        "description": "Upgrades an existing API key to a higher plan. If key has active Stripe subscription, updates in-place with proration. Otherwise creates new checkout session.",
+        "tags": ["Billing API"],
+        "security": [{ "SessionCookie": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["plan", "key"],
+                "properties": {
+                  "plan": { "type": "string", "enum": ["builder", "pro", "scale"] },
+                  "key": { "type": "string", "description": "API key to upgrade" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Upgrade result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "upgraded": { "type": "boolean", "const": true },
+                        "plan": { "type": "string" }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "url": { "type": "string", "format": "uri", "description": "Stripe checkout URL for new subscription" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid plan" },
+          "401": { "description": "Not authenticated" },
+          "403": { "description": "Key not found or not owned by user" },
+          "503": { "description": "Stripe not configured" }
+        }
+      }
+    },
+    "/api/xrp-checkout": {
+      "post": {
+        "operationId": "xrpCheckout",
+        "summary": "Initiate XRP payment",
+        "description": "Creates a pending XRP payment with a unique destination tag. Payment expires in 15 minutes.",
+        "tags": ["Billing API"],
+        "security": [{ "SessionCookie": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["plan"],
+                "properties": {
+                  "plan": { "type": "string", "enum": ["builder", "pro", "scale"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Payment details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "address": { "type": "string", "description": "XRP receive address" },
+                    "destinationTag": { "type": "integer", "description": "Unique destination tag for this payment" },
+                    "amount": { "type": "number", "description": "Amount in XRP" },
+                    "amountDrops": { "type": "integer", "description": "Amount in drops (1 XRP = 1,000,000 drops)" },
+                    "plan": { "type": "string" },
+                    "network": { "type": "string", "enum": ["testnet", "mainnet"] },
+                    "expiresIn": { "type": "integer", "description": "Seconds until expiration (900)" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid plan" },
+          "401": { "description": "Not authenticated" },
+          "503": { "description": "XRP payments not configured" }
+        }
+      }
+    },
+    "/api/xrp-verify": {
+      "post": {
+        "operationId": "xrpVerify",
+        "summary": "Verify XRP payment",
+        "description": "Checks the XRP Ledger for a matching payment by destination tag. On success, creates or upgrades the API key.",
+        "tags": ["Billing API"],
+        "security": [{ "SessionCookie": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["destinationTag"],
+                "properties": {
+                  "destinationTag": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Verification result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "verified": { "type": "boolean", "const": false },
+                        "message": { "type": "string" }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "verified": { "type": "boolean", "const": true },
+                        "txHash": { "type": "string" },
+                        "plan": { "type": "string" },
+                        "key": { "type": "string" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": { "description": "Missing destination tag" },
+          "401": { "description": "Not authenticated" },
+          "404": { "description": "Payment expired or not found" },
+          "500": { "description": "Verification failed" }
+        }
+      }
+    },
+    "/api/webhook": {
+      "post": {
+        "operationId": "stripeWebhook",
+        "summary": "Stripe webhook handler",
+        "description": "Receives and processes Stripe webhook events. Handles checkout.session.completed, subscription updates/deletions, and payment failures.",
+        "tags": ["Billing API"],
+        "security": [{ "StripeSignature": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "type": "object", "description": "Stripe event payload" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Webhook received",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "received": { "type": "boolean" } } } } }
+          },
+          "400": { "description": "Invalid signature" },
+          "503": { "description": "Stripe not configured" }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "get": {
+        "operationId": "googleLogin",
+        "summary": "Initiate Google OAuth login",
+        "description": "Redirects to Google OAuth consent screen. Sets state and code verifier cookies.",
+        "tags": ["Authentication"],
+        "responses": {
+          "302": { "description": "Redirect to Google OAuth" }
+        }
+      }
+    },
+    "/api/auth/callback": {
+      "get": {
+        "operationId": "googleCallback",
+        "summary": "Google OAuth callback",
+        "description": "Completes Google OAuth flow. Creates session and redirects to dashboard.",
+        "tags": ["Authentication"],
+        "parameters": [
+          { "name": "code", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "state", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "302": { "description": "Redirect to /dashboard with session cookie" },
+          "400": { "description": "Invalid state or code" }
+        }
+      }
+    },
+    "/api/auth/github/login": {
+      "get": {
+        "operationId": "githubLogin",
+        "summary": "Initiate GitHub OAuth login",
+        "description": "Redirects to GitHub OAuth authorization with `user:email` scope.",
+        "tags": ["Authentication"],
+        "responses": {
+          "302": { "description": "Redirect to GitHub OAuth" }
+        }
+      }
+    },
+    "/api/auth/github/callback": {
+      "get": {
+        "operationId": "githubCallback",
+        "summary": "GitHub OAuth callback",
+        "description": "Completes GitHub OAuth flow. Creates session and redirects to dashboard.",
+        "tags": ["Authentication"],
+        "parameters": [
+          { "name": "code", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "state", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "302": { "description": "Redirect to /dashboard with session cookie" },
+          "400": { "description": "Invalid state or code" }
+        }
+      }
+    },
+    "/api/auth/xaman/login": {
+      "get": {
+        "operationId": "xamanLogin",
+        "summary": "Create Xaman wallet sign-in",
+        "description": "Creates a Xaman (wallet) sign-in payload. Returns QR code and WebSocket URL for status.",
+        "tags": ["Authentication"],
+        "responses": {
+          "200": {
+            "description": "Xaman sign-in payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "uuid": { "type": "string" },
+                    "qr": { "type": "string", "format": "uri", "description": "QR code image URL" },
+                    "ws": { "type": "string", "format": "uri", "description": "WebSocket URL for status updates" },
+                    "link": { "type": "string", "format": "uri", "description": "Direct Xaman deep link" }
+                  }
+                }
+              }
+            }
+          },
+          "500": { "description": "Xaman SDK error" }
+        }
+      }
+    },
+    "/api/auth/xaman/verify": {
+      "post": {
+        "operationId": "xamanVerify",
+        "summary": "Verify Xaman wallet signature",
+        "description": "Verifies the Xaman sign-in payload and creates a session.",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["uuid"],
+                "properties": {
+                  "uuid": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Session created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": { "type": "boolean" },
+                    "sessionId": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Missing UUID" },
+          "401": { "description": "Signature not verified" }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "get": {
+        "operationId": "logout",
+        "summary": "Log out",
+        "description": "Deletes session and clears session cookie. Redirects to homepage.",
+        "tags": ["Authentication"],
+        "security": [{ "SessionCookie": [] }],
+        "responses": {
+          "302": { "description": "Redirect to homepage" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "API key (e.g. `xm_live_abc123`)"
+      },
+      "SessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "session",
+        "description": "Session cookie set after OAuth login (HttpOnly, Secure, 7-day TTL)"
+      },
+      "StripeSignature": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "stripe-signature",
+        "description": "Stripe webhook HMAC signature"
+      }
+    },
+    "schemas": {
+      "XrplRequest": {
+        "type": "object",
+        "description": "XRPL JSON-RPC request. Use `command` (preferred) or legacy `method` + `params` format.",
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["command"],
+            "properties": {
+              "command": {
+                "type": "string",
+                "description": "XRPL command name",
+                "enum": [
+                  "account_info", "account_lines", "account_channels", "account_currencies",
+                  "account_nfts", "account_objects", "account_offers", "account_tx",
+                  "gateway_balances", "noripple_check",
+                  "ledger", "ledger_closed", "ledger_current", "ledger_data", "ledger_entry",
+                  "tx", "transaction_entry", "submit", "submit_multisigned",
+                  "book_offers", "book_changes", "deposit_authorized", "ripple_path_find", "amm_info",
+                  "nft_info", "nft_buy_offers", "nft_sell_offers", "nft_history", "nfts_by_issuer",
+                  "server_info", "server_state", "server_definitions", "fee", "manifest",
+                  "subscribe", "unsubscribe"
+                ]
+              }
+            },
+            "additionalProperties": true
+          },
+          {
+            "type": "object",
+            "required": ["method"],
+            "properties": {
+              "method": { "type": "string" },
+              "params": { "type": "array", "items": { "type": "object" } }
+            }
+          }
+        ]
+      },
+      "XrplResponse": {
+        "type": "object",
+        "properties": {
+          "result": { "type": "object", "description": "XRPL response data" },
+          "status": { "type": "string" },
+          "type": { "type": "string" }
+        }
+      },
+      "ProxyError": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" }
+        }
+      }
+    },
+    "responses": {
+      "InvalidEndpoint": {
+        "description": "Invalid API key / token",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProxyError" }, "example": { "error": "invalid_endpoint" } } }
+      },
+      "EndpointDisabled": {
+        "description": "Account deactivated",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProxyError" }, "example": { "error": "endpoint_disabled" } } }
+      },
+      "RateLimited": {
+        "description": "Rate limited or quota exceeded",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProxyError" }, "examples": { "rate_limited": { "value": { "error": "rate_limited" } }, "quota_exceeded": { "value": { "error": "monthly_quota_exceeded" } } } } }
+      }
+    }
+  },
+  "tags": [
+    { "name": "XRPL Proxy", "description": "Core XRPL JSON-RPC and WebSocket proxy endpoints" },
+    { "name": "REST API", "description": "RESTful GET endpoints for transaction and ledger lookups" },
+    { "name": "Platform API", "description": "Public platform status and analytics endpoints" },
+    { "name": "Account API", "description": "API key management and usage (requires authentication)" },
+    { "name": "Billing API", "description": "Stripe and XRP payment endpoints (requires authentication)" },
+    { "name": "Authentication", "description": "OAuth and wallet-based authentication flows" }
+  ]
+}

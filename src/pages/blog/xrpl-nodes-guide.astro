@@ -1,0 +1,102 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+---
+
+<Base title="XRPL Nodes Guide - Running and Connecting to XRP Ledger Nodes | XRPL Stream" description="Complete guide to XRP Ledger nodes. Validators, stock nodes, full history, hardware requirements, public RPC providers, and managed alternatives.">
+  <Header />
+  <article class="post">
+    <div class="post-header">
+      <a href="/blog" class="back-link">Back to Blog</a>
+      <div class="post-meta">
+        <span class="post-tag">Infrastructure</span>
+        <time>April 13, 2026</time>
+      </div>
+      <h1>XRPL Nodes Guide</h1>
+      <p class="post-lead">Understanding XRP Ledger node types, how to connect to them, and when it makes sense to run your own versus using a managed provider like XRPL Stream.</p>
+    </div>
+    <div class="post-body">
+      <h2>Node types</h2>
+      <p>The XRP Ledger network consists of several types of nodes, each serving a different purpose:</p>
+      <ul>
+        <li><strong>Validator nodes:</strong> Participate in the consensus process. They propose and vote on which transactions to include in each ledger. The XRPL uses a unique consensus protocol (not proof-of-work or proof-of-stake) where trusted validators agree on transaction ordering. There are roughly 150+ validators on the network, with about 35 on Ripple's recommended Unique Node List (UNL).</li>
+        <li><strong>Stock nodes:</strong> Track the current state of the ledger and serve API requests. They do not participate in consensus but maintain a connection to the network and process incoming transactions. Most developers interact with stock nodes.</li>
+        <li><strong>Full history nodes:</strong> Stock nodes that store the complete ledger history from genesis (ledger 32,570 in January 2013). These require significant storage -- currently around 39 TB and growing. Most stock nodes only keep recent history (days or weeks).</li>
+        <li><strong>Clio nodes:</strong> Specialized read-only nodes optimized for API serving. Clio stores data in Cassandra/ScyllaDB and is designed for high-throughput query workloads. Ripple's public servers (s1.ripple.com, s2.ripple.com) run Clio.</li>
+      </ul>
+
+      <h2>Hardware requirements</h2>
+      <p>Running your own XRPL node requires dedicated hardware:</p>
+      <ul>
+        <li><strong>Stock node (recent history):</strong> 8 CPU cores, 32 GB RAM, 500 GB SSD. Stores approximately 2-4 weeks of ledger history.</li>
+        <li><strong>Full history node:</strong> 8+ CPU cores, 64+ GB RAM, 39+ TB NVMe storage. The storage requirement grows by roughly 1-2 TB per month.</li>
+        <li><strong>Validator:</strong> Same as stock node, plus reliable uptime and network connectivity. Validators should be professionally hosted with redundant infrastructure.</li>
+      </ul>
+      <p>The storage requirement for full history is the biggest barrier. At 39 TB, NVMe storage alone costs $3,000-5,000+ depending on hosting provider. This is why most developers use managed RPC providers instead of running their own full history node.</p>
+
+      <h2>Public RPC endpoints</h2>
+      <p>Several organizations provide free public access to XRPL nodes:</p>
+      <ul>
+        <li><strong>s1.ripple.com / s2.ripple.com:</strong> Ripple's public Clio servers. Full history, but rate limited. Good for development, not suitable for production workloads.</li>
+        <li><strong>xrplcluster.com:</strong> Community-run rippled cluster. Full history, relatively generous rate limits.</li>
+        <li><strong>xrpl.link:</strong> Another community rippled endpoint. Full history.</li>
+        <li><strong>XRPL Stream (s1.xrpl.stream):</strong> Managed 21-node edge network. Full history, dedicated endpoints, guaranteed rate limits, global distribution.</li>
+      </ul>
+
+      <h2>Connecting via WebSocket</h2>
+      <p>The primary way to interact with XRPL nodes is through WebSocket connections. This allows bidirectional communication -- you can send requests and also subscribe to real-time events like ledger closes and transaction notifications. Most XRPL client libraries (xrpl.js, xrpl-py, xrpl4j) use WebSocket under the hood.</p>
+
+      <h2>JSON-RPC over HTTP</h2>
+      <p>Nodes also accept JSON-RPC requests over HTTP POST. This is simpler for one-off queries -- you send a request and get a response. No persistent connection needed. XRPL Stream supports both WebSocket and JSON-RPC on the same endpoint.</p>
+
+      <h2>Mainnet, testnet, and devnet</h2>
+      <p>The XRPL has three networks:</p>
+      <ul>
+        <li><strong>Mainnet:</strong> The production network where real XRP transactions happen.</li>
+        <li><strong>Testnet:</strong> A parallel network for testing. Free test XRP is available from faucets. Testnet mirrors mainnet features and is reset periodically.</li>
+        <li><strong>Devnet:</strong> An experimental network where new amendments and features are tested before reaching testnet or mainnet.</li>
+      </ul>
+
+      <h2>Why use a managed provider</h2>
+      <p>Running your own XRPL node is viable for validators and organizations that need complete control. But for API access, a managed provider like XRPL Stream offers significant advantages:</p>
+      <ul>
+        <li><strong>No infrastructure to maintain:</strong> No servers, no storage, no upgrades</li>
+        <li><strong>Full history included:</strong> Every transaction since 2013, no 39 TB storage bill</li>
+        <li><strong>Global distribution:</strong> 21 nodes across 9 regions, queries served from nearest node</li>
+        <li><strong>Guaranteed uptime:</strong> Redundant infrastructure with automatic failover</li>
+        <li><strong>Free tier available:</strong> Start building immediately, scale when needed</li>
+      </ul>
+
+      <div class="post-cta">
+        <a href="/login" class="btn btn-primary">Get Started Free</a>
+        <a href="/docs" class="btn btn-ghost">API Documentation</a>
+      </div>
+    </div>
+  </article>
+  <Footer />
+</Base>
+
+<style>
+  .post { max-width: 1400px; margin: 0 auto; padding: 48px 40px 64px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 24px; transition: color 0.2s; }
+  .back-link:hover { color: var(--accent); text-decoration: none; }
+  .post-header { margin-bottom: 40px; }
+  .post-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .post-tag { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); padding: 3px 10px; border-radius: 6px; }
+  time { font-size: 0.8rem; color: var(--text-dim); }
+  h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; }
+  .post-lead { font-size: 1.1rem; color: var(--text-muted); line-height: 1.7; }
+  .post-body h2 { font-size: 1.25rem; font-weight: 700; margin: 40px 0 12px; color: var(--text); }
+  .post-body p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 16px; }
+  .post-body a { color: var(--accent); }
+  .post-body ul { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin: 0 0 16px 20px; }
+  .post-body li { margin-bottom: 8px; }
+  .post-body li strong { color: var(--text); }
+  .post-cta { display: flex; gap: 12px; margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
+  .btn { display: inline-block; padding: 11px 28px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
+  .btn-primary { background: var(--accent); color: #fff; font-weight: 700; }
+  .btn-primary:hover { text-decoration: none; }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text-muted); }
+  .btn-ghost:hover { border-color: var(--accent); text-decoration: none; color: var(--text); }
+</style>

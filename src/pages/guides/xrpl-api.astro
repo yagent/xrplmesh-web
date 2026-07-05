@@ -1,0 +1,143 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+---
+
+<Base title="XRPL API Guide - WebSocket and JSON-RPC | XRPL Stream" description="Complete guide to the XRP Ledger API. WebSocket, JSON-RPC, account queries, transactions, NFTs, DEX, AMM. Free full-history endpoints.">
+  <Header />
+  <article class="post">
+    <div class="post-header">
+      <a href="/guides" class="back-link">Back to Guides</a>
+      <div class="post-meta">
+        <span class="post-tag">API</span>
+        <span class="post-tag">WebSocket</span>
+        <span class="post-tag">RPC</span>
+        <time>Updated April 2026</time>
+      </div>
+      <h1>XRPL API Guide</h1>
+      <p class="post-lead">Everything you need to query the XRP Ledger. Full history from ledger 32,570 to present. WebSocket, JSON-RPC, accounts, transactions, NFTs, DEX, and AMM from one endpoint.</p>
+    </div>
+    <div class="post-body">
+      <h2>Getting Started</h2>
+      <p>Sign up for a free account to get your API endpoint. Replace YOUR_TOKEN in the URLs below with your token. No credit card required.</p>
+      <div class="post-cta">
+        <a href="/login" class="btn btn-primary">Get Free API Key</a>
+        <a href="/docs" class="btn btn-ghost">Full API Docs</a>
+      </div>
+
+      <h2>Endpoints</h2>
+      <p>XRPL Stream provides full-history access across mainnet, testnet, and devnet.</p>
+      <table><thead><tr><th>Protocol</th><th>URL</th><th>Use</th></tr></thead><tbody>
+        <tr><td><strong>POST</strong></td><td>https://s1.xrpl.stream/e/TOKEN</td><td>JSON-RPC - all XRPL methods</td></tr>
+        <tr><td><strong>WebSocket</strong></td><td>wss://s1.xrpl.stream/e/TOKEN</td><td>Subscriptions and streaming</td></tr>
+        <tr><td><strong>Testnet</strong></td><td>https://s1.xrpl.stream/testnet</td><td>XRPL Testnet</td></tr>
+        <tr><td><strong>Devnet</strong></td><td>https://s1.xrpl.stream/devnet</td><td>XRPL Devnet</td></tr>
+      </tbody></table>
+
+      <h2>Account Methods</h2>
+      <p>Query any XRPL account state or full transaction history back to genesis.</p>
+      <table><thead><tr><th>Method</th><th>Returns</th></tr></thead><tbody>
+        <tr><td><strong>account_info</strong></td><td>Balance, sequence, flags, settings</td></tr>
+        <tr><td><strong>account_lines</strong></td><td>Trust lines and token balances</td></tr>
+        <tr><td><strong>account_tx</strong></td><td>Full transaction history from genesis</td></tr>
+        <tr><td><strong>account_offers</strong></td><td>Active DEX offers</td></tr>
+        <tr><td><strong>account_nfts</strong></td><td>Owned NFTs (XLS-20)</td></tr>
+        <tr><td><strong>account_objects</strong></td><td>All ledger objects (offers, checks, escrows)</td></tr>
+        <tr><td><strong>account_currencies</strong></td><td>Sendable and receivable currencies</td></tr>
+        <tr><td><strong>account_channels</strong></td><td>Payment channels</td></tr>
+        <tr><td><strong>gateway_balances</strong></td><td>Issued currency totals for issuers</td></tr>
+      </tbody></table>
+      <blockquote><strong>Full History</strong> - account_tx returns transactions back to ledger 32,570 (January 2013). No gaps, no truncation.</blockquote>
+
+      <h2>Transaction Methods</h2>
+      <p>Look up transactions, submit new ones, and check fees.</p>
+      <table><thead><tr><th>Method</th><th>Returns</th></tr></thead><tbody>
+        <tr><td><strong>tx</strong></td><td>Look up any transaction by hash</td></tr>
+        <tr><td><strong>submit</strong></td><td>Submit a signed transaction</td></tr>
+        <tr><td><strong>submit_multisigned</strong></td><td>Submit a multi-signed transaction</td></tr>
+        <tr><td><strong>transaction_entry</strong></td><td>Transaction from a specific ledger</td></tr>
+        <tr><td><strong>fee</strong></td><td>Current transaction fee</td></tr>
+      </tbody></table>
+
+      <h2>NFT Methods</h2>
+      <p>Full XLS-20 NFT support. Query, mint, transfer, and trade NFTs on the XRP Ledger.</p>
+      <table><thead><tr><th>Method</th><th>Returns</th></tr></thead><tbody>
+        <tr><td><strong>nft_info</strong></td><td>NFT metadata, owner, issuer, URI</td></tr>
+        <tr><td><strong>nft_buy_offers</strong></td><td>Active buy offers for an NFT</td></tr>
+        <tr><td><strong>nft_sell_offers</strong></td><td>Active sell offers for an NFT</td></tr>
+        <tr><td><strong>nfts_by_issuer</strong></td><td>All NFTs minted by an issuer</td></tr>
+      </tbody></table>
+
+      <h2>DEX and Order Book</h2>
+      <p>The XRP Ledger has a built-in decentralized exchange. Query order books, find payment paths, and check AMM pools.</p>
+      <table><thead><tr><th>Method</th><th>Returns</th></tr></thead><tbody>
+        <tr><td><strong>book_offers</strong></td><td>Order book for any currency pair</td></tr>
+        <tr><td><strong>ripple_path_find</strong></td><td>Find payment paths across the DEX</td></tr>
+        <tr><td><strong>amm_info</strong></td><td>AMM pool state, reserves, LP tokens</td></tr>
+        <tr><td><strong>deposit_authorized</strong></td><td>Check if deposits are allowed</td></tr>
+      </tbody></table>
+
+      <h2>WebSocket Subscriptions</h2>
+      <p>Stream real-time data over WebSocket. Subscribe to ledger closes, specific accounts, order books, or transaction streams. Connect once and receive updates as they happen - ideal for wallets, trading interfaces, and live dashboards.</p>
+
+      <h2>Ledger Methods</h2>
+      <p>Query any ledger from genesis to present.</p>
+      <table><thead><tr><th>Method</th><th>Returns</th></tr></thead><tbody>
+        <tr><td><strong>ledger</strong></td><td>Ledger header, transactions, state</td></tr>
+        <tr><td><strong>ledger_data</strong></td><td>Raw ledger state entries</td></tr>
+        <tr><td><strong>ledger_entry</strong></td><td>Single ledger object</td></tr>
+        <tr><td><strong>ledger_closed</strong></td><td>Most recently closed ledger</td></tr>
+        <tr><td><strong>ledger_current</strong></td><td>Current working ledger</td></tr>
+      </tbody></table>
+
+      <h2>Server Methods</h2>
+      <table><thead><tr><th>Method</th><th>Returns</th></tr></thead><tbody>
+        <tr><td><strong>server_info</strong></td><td>Server status and validated ledger</td></tr>
+        <tr><td><strong>server_state</strong></td><td>Detailed server state</td></tr>
+        <tr><td><strong>server_definitions</strong></td><td>Protocol type and field definitions</td></tr>
+      </tbody></table>
+
+      <h2>Rate Limits</h2>
+      <p>Start free, scale when you need to.</p>
+      <table><thead><tr><th>Plan</th><th>Rate</th><th>Price</th></tr></thead><tbody>
+        <tr><td>Free</td><td>15 req/s</td><td>$0/mo</td></tr>
+        <tr><td>Builder</td><td>50 req/s</td><td>$29/mo</td></tr>
+        <tr><td>Pro</td><td>150 req/s</td><td>$79/mo</td></tr>
+        <tr><td>Scale</td><td>300 req/s</td><td>$199/mo</td></tr>
+        <tr><td>Enterprise</td><td>Custom</td><td>Contact us</td></tr>
+      </tbody></table>
+      <div class="post-cta">
+        <a href="/login" class="btn btn-primary">Get Started Free</a>
+        <a href="/pricing" class="btn btn-ghost">See Pricing</a>
+      </div>
+    </div>
+  </article>
+  <Footer />
+</Base>
+
+<style>
+  .post { max-width: 1400px; margin: 0 auto; padding: 48px 40px 64px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 24px; }
+  .back-link:hover { color: var(--accent); text-decoration: none; }
+  .post-header { margin-bottom: 40px; }
+  .post-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .post-tag { font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); background: rgba(77,158,255,0.08); border: 1px solid rgba(77,158,255,0.15); padding: 3px 10px; border-radius: 6px; }
+  time { font-size: 0.78rem; color: var(--text-dim); }
+  h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; }
+  .post-lead { font-size: 1.05rem; color: var(--text-muted); line-height: 1.7; }
+  .post-body { }
+  .post-body h2 { font-size: 1.4rem; font-weight: 700; margin: 40px 0 12px; letter-spacing: -0.01em; }
+  .post-body p { color: var(--text-muted); line-height: 1.75; margin-bottom: 16px; font-size: 0.95rem; }
+  .post-body table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.88rem; }
+  .post-body th { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-dim); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+  .post-body td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-muted); }
+  .post-body td strong { color: var(--accent); font-family: var(--mono); font-size: 0.84rem; }
+  .post-body blockquote { background: rgba(77,158,255,0.05); border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 0 0 16px; font-size: 0.9rem; color: var(--text-muted); }
+  .post-cta { display: flex; gap: 12px; margin: 32px 0; }
+  .btn { display: inline-block; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { text-decoration: none; opacity: 0.9; }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text-muted); }
+  .btn-ghost:hover { border-color: var(--accent); text-decoration: none; color: var(--text); }
+</style>

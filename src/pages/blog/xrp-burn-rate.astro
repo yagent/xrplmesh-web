@@ -1,0 +1,96 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+---
+
+<Base title="XRP Burn Rate - How Much XRP is Destroyed Per Day | XRPL Stream" description="Live XRP burn rate data. How transaction fees destroy XRP permanently, daily burn statistics, total XRP destroyed since genesis, and what it means for supply.">
+  <Header />
+  <article class="post">
+    <div class="post-header">
+      <a href="/blog" class="back-link">Back to Blog</a>
+      <div class="post-meta">
+        <span class="post-tag">Data</span>
+        <span class="post-tag">Supply</span>
+        <time>April 13, 2026</time>
+      </div>
+      <h1>XRP Burn Rate</h1>
+      <p class="post-lead">Every XRP Ledger transaction destroys a small amount of XRP permanently. No miner or validator receives it -- it is gone forever. Here is how the burn works, how much XRP has been destroyed, and what it means for the total supply.</p>
+    </div>
+    <div class="post-body">
+      <h2>How XRP burning works</h2>
+      <p>When you send a transaction on the XRP Ledger, the fee (typically 10-12 drops, or 0.00001 XRP) is not paid to anyone. It is permanently removed from the total supply. This is a fundamental design choice -- it prevents spam while making XRP slightly deflationary over time. Every Payment, OfferCreate, TrustSet, NFTokenMint, and every other transaction type burns XRP.</p>
+
+      <h2>Burn rate statistics</h2>
+      <p>The daily XRP burn rate varies based on network activity. During high-traffic periods like bull markets or NFT minting waves, the burn rate increases significantly. Here are approximate figures:</p>
+      <ul>
+        <li><strong>Average daily burn:</strong> 5,000 - 15,000 XRP per day during normal activity</li>
+        <li><strong>Peak daily burn:</strong> 50,000+ XRP during high-volume events</li>
+        <li><strong>Total burned since genesis:</strong> Approximately 12+ million XRP destroyed since 2012</li>
+        <li><strong>Original supply:</strong> 100 billion XRP created at genesis</li>
+        <li><strong>Current circulating supply:</strong> Approximately 57 billion XRP (rest in Ripple escrow)</li>
+      </ul>
+
+      <h2>What drives the burn rate</h2>
+      <p>Several factors influence how much XRP is burned daily:</p>
+      <ul>
+        <li><strong>Transaction volume:</strong> More transactions means more fees burned. The XRPL processes 1-2 million transactions per day on average.</li>
+        <li><strong>Fee escalation:</strong> During network congestion, minimum fees increase exponentially, burning more XRP per transaction.</li>
+        <li><strong>DEX trading:</strong> Every offer creation and cancellation on the built-in DEX burns fees.</li>
+        <li><strong>NFT activity:</strong> Minting, transferring, and trading NFTs all incur transaction fees.</li>
+        <li><strong>Account creation:</strong> New accounts require a base reserve, but the creation transaction itself burns a fee.</li>
+      </ul>
+
+      <h2>Burn rate vs other chains</h2>
+      <p>The XRPL burn mechanism is different from other deflationary models:</p>
+      <ul>
+        <li><strong>Ethereum EIP-1559:</strong> Burns base fees but also creates new ETH through staking rewards. Net issuance can be positive or negative.</li>
+        <li><strong>BNB quarterly burns:</strong> Binance manually buys and destroys BNB on a schedule. Centralized and discretionary.</li>
+        <li><strong>XRP Ledger:</strong> Every fee is burned automatically at the protocol level. No new XRP is ever created. The supply can only decrease.</li>
+      </ul>
+      <p>The key difference is that XRP has a hard cap with no inflation. The 100 billion supply at genesis is the maximum that will ever exist, and it shrinks with every transaction.</p>
+
+      <h2>Impact on supply economics</h2>
+      <p>At current burn rates, the economic impact is small in absolute terms -- 12 million XRP burned out of 100 billion is 0.012%. But the mechanism is important for several reasons:</p>
+      <ul>
+        <li><strong>Spam prevention:</strong> Even tiny fees make sustained spam attacks expensive over time</li>
+        <li><strong>Guaranteed deflation:</strong> Unlike inflationary blockchains, XRP supply provably decreases</li>
+        <li><strong>Long-term scarcity:</strong> Over decades of increasing adoption, cumulative burns become meaningful</li>
+      </ul>
+
+      <h2>Tracking the burn rate</h2>
+      <p>You can track XRP burn data using the XRPL Stream API. Query any account's transaction history, monitor fee levels in real time via WebSocket subscriptions, and calculate burn rates from validated ledger data. The <strong>fee</strong> method shows current fee levels, and <strong>server_info</strong> includes the validated ledger sequence for tracking network throughput.</p>
+      <p>For historical analysis, XRPL Stream provides full transaction history from ledger 32,570 (January 2013) to present. Every transaction fee ever paid is queryable, enabling precise burn rate calculations across any time period.</p>
+
+      <div class="post-cta">
+        <a href="/login" class="btn btn-primary">Get API Access</a>
+        <a href="/blog/xrpl-fees-explained" class="btn btn-ghost">How Fees Work</a>
+      </div>
+    </div>
+  </article>
+  <Footer />
+</Base>
+
+<style>
+  .post { max-width: 1400px; margin: 0 auto; padding: 48px 40px 64px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 24px; transition: color 0.2s; }
+  .back-link:hover { color: var(--accent); text-decoration: none; }
+  .post-header { margin-bottom: 40px; }
+  .post-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .post-tag { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); padding: 3px 10px; border-radius: 6px; }
+  time { font-size: 0.8rem; color: var(--text-dim); }
+  h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; }
+  .post-lead { font-size: 1.1rem; color: var(--text-muted); line-height: 1.7; }
+  .post-body h2 { font-size: 1.25rem; font-weight: 700; margin: 40px 0 12px; color: var(--text); }
+  .post-body p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 16px; }
+  .post-body a { color: var(--accent); }
+  .post-body ul { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin: 0 0 16px 20px; }
+  .post-body li { margin-bottom: 8px; }
+  .post-body li strong { color: var(--text); }
+  .post-cta { display: flex; gap: 12px; margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
+  .btn { display: inline-block; padding: 11px 28px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
+  .btn-primary { background: var(--accent); color: #fff; font-weight: 700; }
+  .btn-primary:hover { text-decoration: none; }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text-muted); }
+  .btn-ghost:hover { border-color: var(--accent); text-decoration: none; color: var(--text); }
+</style>

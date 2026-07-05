@@ -4,9 +4,12 @@ import '../styles/global.css';
 interface Props {
   title: string;
   description?: string;
+  schema?: Record<string, any>;
 }
 
-const { title, description = 'Distributed XRPL proxy network with edge caching. Free, fast, open API for the XRP Ledger.' } = Astro.props;
+const { title, description = 'Free XRP Ledger full history API. Global edge network with WebSocket and JSON-RPC. Mainnet, testnet, and devnet supported.', schema } = Astro.props;
+const canonicalUrl = `https://xrpl.stream${Astro.url.pathname.replace(/\/$/, '') || '/'}`;
+const ogImage = `https://xrpl.stream/api/og?path=${encodeURIComponent(Astro.url.pathname.replace(/\/$/, '') || '/')}`;
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -15,23 +18,52 @@ const { title, description = 'Distributed XRPL proxy network with edge caching. 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content={description} />
   <meta name="robots" content="index, follow" />
-  <link rel="canonical" href={`https://xrplmesh.com${Astro.url.pathname}`} />
+  <meta name="keywords" content="XRPL, XRP Ledger, API, WebSocket, JSON-RPC, full history, node provider, testnet, devnet, blockchain infrastructure" />
+  <link rel="canonical" href={canonicalUrl} />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="/favicon.ico" sizes="32x32" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
-  <meta property="og:url" content={`https://xrplmesh.com${Astro.url.pathname}`} />
-  <meta property="og:site_name" content="XRPL Mesh" />
+  <meta property="og:url" content={canonicalUrl} />
+  <meta property="og:site_name" content="XRPL Stream" />
+  <meta property="og:image" content={ogImage} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="XRPL Stream - Full History XRP Ledger API" />
 
   <!-- Twitter -->
-  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={title} />
   <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={ogImage} />
 
   <title>{title}</title>
+
+  <!-- Structured Data -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "XRPL Stream",
+    "url": "https://xrpl.stream",
+    "logo": ogImage,
+    "description": "Full history XRP Ledger API with global edge network infrastructure.",
+    "sameAs": []
+  })} />
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "XRPL Stream",
+    "url": "https://xrpl.stream",
+    "description": description
+  })} />
+  {schema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}
 </head>
 <body>
-  <slot />
+  <main>
+    <slot />
+  </main>
 </body>
 </html>

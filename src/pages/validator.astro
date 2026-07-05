@@ -1,0 +1,321 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { Shield, Server, Clock, Users, Vote, Globe, Wrench, HeartPulse, ArrowRight } from 'lucide-astro';
+---
+
+<Base title="XRPL Validator as a Service - Managed XRP Ledger Validator | XRPL Stream" description="Run a managed XRP Ledger validator without the operational burden. Participate in consensus, vote on amendments, and strengthen the network with enterprise-grade infrastructure." schema={{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "XRPL Validator as a Service",
+  "provider": { "@type": "Organization", "name": "XRPL Stream" },
+  "description": "Managed XRP Ledger validator service. Participate in XRPL consensus, vote on amendments, and secure the network without operational overhead.",
+  "url": "https://xrpl.stream/validator"
+}}>
+  <Header />
+
+  <section class="hero">
+    <div class="container">
+      <span class="hero-badge">Coming Soon</span>
+      <h1>Managed XRP Ledger<br/><span class="accent">Validator as a Service</span></h1>
+      <p class="hero-sub">Participate in XRPL consensus, vote on network amendments, submit transactions, and query live data directly from your own node. We handle the infrastructure.</p>
+      <p class="hero-note">Looking for a non-validating node or full history node? <a href="mailto:hello@xrpl.to">Contact us</a> for other configurations.</p>
+      <div class="hero-actions">
+        <a href="mailto:hello@xrpl.to" class="btn btn-primary">Get in Touch</a>
+        <a href="/docs" class="btn btn-ghost">Learn More</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+
+    <!-- Why run a validator -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-tag">Why It Matters</span>
+        <h2>Why Run an XRP Ledger Validator?</h2>
+        <p class="section-desc">XRPL validators do more than secure consensus. They give you direct access to live ledger data, a vote in protocol governance, and a trusted presence in the ecosystem.</p>
+      </div>
+      <div class="grid-4">
+        <div class="card">
+          <Server size={22} />
+          <h3>Live Data Access</h3>
+          <p>Query accounts, submit transactions, and fetch live ledger data directly from your own validator. No third-party dependencies.</p>
+        </div>
+        <div class="card">
+          <Vote size={22} />
+          <h3>Vote on Amendments</h3>
+          <p>Have a direct say in protocol upgrades. Your validator votes on proposed changes to the XRP Ledger.</p>
+        </div>
+        <div class="card">
+          <Shield size={22} />
+          <h3>Secure the Network</h3>
+          <p>Participate in consensus and validate transactions. Every trusted validator strengthens XRPL decentralization.</p>
+        </div>
+        <div class="card">
+          <Users size={22} />
+          <h3>Build Trust</h3>
+          <p>Become a recognized entity in the ecosystem. Reliable validators earn a place on Unique Node Lists (UNLs) over time.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- The problem -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-tag">The Challenge</span>
+        <h2>Running a Validator Is Not Trivial</h2>
+      </div>
+      <div class="grid-3">
+        <div class="card card-muted">
+          <span class="card-stat">24/7</span>
+          <h3>Always-On Requirement</h3>
+          <p>Validators must maintain near-perfect uptime. Downtime erodes trust and can result in removal from UNLs.</p>
+        </div>
+        <div class="card card-muted">
+          <span class="card-stat">rippled</span>
+          <h3>Complex Operations</h3>
+          <p>Managing rippled upgrades, key rotation, UNL migration, peering configuration, and database tuning requires deep XRPL expertise.</p>
+        </div>
+        <div class="card card-muted">
+          <span class="card-stat">0 margin</span>
+          <h3>No Room for Error</h3>
+          <p>A misconfigured validator can fork from consensus or get amendment-blocked. Recovery requires immediate, expert intervention.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- What you get -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-tag">What You Get</span>
+        <h2>We Handle Everything</h2>
+        <p class="section-desc">From hardware to upgrades, monitoring to key management. Your validator runs reliably while you focus on what matters.</p>
+      </div>
+      <div class="grid-2">
+        <div class="feature-row">
+          <div class="feature-icon"><Server size={20} /></div>
+          <div>
+            <h3>Dedicated Infrastructure</h3>
+            <p>Your validator runs on isolated, high-performance hardware in enterprise-grade data centers across multiple regions.</p>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon"><HeartPulse size={20} /></div>
+          <div>
+            <h3>24/7 Monitoring and Alerting</h3>
+            <p>Continuous health checks, ledger sync monitoring, and automated alerting. We detect and resolve issues before they affect consensus.</p>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon"><Wrench size={20} /></div>
+          <div>
+            <h3>Managed Upgrades</h3>
+            <p>We handle rippled version upgrades, UNL migrations, and amendment tracking. Your validator stays current without your team lifting a finger.</p>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon"><Shield size={20} /></div>
+          <div>
+            <h3>Secure Key Management</h3>
+            <p>Validator keys generated and stored securely. Token rotation handled on schedule. Your signing keys never touch an insecure environment.</p>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon"><Globe size={20} /></div>
+          <div>
+            <h3>Optimal Peering</h3>
+            <p>Pre-configured peering with well-connected XRPL nodes for fast consensus propagation and minimal validation latency.</p>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon"><Clock size={20} /></div>
+          <div>
+            <h3>Uptime SLA</h3>
+            <p>We target 99.9%+ uptime with failover procedures in place. Your validator's reputation is our priority.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Who is this for -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-tag">Who Is This For</span>
+        <h2>Built for Teams That Care About the XRPL</h2>
+      </div>
+      <div class="grid-3">
+        <div class="card">
+          <h3>Exchanges</h3>
+          <p>Demonstrate commitment to the XRP Ledger. Validate transactions your platform processes and participate in governance.</p>
+        </div>
+        <div class="card">
+          <h3>Custodians</h3>
+          <p>Run a trusted validator on behalf of your clients. Strengthen your compliance posture and network presence.</p>
+        </div>
+        <div class="card">
+          <h3>XRPL Projects</h3>
+          <p>If you build on the XRP Ledger, running a validator aligns your interests with the network's health and future.</p>
+        </div>
+        <div class="card">
+          <h3>Financial Institutions</h3>
+          <p>Participate in XRPL governance at the protocol level. Vote on amendments that affect cross-border payments and tokenization.</p>
+        </div>
+        <div class="card">
+          <h3>Foundations</h3>
+          <p>Support XRPL decentralization as part of your mission. A managed validator removes the operational burden.</p>
+        </div>
+        <div class="card">
+          <h3>Corporate Treasuries</h3>
+          <p>Organizations holding XRP can strengthen the network they depend on without building an infrastructure team.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Infrastructure stats -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-tag">Infrastructure</span>
+        <h2>Backed by XRPL-Native Expertise</h2>
+      </div>
+      <div class="grid-4">
+        <div class="stat-card">
+          <span class="stat-val">99.9%+</span>
+          <span class="stat-label">Target Uptime</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-val">24/7</span>
+          <span class="stat-label">Monitoring</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-val">3</span>
+          <span class="stat-label">Continents</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-val">100%</span>
+          <span class="stat-label">Ledger History</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section">
+      <div class="section-header">
+        <h2>Frequently Asked Questions</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>Do XRPL validators earn staking rewards?</summary>
+          <p>No. The XRP Ledger uses a consensus protocol, not proof-of-stake. Validators don't earn block rewards or staking yields. The value of running a validator is governance participation, network influence, and trust within the ecosystem.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What is a Unique Node List (UNL)?</summary>
+          <p>A UNL is a list of validators that an XRPL server trusts for consensus. Being included in a widely-used UNL means your validator directly influences which transactions are confirmed. Earning a UNL spot requires consistent uptime and reliability over time.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Do I need technical expertise to run a managed validator?</summary>
+          <p>No. We handle all technical operations including setup, configuration, upgrades, monitoring, and key management. You retain control over governance decisions like amendment voting.</p>
+        </details>
+        <details class="faq-item">
+          <summary>How much does it cost?</summary>
+          <p>Pricing depends on your requirements including redundancy, region, and support level. Contact us for a tailored quote.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I vote on XRPL amendments with a managed validator?</summary>
+          <p>Yes. You retain full control over amendment voting. We execute the configuration changes on your behalf based on your decisions.</p>
+        </details>
+        <details class="faq-item">
+          <summary>How long does it take to get on a UNL?</summary>
+          <p>UNL inclusion is not guaranteed and depends on the validator's track record. Typically, it requires months of consistent, reliable operation. We optimize your validator's configuration and uptime to give you the best chance.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <h2>Ready to run your own XRPL validator?</h2>
+      <p>We handle the infrastructure. You shape the network.</p>
+      <div class="hero-actions">
+        <a href="mailto:hello@xrpl.to" class="btn btn-primary">Contact Us</a>
+        <a href="/docs" class="btn btn-ghost">Read the Docs <ArrowRight size={14} /></a>
+      </div>
+    </section>
+
+    <Footer />
+  </div>
+</Base>
+
+<style>
+  .accent { color: var(--accent); text-shadow: 0 0 40px rgba(88,166,255,0.2); }
+  .container { max-width: 1400px; margin: 0 auto; padding: 0 40px; }
+
+  .hero { text-align: center; padding: 100px 40px 80px; }
+  .hero-badge { display: inline-block; font-size: 0.68rem; font-weight: 600; color: #d29922; border: 1px solid rgba(210,153,34,0.25); background: rgba(210,153,34,0.08); border-radius: 20px; padding: 5px 16px; margin-bottom: 20px; letter-spacing: 0.08em; text-transform: uppercase; }
+  h1 { font-size: 3.2rem; font-weight: 800; line-height: 1.15; margin-bottom: 20px; letter-spacing: -0.02em; }
+  .hero-sub { color: var(--text-muted); font-size: 1.05rem; line-height: 1.7; max-width: 580px; margin: 0 auto 16px; }
+  .hero-note { font-size: 0.82rem; color: var(--text-muted); margin: 0 auto 32px; }
+  .hero-note a { color: var(--accent); }
+  .hero-actions { display: flex; gap: 12px; justify-content: center; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 12px 28px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; cursor: pointer; }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: #79c0ff; text-decoration: none; }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text-muted); background: transparent; }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--text); text-decoration: none; }
+
+  .section { margin-bottom: 80px; }
+  .section-header { text-align: center; margin-bottom: 36px; }
+  .section-tag { display: inline-block; font-size: 0.65rem; font-weight: 600; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; }
+  .section h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 10px; }
+  .section-desc { color: var(--text-muted); font-size: 0.95rem; max-width: 600px; margin: 0 auto; line-height: 1.6; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 28px; transition: border-color 0.2s; }
+  .card:hover { border-color: rgba(88,166,255,0.2); }
+  .card :global(svg) { color: var(--accent); margin-bottom: 12px; }
+  .card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; }
+  .card p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.55; }
+  .card-muted { border-color: rgba(248,81,73,0.15); }
+  .card-stat { display: block; font-family: var(--mono); font-size: 1.3rem; font-weight: 800; color: #f85149; margin-bottom: 12px; }
+
+  .feature-row { display: flex; gap: 16px; align-items: flex-start; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; transition: border-color 0.2s; }
+  .feature-row:hover { border-color: rgba(88,166,255,0.2); }
+  .feature-icon { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); border-radius: 10px; color: var(--accent); flex-shrink: 0; }
+  .feature-row h3 { font-size: 0.92rem; font-weight: 600; margin-bottom: 6px; }
+  .feature-row p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.55; }
+
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 28px; text-align: center; }
+  .stat-val { display: block; font-size: 2rem; font-weight: 800; color: var(--accent); font-family: var(--mono); }
+  .stat-label { display: block; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 6px; }
+
+  .faq-list { max-width: 800px; margin: 0 auto; }
+  .faq-item { border-bottom: 1px solid var(--border); }
+  .faq-item summary { padding: 16px 0; font-size: 0.92rem; font-weight: 600; cursor: pointer; color: var(--text); list-style: none; display: flex; justify-content: space-between; align-items: center; }
+  .faq-item summary::after { content: '+'; font-size: 1.2rem; color: var(--text-muted); }
+  .faq-item[open] summary::after { content: '-'; }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item p { padding: 0 0 16px; color: var(--text-muted); font-size: 0.88rem; line-height: 1.65; }
+
+  .cta-section { text-align: center; padding: 64px 0; margin-bottom: 40px; border-top: 1px solid var(--border); }
+  .cta-section h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 10px; }
+  .cta-section p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 28px; }
+
+  @media (max-width: 768px) {
+    .hero { padding: 60px 20px 48px; }
+    h1 { font-size: 2rem; }
+    .section h2 { font-size: 1.3rem; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+    .container { padding: 0 16px; }
+  }
+  @media (max-width: 480px) {
+    .container { padding: 0 12px; }
+    h1 { font-size: 1.7rem; }
+    .hero-actions { flex-direction: column; align-items: center; width: 100%; }
+    .hero-actions .btn { width: 100%; text-align: center; justify-content: center; }
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+  }
+</style>

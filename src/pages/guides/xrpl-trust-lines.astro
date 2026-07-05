@@ -1,0 +1,102 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+---
+
+<Base title="XRPL Trust Lines Explained - How Tokens Work on the XRP Ledger | XRPL Stream" description="Complete guide to XRPL trust lines. How tokens are issued, how trust lines work, setting limits, freezing, authorized lines, and querying via API.">
+  <Header />
+  <article class="post">
+    <div class="post-header">
+      <a href="/guides" class="back-link">Back to Guides</a>
+      <div class="post-meta">
+        <span class="post-tag">Tokens</span>
+        <span class="post-tag">Trust Lines</span>
+        <time>April 13, 2026</time>
+      </div>
+      <h1>XRPL Trust Lines Explained</h1>
+      <p class="post-lead">Trust lines are the foundation of the XRPL token system. Every token on the XRP Ledger -- stablecoins, meme coins, wrapped assets -- depends on trust lines. Here is how they work and how to use them.</p>
+    </div>
+    <div class="post-body">
+      <h2>What is a trust line</h2>
+      <p>A trust line is an explicit opt-in relationship between an XRPL account and a token issuer. Before you can hold any token on the XRP Ledger (other than XRP itself), you must create a trust line to the issuer of that token. This is fundamentally different from Ethereum where any ERC-20 token can be sent to your address without consent.</p>
+      <p>Think of it like this: on Ethereum, anyone can airdrop random tokens to your wallet. On the XRPL, you choose which tokens you are willing to hold by creating trust lines. This prevents spam tokens and gives users control over their account.</p>
+
+      <h2>How trust lines work</h2>
+      <p>A trust line has three key properties:</p>
+      <ul>
+        <li><strong>Currency code:</strong> The token identifier (e.g., USD, EUR, SOLO, CSC). Can be a 3-character code or a 40-character hex string for longer names.</li>
+        <li><strong>Issuer:</strong> The XRPL account address that issues the token. The same currency code from different issuers are different tokens.</li>
+        <li><strong>Limit:</strong> The maximum amount of this token you are willing to hold. Can be set to any value. Setting a limit creates the trust line.</li>
+      </ul>
+      <p>When you create a trust line, you are telling the network "I trust this issuer for this currency up to this limit." The issuer can then send you tokens or you can receive them through DEX trades and payments.</p>
+
+      <h2>Creating a trust line</h2>
+      <p>To create a trust line, you submit a TrustSet transaction specifying the currency, issuer, and limit. This costs the standard transaction fee (about 0.00001 XRP) plus a 0.2 XRP reserve increase on your account. The reserve is not a fee -- it is held in your account and released when you remove the trust line.</p>
+      <p>Most XRPL wallets (Xaman, Crossmark, GemWallet) have built-in trust line management. You can also create trust lines programmatically using xrpl.js, xrpl-py, or any XRPL client library.</p>
+
+      <h2>Issuer controls</h2>
+      <p>Token issuers on the XRPL have powerful control over their tokens through trust line features:</p>
+      <ul>
+        <li><strong>Authorized trust lines:</strong> Require explicit approval before anyone can hold your token. Used for securities, regulated assets, and KYC-gated tokens.</li>
+        <li><strong>Global freeze:</strong> Freeze all trust lines for a token simultaneously. Used for emergency compliance actions.</li>
+        <li><strong>Individual freeze:</strong> Freeze a specific account's trust line. Used for targeted enforcement.</li>
+        <li><strong>Clawback:</strong> Recover tokens from a holder's account. Required by some regulatory frameworks.</li>
+        <li><strong>Transfer fee:</strong> Charge a percentage on every transfer of your token between third parties.</li>
+        <li><strong>No Ripple flag:</strong> Controls whether your token can be used in cross-currency payment paths.</li>
+      </ul>
+
+      <h2>Trust line reserves</h2>
+      <p>Each trust line increases your account's reserve requirement by 0.2 XRP. If you have 10 trust lines, that is 2 XRP reserved (plus the 1 XRP base reserve = 3 XRP total). The reserve prevents ledger bloat by making it costly to create millions of empty trust lines.</p>
+      <p>You can recover the reserve by removing trust lines you no longer need. To remove a trust line, set its limit to 0 and ensure the balance is also 0 (sell or send any remaining tokens first).</p>
+
+      <h2>Querying trust lines via API</h2>
+      <p>XRPL Stream provides several API methods for working with trust lines:</p>
+      <ul>
+        <li><strong>account_lines:</strong> List all trust lines for an account, including balances and limits</li>
+        <li><strong>account_currencies:</strong> List which currencies an account can send and receive</li>
+        <li><strong>account_info:</strong> Check the account's owner count (which determines total reserve)</li>
+        <li><strong>gateway_balances:</strong> For issuers -- see total amounts outstanding across all holders</li>
+      </ul>
+      <p>Large issuers like GateHub (rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq) can have tens of thousands of trust lines. XRPL Stream handles paginated queries with full history, so you can enumerate all holders of any token at any point in time.</p>
+
+      <h2>Common use cases</h2>
+      <ul>
+        <li><strong>Stablecoins:</strong> USD, EUR, and other fiat-pegged tokens issued by regulated entities. Trust lines enable compliance controls.</li>
+        <li><strong>Community tokens:</strong> SOLO, CSC, CORE, and other XRPL community tokens. Users opt in by creating trust lines.</li>
+        <li><strong>Wrapped assets:</strong> BTC, ETH, and other assets bridged to the XRPL as issued tokens.</li>
+        <li><strong>Loyalty points:</strong> Businesses issue reward tokens that customers hold via trust lines.</li>
+      </ul>
+
+      <div class="post-cta">
+        <a href="/login" class="btn btn-primary">Get API Access</a>
+        <a href="/guides/xrpl-api" class="btn btn-ghost">XRPL API Guide</a>
+      </div>
+    </div>
+  </article>
+  <Footer />
+</Base>
+
+<style>
+  .post { max-width: 1400px; margin: 0 auto; padding: 48px 40px 64px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 24px; transition: color 0.2s; }
+  .back-link:hover { color: var(--accent); text-decoration: none; }
+  .post-header { margin-bottom: 40px; }
+  .post-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .post-tag { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); padding: 3px 10px; border-radius: 6px; }
+  time { font-size: 0.8rem; color: var(--text-dim); }
+  h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; }
+  .post-lead { font-size: 1.1rem; color: var(--text-muted); line-height: 1.7; }
+  .post-body h2 { font-size: 1.25rem; font-weight: 700; margin: 40px 0 12px; color: var(--text); }
+  .post-body p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 16px; }
+  .post-body a { color: var(--accent); }
+  .post-body ul { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin: 0 0 16px 20px; }
+  .post-body li { margin-bottom: 8px; }
+  .post-body li strong { color: var(--text); }
+  .post-cta { display: flex; gap: 12px; margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
+  .btn { display: inline-block; padding: 11px 28px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
+  .btn-primary { background: var(--accent); color: #fff; font-weight: 700; }
+  .btn-primary:hover { text-decoration: none; }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text-muted); }
+  .btn-ghost:hover { border-color: var(--accent); text-decoration: none; color: var(--text); }
+</style>

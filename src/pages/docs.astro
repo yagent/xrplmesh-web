@@ -4,27 +4,40 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 ---
 
-<Base title="XRPL API Documentation -XRP Ledger Node Endpoint" description="How to connect to XRPL Mesh full history nodes. WebSocket, JSON-RPC, xrpl.js, Python examples. Free tier available.">
+<Base title="XRPL API Documentation - XRP Ledger Node Endpoint | XRPL Stream" description="Connect to XRPL Stream full history nodes. WebSocket, JSON-RPC, xrpl.js, and Python examples. Mainnet, testnet, and devnet. Free tier available." schema={{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "XRPL Stream API Documentation",
+  "description": "Complete guide to connecting to XRPL Stream full history XRP Ledger nodes via WebSocket, JSON-RPC, xrpl.js, and Python.",
+  "url": "https://xrpl.stream/docs",
+  "publisher": { "@type": "Organization", "name": "XRPL Stream" }
+}}>
   <Header />
 
   <div class="docs">
-    <h1>Documentation</h1>
+    <div class="docs-header">
+      <h1>XRPL Stream API Documentation</h1>
+      <a href="/openapi.json" download="openapi.json" class="openapi-btn">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 1v9m0 0L5 7m3 3l3-3M2 12v1a2 2 0 002 2h8a2 2 0 002-2v-1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        OpenAPI Spec
+      </a>
+    </div>
 
     <section id="quickstart">
       <h2>Quick Start</h2>
-      <p>XRPL Mesh is a drop-in replacement for any XRPL endpoint. Replace your URL and you're connected.</p>
+      <p>XRPL Stream is a drop-in replacement for any XRPL endpoint. Replace your URL and you're connected.</p>
 
       <h3>Your Endpoint</h3>
       <p>After signing in, you get a unique endpoint URL:</p>
       <div class="code">
         <div class="code-label">HTTP</div>
-        <pre>https://s1.xrplmesh.com/e/xm_live_your_token_here</pre>
+        <pre>https://s1.xrpl.stream/e/xm_live_your_token_here</pre>
       </div>
       <div class="code">
         <div class="code-label">WebSocket</div>
-        <pre>wss://s1.xrplmesh.com/e/xm_live_your_token_here</pre>
+        <pre>wss://s1.xrpl.stream/e/xm_live_your_token_here</pre>
       </div>
-      <p class="note">Sign in at <a href="/dashboard">xrplmesh.com/dashboard</a> to get your endpoint.</p>
+      <p class="note">Sign in at <a href="/dashboard">xrpl.stream/dashboard</a> to get your endpoint.</p>
     </section>
 
     <section id="http">
@@ -34,7 +47,7 @@ import Footer from '../components/Footer.astro';
       <h3>Using your endpoint URL (recommended)</h3>
       <div class="code">
         <div class="code-label">curl</div>
-        <pre>curl -X POST https://s1.xrplmesh.com/e/YOUR_TOKEN \
+        <pre>curl -X POST https://s1.xrpl.stream/e/YOUR_TOKEN \
   -H "Content-Type: application/json" \
   -d '{"{"}command":"account_info","account":"rN7n3...","ledger_index":"validated"{"}"}'</pre>
       </div>
@@ -42,7 +55,7 @@ import Footer from '../components/Footer.astro';
       <h3>Using X-API-Key header</h3>
       <div class="code">
         <div class="code-label">curl</div>
-        <pre>curl -X POST https://s1.xrplmesh.com/ \
+        <pre>curl -X POST https://s1.xrpl.stream/ \
   -H "Content-Type: application/json" \
   -H "X-API-Key: xm_live_your_token_here" \
   -d '{"{"}command":"server_info"{"}"}'</pre>
@@ -51,7 +64,7 @@ import Footer from '../components/Footer.astro';
       <h3>Without authentication (free tier, lower limits)</h3>
       <div class="code">
         <div class="code-label">curl</div>
-        <pre>curl -X POST https://s1.xrplmesh.com/ \
+        <pre>curl -X POST https://s1.xrpl.stream/ \
   -H "Content-Type: application/json" \
   -d '{"{"}command":"server_info"{"}"}'</pre>
       </div>
@@ -63,7 +76,7 @@ import Footer from '../components/Footer.astro';
 
       <div class="code">
         <div class="code-label">JavaScript</div>
-        <pre>const ws = new WebSocket('wss://s1.xrplmesh.com/e/YOUR_TOKEN');
+        <pre>const ws = new WebSocket('wss://s1.xrpl.stream/e/YOUR_TOKEN');
 
 ws.onopen = () => {'{'}
   ws.send(JSON.stringify({'{'}
@@ -84,7 +97,7 @@ ws.onmessage = (msg) => {'{'}
         <div class="code-label">JavaScript</div>
         <pre>import {'{'} Client {'}'} from 'xrpl';
 
-const client = new Client('wss://s1.xrplmesh.com/e/YOUR_TOKEN');
+const client = new Client('wss://s1.xrpl.stream/e/YOUR_TOKEN');
 await client.connect();
 
 const info = await client.request({'{'}
@@ -104,7 +117,7 @@ console.log(info.result.account_data);</pre>
         <pre>import requests
 
 resp = requests.post(
-    'https://s1.xrplmesh.com/e/YOUR_TOKEN',
+    'https://s1.xrpl.stream/e/YOUR_TOKEN',
     json={'{'}
         'method': 'account_info',
         'params': [{'{'}
@@ -164,25 +177,25 @@ print(resp.json()['result']['account_data'])</pre>
     <section id="features">
       <h2>What You Get</h2>
       <ul>
-        <li>Full XRPL ledger history since genesis on every plan</li>
-        <li>All XRPL WebSocket and JSON-RPC commands supported</li>
-        <li>Global edge network for low-latency coverage worldwide</li>
+        <li>Full history reads and transaction submission from one endpoint</li>
+        <li>Mainnet, testnet, and devnet supported</li>
+        <li>Global edge network for low-latency worldwide coverage</li>
         <li>WebSocket subscriptions (ledger, transactions, accounts, order books)</li>
-        <li>Automatic failover and load balancing</li>
-        <li>No archive add-ons required</li>
+        <li>Automatic failover, load balancing, and self-healing peer mesh</li>
+        <li>Free tier with no credit card required</li>
       </ul>
     </section>
 
     <section id="full-history">
-      <h2>Full History & Clio</h2>
-      <p>XRPL Mesh provides access to the complete XRP Ledger history -every transaction and ledger close since <a href="https://xrpl.org/docs/concepts/networks-and-servers/ledger-history" target="_blank" rel="noopener">ledger #32570</a> (the earliest available). Unlike most public endpoints that only keep recent history, XRPL Mesh serves validated data from genesis.</p>
-      <p>Our infrastructure leverages <a href="https://xrpl.org/blog/2022/introducing-clio" target="_blank" rel="noopener">Clio</a>, an XRP Ledger API server optimized for HTTP and WebSocket API calls. Clio stores validated ledger data in a space-efficient format, enabling significantly faster lookups for NFT data, account history, and ledger objects compared to the core <code>rippled</code> server. Learn more about the <a href="https://github.com/XRPLF/clio" target="_blank" rel="noopener">Clio project on GitHub</a>.</p>
-      <p>Queries that require the current open ledger state (like <code>fee</code>, <code>submit</code>, <code>ledger_current</code>) are automatically routed to <code>rippled</code> nodes, while historical and NFT queries are served by Clio for optimal performance. This hybrid routing is transparent -you use the same endpoint for everything.</p>
+      <h2>Full History & Transaction Submission</h2>
+      <p>XRPL Stream provides access to the complete XRP Ledger history -every transaction and ledger close since <a href="https://xrpl.org/docs/concepts/networks-and-servers/ledger-history" target="_blank" rel="noopener">ledger #32570</a> (the earliest available). Unlike most public endpoints that only keep recent history, XRPL Stream serves validated data from genesis.</p>
+      <p>The network includes both full history nodes and submission nodes. Historical queries, NFT lookups, and account data are served from optimized read infrastructure, while transaction submissions and live ledger commands are routed to nodes connected directly to the XRP Ledger peer network.</p>
+      <p>Routing is automatic and transparent -you use the same endpoint for everything. No configuration needed.</p>
     </section>
 
     <section id="supported-commands">
       <h2>Supported Commands</h2>
-      <p>XRPL Mesh supports every public XRPL API command. For the complete reference, see the <a href="https://xrpl.org/docs/references/http-websocket-apis/public-api-methods" target="_blank" rel="noopener">official XRPL API documentation</a>.</p>
+      <p>XRPL Stream supports every public XRPL API command. For the complete reference, see the <a href="https://xrpl.org/docs/references/http-websocket-apis/public-api-methods" target="_blank" rel="noopener">official XRPL API documentation</a>.</p>
 
       <h3>Account Methods</h3>
       <p><code>account_info</code> <code>account_lines</code> <code>account_channels</code> <code>account_currencies</code> <code>account_nfts</code> <code>account_objects</code> <code>account_offers</code> <code>account_tx</code> <code>gateway_balances</code> <code>noripple_check</code></p>
@@ -219,14 +232,102 @@ print(resp.json()['result']['account_data'])</pre>
 
     <section id="networks">
       <h2>Networks</h2>
-      <p>XRPL Mesh supports the XRP Ledger mainnet. Testnet and devnet support is coming soon.</p>
+      <p>XRPL Stream supports mainnet, testnet, and devnet. Add <code>/testnet</code> or <code>/devnet</code> to any endpoint path to switch networks. All features (caching, rate limiting, WebSocket subscriptions) work identically across networks.</p>
       <div class="table-wrap">
         <table>
-          <tr><th>Network</th><th>Endpoint</th><th>Status</th></tr>
-          <tr><td>Mainnet</td><td><code>https://s1.xrplmesh.com</code></td><td>Live</td></tr>
-          <tr><td>Testnet</td><td><code>https://testnet.xrplmesh.com</code></td><td>Coming soon</td></tr>
-          <tr><td>Devnet</td><td><code>https://devnet.xrplmesh.com</code></td><td>Coming soon</td></tr>
+          <tr><th>Network</th><th>HTTP Endpoint</th><th>WebSocket</th><th>Status</th></tr>
+          <tr><td>Mainnet</td><td><code>https://s1.xrpl.stream/</code></td><td><code>wss://s1.xrpl.stream/</code></td><td>Live</td></tr>
+          <tr><td>Testnet</td><td><code>https://s1.xrpl.stream/testnet</code></td><td><code>wss://s1.xrpl.stream/testnet</code></td><td>Live</td></tr>
+          <tr><td>Devnet</td><td><code>https://s1.xrpl.stream/devnet</code></td><td><code>wss://s1.xrpl.stream/devnet</code></td><td>Live</td></tr>
         </table>
+      </div>
+
+      <h3>HTTP JSON-RPC</h3>
+      <div class="code">
+        <div class="code-label">Testnet</div>
+        <pre>curl -X POST https://s1.xrpl.stream/testnet \
+  -H "Content-Type: application/json" \
+  -d '{"{"}command":"server_info"{"}"}'</pre>
+      </div>
+      <div class="code">
+        <div class="code-label">Devnet</div>
+        <pre>curl -X POST https://s1.xrpl.stream/devnet \
+  -H "Content-Type: application/json" \
+  -d '{"{"}command":"server_info"{"}"}'</pre>
+      </div>
+
+      <h3>With Authentication</h3>
+      <p>Works with endpoint tokens, API key headers, and query params:</p>
+      <div class="code">
+        <div class="code-label">Endpoint token</div>
+        <pre>curl -X POST https://s1.xrpl.stream/e/YOUR_TOKEN/testnet \
+  -H "Content-Type: application/json" \
+  -d '{"{"}command":"account_info","account":"rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe","ledger_index":"validated"{"}"}'</pre>
+      </div>
+      <div class="code">
+        <div class="code-label">X-API-Key header</div>
+        <pre>curl -X POST https://s1.xrpl.stream/testnet \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: xm_live_your_token_here" \
+  -d '{"{"}command":"server_info"{"}"}'</pre>
+      </div>
+
+      <h3>WebSocket</h3>
+      <div class="code">
+        <div class="code-label">JavaScript</div>
+        <pre>const ws = new WebSocket('wss://s1.xrpl.stream/testnet');
+
+ws.onopen = () => {'{'}
+  ws.send(JSON.stringify({'{'}
+    command: 'subscribe',
+    streams: ['ledger']
+  {'}'}));
+{'}'};
+
+ws.onmessage = (msg) => {'{'}
+  console.log(JSON.parse(msg.data));
+{'}'};</pre>
+      </div>
+
+      <h3>xrpl.js</h3>
+      <div class="code">
+        <div class="code-label">JavaScript</div>
+        <pre>import {'{'} Client {'}'} from 'xrpl';
+
+// Testnet
+const client = new Client('wss://s1.xrpl.stream/testnet');
+await client.connect();
+
+// Devnet
+const devClient = new Client('wss://s1.xrpl.stream/devnet');
+await devClient.connect();</pre>
+      </div>
+
+      <h3>Python</h3>
+      <div class="code">
+        <div class="code-label">Python</div>
+        <pre>import requests
+
+# Testnet
+resp = requests.post(
+    'https://s1.xrpl.stream/testnet',
+    json={'{'}
+        'method': 'server_info',
+        'params': [{'{'}{'}'}]
+    {'}'}
+)
+print(resp.json()['result']['info']['network_id'])  # 1</pre>
+      </div>
+
+      <h3>GET API</h3>
+      <p>The REST-style GET API also supports network prefixes:</p>
+      <div class="code">
+        <div class="code-label">curl</div>
+        <pre># Testnet transaction lookup
+curl https://s1.xrpl.stream/v1/testnet/tx/YOUR_TX_HASH
+
+# Devnet ledger
+curl https://s1.xrpl.stream/v1/devnet/ledger/validated</pre>
       </div>
     </section>
 
@@ -246,6 +347,10 @@ print(resp.json()['result']['account_data'])</pre>
 </Base>
 
 <style>
+  .docs-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 40px; }
+  .docs-header h1 { margin-bottom: 0; }
+  .openapi-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); text-decoration: none; transition: all 0.15s; white-space: nowrap; }
+  .openapi-btn:hover { background: var(--surface); color: var(--accent); border-color: var(--accent); }
   .docs { max-width: 1400px; margin: 0 auto; padding: 48px 40px; }
   h1 { font-size: 2rem; font-weight: 800; margin-bottom: 40px; }
   h2 { font-size: 1.2rem; font-weight: 700; margin-top: 48px; margin-bottom: 12px; padding-top: 24px; border-top: 1px solid var(--border); }

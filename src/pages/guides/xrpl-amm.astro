@@ -1,0 +1,100 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+---
+
+<Base title="XRPL AMM Guide - Automated Market Maker Pools on XRP Ledger | XRPL Stream" description="Complete guide to XRPL AMM pools. How automated market makers work on the XRP Ledger, providing liquidity, LP tokens, fees, and querying via API.">
+  <Header />
+  <article class="post">
+    <div class="post-header">
+      <a href="/guides" class="back-link">Back to Guides</a>
+      <div class="post-meta">
+        <span class="post-tag">AMM</span>
+        <span class="post-tag">DeFi</span>
+        <time>April 13, 2026</time>
+      </div>
+      <h1>XRPL AMM Guide</h1>
+      <p class="post-lead">The XRP Ledger has native Automated Market Maker pools built directly into the protocol. No smart contracts, no third-party risk. Here is how they work and how to interact with them.</p>
+    </div>
+    <div class="post-body">
+      <h2>What is the XRPL AMM</h2>
+      <p>An Automated Market Maker (AMM) is a liquidity pool that allows token swaps without a traditional order book. Instead of matching buyers with sellers, an AMM uses a mathematical formula to price trades based on the ratio of two assets in a pool. The XRPL AMM was activated through the AMM amendment and runs at the protocol level alongside the existing order book DEX.</p>
+      <p>This means the XRPL has both an order book DEX and AMM pools operating simultaneously. When you make a trade, the protocol automatically finds the best price across both the order book and AMM pools.</p>
+
+      <h2>How it works</h2>
+      <p>The XRPL AMM uses a constant product formula (similar to Uniswap v2). Each pool holds two assets and prices them according to the formula: x * y = k, where x and y are the quantities of each asset and k is a constant.</p>
+      <ul>
+        <li><strong>Liquidity providers</strong> deposit equal value of two assets into a pool and receive LP (Liquidity Provider) tokens representing their share</li>
+        <li><strong>Traders</strong> swap one asset for another, paying a fee that goes to liquidity providers</li>
+        <li><strong>The protocol</strong> automatically adjusts prices based on supply and demand within the pool</li>
+      </ul>
+
+      <h2>Providing liquidity</h2>
+      <p>Anyone can provide liquidity to an XRPL AMM pool by depositing tokens. In return, you receive LP tokens that represent your proportional share of the pool. As trades occur, fees accumulate in the pool, increasing the value of your LP tokens over time.</p>
+      <p>To provide liquidity, you need:</p>
+      <ul>
+        <li>Equal value of both assets in the pool pair</li>
+        <li>Trust lines to both token issuers (if not XRP)</li>
+        <li>A standard XRPL transaction fee (about 0.00001 XRP)</li>
+      </ul>
+      <p>You can withdraw your liquidity at any time by redeeming your LP tokens for the underlying assets.</p>
+
+      <h2>Trading fees</h2>
+      <p>XRPL AMM pools charge a trading fee on each swap. The fee is set by a governance mechanism where LP token holders can vote on the fee percentage. Fees are distributed proportionally to all liquidity providers based on their share of the pool.</p>
+      <p>The fee structure incentivizes liquidity provision -- the more trading volume a pool has, the more fees it generates for providers.</p>
+
+      <h2>AMM vs order book</h2>
+      <p>The XRPL is unique in having both systems running natively:</p>
+      <ul>
+        <li><strong>Order book DEX:</strong> Better for large trades (less slippage), professional trading, and precise limit orders</li>
+        <li><strong>AMM pools:</strong> Better for long-tail token pairs with less liquidity, passive income for LPs, and guaranteed execution</li>
+        <li><strong>Combined:</strong> The protocol routes trades through whichever gives the better price, maximizing efficiency</li>
+      </ul>
+
+      <h2>Impermanent loss</h2>
+      <p>Like all AMMs, XRPL pools carry impermanent loss risk. If one asset's price changes significantly relative to the other, liquidity providers may end up with less value than if they had simply held both assets. Trading fees can offset this loss, but it is an important risk to understand before providing liquidity.</p>
+
+      <h2>Querying AMM data via API</h2>
+      <p>XRPL Stream provides full API access to AMM pool data:</p>
+      <ul>
+        <li><strong>amm_info:</strong> Query any AMM pool's current state including reserves, LP token supply, and trading fee</li>
+        <li><strong>account_lines:</strong> Check LP token balances for any account</li>
+        <li><strong>book_offers:</strong> See order book liquidity alongside AMM pricing</li>
+        <li><strong>subscribe:</strong> Stream real-time AMM trades and liquidity changes via WebSocket</li>
+        <li><strong>account_tx:</strong> Full history of AMM deposits, withdrawals, and swaps</li>
+      </ul>
+      <p>All AMM data is available from the moment the pools were first created, through XRPL Stream's full history access.</p>
+
+      <div class="post-cta">
+        <a href="/login" class="btn btn-primary">Get API Access</a>
+        <a href="/guides/xrpl-api" class="btn btn-ghost">XRPL API Guide</a>
+      </div>
+    </div>
+  </article>
+  <Footer />
+</Base>
+
+<style>
+  .post { max-width: 1400px; margin: 0 auto; padding: 48px 40px 64px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 24px; transition: color 0.2s; }
+  .back-link:hover { color: var(--accent); text-decoration: none; }
+  .post-header { margin-bottom: 40px; }
+  .post-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .post-tag { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); padding: 3px 10px; border-radius: 6px; }
+  time { font-size: 0.8rem; color: var(--text-dim); }
+  h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; }
+  .post-lead { font-size: 1.1rem; color: var(--text-muted); line-height: 1.7; }
+  .post-body h2 { font-size: 1.25rem; font-weight: 700; margin: 40px 0 12px; color: var(--text); }
+  .post-body p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 16px; }
+  .post-body a { color: var(--accent); }
+  .post-body ul { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin: 0 0 16px 20px; }
+  .post-body li { margin-bottom: 8px; }
+  .post-body li strong { color: var(--text); }
+  .post-cta { display: flex; gap: 12px; margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
+  .btn { display: inline-block; padding: 11px 28px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
+  .btn-primary { background: var(--accent); color: #fff; font-weight: 700; }
+  .btn-primary:hover { text-decoration: none; }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text-muted); }
+  .btn-ghost:hover { border-color: var(--accent); text-decoration: none; color: var(--text); }
+</style>

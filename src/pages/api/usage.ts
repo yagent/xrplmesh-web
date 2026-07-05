@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getSessionFromCookie } from '../../lib/auth';
 
-const API_URL = import.meta.env.API_URL || 'https://s1.xrplmesh.com';
+const API_URL = import.meta.env.API_URL || 'https://s1.xrpl.stream';
 const ADMIN_TOKEN = import.meta.env.ADMIN_TOKEN || '';
 
 export const GET: APIRoute = async ({ request }) => {

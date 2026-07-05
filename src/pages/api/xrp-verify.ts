@@ -1,11 +1,11 @@
 import type { APIRoute } from 'astro';
 import * as xrpl from 'xrpl';
 import { getSessionFromCookie } from '../../lib/auth';
-import { pendingPayments } from './xrp-checkout';
+import { pendingPayments, savePending } from './xrp-checkout';
 
 const XRP_ADDRESS = import.meta.env.XRP_RECEIVE_ADDRESS || '';
 const XRP_NODE_URL = import.meta.env.XRP_NODE_URL || 'wss://s.altnet.rippletest.net:51233';
-const API_URL = import.meta.env.API_URL || 'https://s1.xrplmesh.com';
+const API_URL = import.meta.env.API_URL || 'https://s1.xrpl.stream';
 const ADMIN_TOKEN = import.meta.env.ADMIN_TOKEN || '';
 
 export const POST: APIRoute = async ({ request }) => {
@@ -84,8 +84,8 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Clean up pending payment
     pendingPayments.delete(destinationTag);
+    savePending(pendingPayments);
 
     const txHash = (match.tx_json || match.tx)?.hash || match.hash;
     return new Response(JSON.stringify({

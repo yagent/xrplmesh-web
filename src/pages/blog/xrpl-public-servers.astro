@@ -1,0 +1,113 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+---
+
+<Base title="XRPL Public Servers - Free XRP Ledger RPC Endpoints Compared | XRPL Stream" description="Compare all public XRPL servers and RPC endpoints. s1.ripple.com, s2.ripple.com, xrplcluster, xrpl.link, and XRPL Stream. Rate limits, features, and reliability.">
+  <Header />
+  <article class="post">
+    <div class="post-header">
+      <a href="/blog" class="back-link">Back to Blog</a>
+      <div class="post-meta">
+        <span class="post-tag">Infrastructure</span>
+        <span class="post-tag">RPC</span>
+        <time>April 13, 2026</time>
+      </div>
+      <h1>XRPL Public Servers Compared</h1>
+      <p class="post-lead">Every XRPL application needs a server to connect to. Here is a comparison of all public XRP Ledger endpoints -- their capabilities, rate limits, and when to use each one.</p>
+    </div>
+    <div class="post-body">
+      <h2>Available public servers</h2>
+      <p>Several organizations run public XRPL servers that developers can connect to for free. Each has different characteristics:</p>
+
+      <h2>s1.ripple.com and s2.ripple.com</h2>
+      <p><strong>Operated by:</strong> Ripple. <strong>Type:</strong> Clio (optimized read-only nodes).</p>
+      <p>These are the most commonly used public endpoints. They run Clio, a specialized XRPL server optimized for API queries. They have full ledger history and support all read methods. Rate limits are relatively strict -- suitable for development and low-volume production, but not for applications making hundreds of requests per second.</p>
+      <p><strong>Pros:</strong> Reliable, full history, operated by Ripple. <strong>Cons:</strong> Rate limited, shared with all developers globally, no SLA.</p>
+
+      <h2>xrplcluster.com</h2>
+      <p><strong>Operated by:</strong> XRPL Community. <strong>Type:</strong> rippled (full node).</p>
+      <p>A community-run cluster of rippled servers. It supports both read and write operations (transaction submission). Full history available. More generous rate limits than Ripple's servers. Used widely by community projects and tools.</p>
+      <p><strong>Pros:</strong> Full history, supports submit, community operated. <strong>Cons:</strong> No guaranteed uptime, shared resource.</p>
+
+      <h2>xrpl.link</h2>
+      <p><strong>Operated by:</strong> XRPL Community. <strong>Type:</strong> rippled.</p>
+      <p>Another community rippled endpoint with full history. Similar capabilities to xrplcluster.com. Provides an alternative connection point for redundancy.</p>
+
+      <h2>honeycluster.io</h2>
+      <p><strong>Operated by:</strong> Community. <strong>Type:</strong> Clio.</p>
+      <p>A Clio-based public server. Good for read queries with reasonable rate limits. Full history available.</p>
+
+      <h2>XRPL Stream (s1.xrpl.stream)</h2>
+      <p><strong>Operated by:</strong> XRPL Stream. <strong>Type:</strong> 21-node distributed edge network (rippled + Clio + Evernode relay layer).</p>
+      <p>Unlike single-server endpoints, XRPL Stream runs a distributed network of 21 nodes across 9 regions globally. Requests are routed to the nearest healthy node automatically. Features include:</p>
+      <ul>
+        <li><strong>Full history:</strong> Every transaction from ledger 32,570 (January 2013)</li>
+        <li><strong>Dedicated endpoints:</strong> Your own API key with guaranteed rate limits</li>
+        <li><strong>Global distribution:</strong> Sub-50ms latency from most locations</li>
+        <li><strong>All networks:</strong> Mainnet, testnet, and devnet on one endpoint</li>
+        <li><strong>WebSocket and JSON-RPC:</strong> Both protocols supported</li>
+        <li><strong>Free tier:</strong> 15 req/s, 1M monthly credits at no cost</li>
+      </ul>
+      <p><strong>Pros:</strong> Dedicated endpoints, global distribution, guaranteed rate limits, free tier. <strong>Cons:</strong> Higher tiers are paid (starting at $29/mo).</p>
+
+      <h2>Which server should you use</h2>
+      <ul>
+        <li><strong>Quick testing and prototyping:</strong> s1.ripple.com or s2.ripple.com -- easy, no signup needed</li>
+        <li><strong>Community projects:</strong> xrplcluster.com -- generous limits, supports submit</li>
+        <li><strong>Production applications:</strong> XRPL Stream -- dedicated endpoints, reliability guarantees, global distribution</li>
+        <li><strong>Redundancy:</strong> Use multiple endpoints as fallbacks. XRPL Stream handles this internally with 21 nodes.</li>
+      </ul>
+
+      <h2>Rate limits comparison</h2>
+      <p>Public shared servers do not publish official rate limits, but community testing shows approximate thresholds:</p>
+      <ul>
+        <li><strong>s1/s2.ripple.com:</strong> Approximately 25-30 concurrent requests before load warnings</li>
+        <li><strong>xrplcluster.com:</strong> Higher tolerance, approximately 80-100 req/s for short bursts</li>
+        <li><strong>honeycluster.io:</strong> Approximately 40-50 concurrent requests</li>
+        <li><strong>XRPL Stream (free):</strong> 15 req/s guaranteed, no shared contention</li>
+        <li><strong>XRPL Stream (pro):</strong> 150 req/s guaranteed</li>
+      </ul>
+
+      <h2>Connection examples</h2>
+      <p>All public servers accept the same XRPL protocol. You just change the URL:</p>
+      <ul>
+        <li><strong>Ripple:</strong> wss://s1.ripple.com or wss://s2.ripple.com</li>
+        <li><strong>Cluster:</strong> wss://xrplcluster.com</li>
+        <li><strong>XRPL Stream:</strong> wss://s1.xrpl.stream/e/YOUR_TOKEN</li>
+      </ul>
+      <p>Any XRPL client library (xrpl.js, xrpl-py, xrpl4j) works with all of these. Just swap the URL.</p>
+
+      <div class="post-cta">
+        <a href="/login" class="btn btn-primary">Get Free API Key</a>
+        <a href="/docs" class="btn btn-ghost">API Documentation</a>
+      </div>
+    </div>
+  </article>
+  <Footer />
+</Base>
+
+<style>
+  .post { max-width: 1400px; margin: 0 auto; padding: 48px 40px 64px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 24px; transition: color 0.2s; }
+  .back-link:hover { color: var(--accent); text-decoration: none; }
+  .post-header { margin-bottom: 40px; }
+  .post-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .post-tag { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); padding: 3px 10px; border-radius: 6px; }
+  time { font-size: 0.8rem; color: var(--text-dim); }
+  h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; }
+  .post-lead { font-size: 1.1rem; color: var(--text-muted); line-height: 1.7; }
+  .post-body h2 { font-size: 1.25rem; font-weight: 700; margin: 40px 0 12px; color: var(--text); }
+  .post-body p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 16px; }
+  .post-body a { color: var(--accent); }
+  .post-body ul { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin: 0 0 16px 20px; }
+  .post-body li { margin-bottom: 8px; }
+  .post-body li strong { color: var(--text); }
+  .post-cta { display: flex; gap: 12px; margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
+  .btn { display: inline-block; padding: 11px 28px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
+  .btn-primary { background: var(--accent); color: #fff; font-weight: 700; }
+  .btn-primary:hover { text-decoration: none; }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text-muted); }
+  .btn-ghost:hover { border-color: var(--accent); text-decoration: none; color: var(--text); }
+</style>

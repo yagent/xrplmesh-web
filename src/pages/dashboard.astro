@@ -14,7 +14,6 @@ let userKey: any = null;
 let usageData: Record<string, number> = {};
 
 try {
-  // Get user's keys
   const keysResp = await fetch(`${API_URL}/admin/keys`, {
     headers: { 'X-Proxy-Token': ADMIN_TOKEN },
     signal: AbortSignal.timeout(5000),
@@ -24,18 +23,21 @@ try {
     const owned = allKeys.filter((k: any) => k.owner === session.email && k.active);
     userKey = owned[0] || null;
   }
+} catch {}
 
-  // Auto-create free endpoint if user has none
-  if (!userKey) {
+if (!userKey) {
+  try {
     const createResp = await fetch(`${API_URL}/admin/keys`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Proxy-Token': ADMIN_TOKEN },
       body: JSON.stringify({ plan: 'free', owner: session.email, label: `${session.name}'s endpoint` }),
+      signal: AbortSignal.timeout(5000),
     });
     if (createResp.ok) userKey = await createResp.json();
-  }
+  } catch {}
+}
 
-  // Get usage
+try {
   const usageResp = await fetch(`${API_URL}/admin/usage`, {
     headers: { 'X-Proxy-Token': ADMIN_TOKEN },
     signal: AbortSignal.timeout(5000),
@@ -48,23 +50,24 @@ try {
 
 const plans: Record<string, { credits: string; rate: string; price: string; raw: number }> = {
   free: { credits: '10M', rate: '15 req/s', price: 'Free', raw: 10_000_000 },
-  builder: { credits: '100M', rate: '50 req/s', price: '$29/mo', raw: 100_000_000 },
-  pro: { credits: '500M', rate: '150 req/s', price: '$79/mo', raw: 500_000_000 },
-  scale: { credits: '2B', rate: '300 req/s', price: '$199/mo', raw: 2_000_000_000 },
-  enterprise: { credits: 'Unlimited', rate: '2000 req/s', price: 'Partner', raw: Infinity },
+  builder: { credits: '100M', rate: '50 req/s', price: '$39/mo', raw: 100_000_000 },
+  pro: { credits: '500M', rate: '125 req/s', price: '$149/mo', raw: 500_000_000 },
+  scale: { credits: '2B', rate: '250 req/s', price: '$299/mo', raw: 2_000_000_000 },
+  enterprise: { credits: '5B', rate: '500 req/s', price: '$699/mo', raw: 5_000_000_000 },
+  internal: { credits: 'Unlimited', rate: 'Unlimited', price: 'Admin', raw: Infinity },
 };
 
 const key = userKey?.key || '';
 const planKey = userKey?.plan || 'free';
 const plan = plans[planKey] || plans.free;
 const credits = usageData[session.email] || 0;
-const creditsFormatted = credits > 1000000 ? (credits / 1000000).toFixed(1) + 'M' : credits > 1000 ? (credits / 1000).toFixed(0) + 'K' : String(credits);
+const creditsFormatted = credits >= 1e9 ? (credits / 1e9).toFixed(1) + 'B' : credits >= 1e6 ? (credits / 1e6).toFixed(1) + 'M' : credits >= 1e3 ? (credits / 1e3).toFixed(0) + 'K' : String(credits);
 const pct = plan.raw === Infinity ? 0 : Math.min(100, (credits / plan.raw) * 100);
-const httpEndpoint = `https://s1.xrplmesh.com/e/${key}`;
-const wsEndpoint = `wss://s1.xrplmesh.com/e/${key}`;
+const httpEndpoint = key ? `https://s1.xrpl.stream/e/${key}` : '';
+const wsEndpoint = key ? `wss://s1.xrpl.stream/e/${key}` : '';
 ---
 
-<Base title="Dashboard - XRPL Mesh">
+<Base title="Dashboard - XRPL Stream">
   <Header />
   <div class="dash">
 
@@ -82,18 +85,24 @@ const wsEndpoint = `wss://s1.xrplmesh.com/e/${key}`;
         <div class="plan-badge">{(userKey?.plan || 'free').charAt(0).toUpperCase() + (userKey?.plan || 'free').slice(1)}{plan.price !== 'Free' ? ` · ${plan.price}` : ''}</div>
       </div>
 
-      <div class="endpoints">
-        <div class="ep-row">
-          <span class="ep-label">HTTP</span>
-          <code class="ep-url" id="http-ep">{httpEndpoint}</code>
-          <button class="ep-copy" onclick="copyEp('http-ep')">Copy</button>
+      {key ? (
+        <div class="endpoints">
+          <div class="ep-row">
+            <span class="ep-label">HTTP</span>
+            <code class="ep-url" id="http-ep">{httpEndpoint}</code>
+            <button class="ep-copy" onclick="copyEp('http-ep')">Copy</button>
+          </div>
+          <div class="ep-row">
+            <span class="ep-label ws">WS</span>
+            <code class="ep-url" id="ws-ep">{wsEndpoint}</code>
+            <button class="ep-copy" onclick="copyEp('ws-ep')">Copy</button>
+          </div>
         </div>
-        <div class="ep-row">
-          <span class="ep-label ws">WS</span>
-          <code class="ep-url" id="ws-ep">{wsEndpoint}</code>
-          <button class="ep-copy" onclick="copyEp('ws-ep')">Copy</button>
+      ) : (
+        <div class="ep-error">
+          <p>Endpoint provisioning failed. Please try refreshing the page or <a href="mailto:hello@xrpl.to">contact support</a>.</p>
         </div>
-      </div>
+      )}
     </div>
 
     <div class="section usage-section">
@@ -103,30 +112,53 @@ const wsEndpoint = `wss://s1.xrplmesh.com/e/${key}`;
       </div>
       <div class="usage-numbers">
         <span class="usage-used" id="usage-used">{creditsFormatted}</span>
-        <span class="usage-sep">/</span>
-        <span class="usage-limit">{plan.credits}</span>
+        {plan.raw !== Infinity && <><span class="usage-sep">/</span><span class="usage-limit">{plan.credits}</span></>}
       </div>
-      <div class="usage-bar-bg">
-        <div class="usage-bar-fill" id="usage-bar" style={`width:${pct}%`}></div>
-      </div>
+      {plan.raw !== Infinity && (
+        <div class="usage-bar-bg">
+          <div class="usage-bar-fill" id="usage-bar" style={`width:${pct}%`}></div>
+        </div>
+      )}
       <div class="usage-footer">
-        <span class="usage-pct" id="usage-pct">{pct.toFixed(1)}% used</span>
+        {plan.raw !== Infinity
+          ? <span class="usage-pct" id="usage-pct">{pct.toFixed(1)}% used</span>
+          : <span class="usage-pct" id="usage-pct">Unlimited</span>
+        }
         <span class="usage-rate">{plan.rate}</span>
       </div>
     </div>
     <div data-email={session.email} data-plan-raw={plan.raw} data-plan-credits={plan.credits} id="usage-meta" style="display:none"></div>
 
-    {userKey?.plan !== 'scale' && userKey?.plan !== 'enterprise' && (
+    {userKey?.plan !== 'enterprise' && userKey?.plan !== 'internal' && (
       <div class="section">
         <h2>Upgrade Plan</h2>
         <div class="upgrade-grid">
-          {userKey?.plan === 'free' && <button class="up-btn" onclick={`upgradePlan('builder','${key}')`}><span class="up-name">Builder</span><span class="up-price">$29/mo</span><span class="up-detail">50 req/s &middot; 100M credits</span></button>}
-          {(userKey?.plan === 'free' || userKey?.plan === 'builder') && <button class="up-btn highlight" onclick={`upgradePlan('pro','${key}')`}><span class="up-name">Pro</span><span class="up-price">$79/mo</span><span class="up-detail">150 req/s &middot; 500M credits</span></button>}
-          {userKey?.plan !== 'scale' && <button class="up-btn" onclick={`upgradePlan('scale','${key}')`}><span class="up-name">Scale</span><span class="up-price">$199/mo</span><span class="up-detail">300 req/s &middot; 2B credits</span></button>}
+          {planKey === 'free' && <div class="up-group"><button class="up-btn" onclick={`upgradePlan('builder','${key}')`}><span class="up-name">Builder</span><span class="up-price">$39/mo</span><span class="up-detail">50 req/s &middot; 100M credits</span></button><button class="up-xrp" onclick={`handleXrpUpgrade('builder')`}>Pay with XRP</button></div>}
+          {(planKey === 'free' || planKey === 'builder') && <div class="up-group"><button class="up-btn highlight" onclick={`upgradePlan('pro','${key}')`}><span class="up-name">Pro</span><span class="up-price">$149/mo</span><span class="up-detail">125 req/s &middot; 500M credits</span></button><button class="up-xrp" onclick={`handleXrpUpgrade('pro')`}>Pay with XRP</button></div>}
+          {(planKey === 'free' || planKey === 'builder' || planKey === 'pro') && <div class="up-group"><button class="up-btn" onclick={`upgradePlan('scale','${key}')`}><span class="up-name">Scale</span><span class="up-price">$299/mo</span><span class="up-detail">250 req/s &middot; 2B credits</span></button><button class="up-xrp" onclick={`handleXrpUpgrade('scale')`}>Pay with XRP</button></div>}
+          {planKey !== 'enterprise' && <div class="up-group"><button class="up-btn" onclick={`upgradePlan('enterprise','${key}')`}><span class="up-name">Enterprise</span><span class="up-price">$699/mo</span><span class="up-detail">500 req/s &middot; 5B credits</span></button><button class="up-xrp" onclick={`handleXrpUpgrade('enterprise')`}>Pay with XRP</button></div>}
         </div>
       </div>
     )}
   </div>
+  <!-- XRP Payment Modal -->
+  <div id="xrp-modal" class="xrp-modal hidden">
+    <div class="xrp-modal-card">
+      <button class="xrp-close" onclick="closeXrpModal()">&times;</button>
+      <h3>Pay with XRP</h3>
+      <p class="xrp-plan-info">Plan: <strong id="xrp-plan-name"></strong> &middot; <strong id="xrp-amount"></strong> XRP</p>
+      <div class="xrp-details">
+        <div class="xrp-field"><span class="xrp-label">Send to</span><code id="xrp-address" class="xrp-val"></code></div>
+        <div class="xrp-field"><span class="xrp-label">Destination Tag</span><code id="xrp-tag" class="xrp-val xrp-tag-hl"></code></div>
+        <div class="xrp-field"><span class="xrp-label">Amount</span><code id="xrp-amount-drops" class="xrp-val"></code></div>
+      </div>
+      <p class="xrp-warn">Include the destination tag or your payment cannot be verified.</p>
+      <button id="xrp-verify-btn" class="up-btn highlight" style="width:100%;margin-bottom:8px" onclick="verifyXrpPayment()">I've sent the payment</button>
+      <p id="xrp-status" class="xrp-status"></p>
+      <p class="xrp-expires">Expires in <span id="xrp-timer">15:00</span></p>
+    </div>
+  </div>
+
   <Footer />
 </Base>
 
@@ -139,6 +171,38 @@ const wsEndpoint = `wss://s1.xrplmesh.com/e/${key}`;
       setTimeout(() => btn.textContent = 'Copy', 1500);
     });
   }
+  var _xrpTag = 0, _xrpTimer = null;
+  async function handleXrpUpgrade(plan) {
+    try {
+      var resp = await fetch('/api/xrp-checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan }) });
+      var data = await resp.json();
+      if (resp.status === 401) { window.location.href = '/login'; return; }
+      if (data.error) { alert(data.error); return; }
+      _xrpTag = data.destinationTag;
+      document.getElementById('xrp-plan-name').textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
+      document.getElementById('xrp-amount').textContent = data.amount;
+      document.getElementById('xrp-address').textContent = data.address;
+      document.getElementById('xrp-tag').textContent = data.destinationTag;
+      document.getElementById('xrp-amount-drops').textContent = data.amount + ' XRP';
+      document.getElementById('xrp-status').textContent = '';
+      document.getElementById('xrp-modal').classList.remove('hidden');
+      var secs = data.expiresIn || 900;
+      clearInterval(_xrpTimer);
+      _xrpTimer = setInterval(function() { secs--; if (secs<=0){clearInterval(_xrpTimer);closeXrpModal();alert('Payment window expired');return;} var m=Math.floor(secs/60),s=secs%60; document.getElementById('xrp-timer').textContent=m+':'+(s<10?'0':'')+s; }, 1000);
+    } catch(e) { alert('Failed to create XRP payment'); }
+  }
+  async function verifyXrpPayment() {
+    var btn = document.getElementById('xrp-verify-btn'), status = document.getElementById('xrp-status');
+    btn.disabled = true; btn.textContent = 'Verifying...'; status.textContent = 'Checking the ledger...'; status.style.color = 'var(--accent)';
+    try {
+      var resp = await fetch('/api/xrp-verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ destinationTag: _xrpTag }) });
+      var data = await resp.json();
+      if (data.verified) { status.textContent = 'Payment verified!'; status.style.color = '#3fb950'; clearInterval(_xrpTimer); setTimeout(function(){window.location.reload()},1500); }
+      else { status.textContent = data.message || 'Not found yet. Try again.'; status.style.color = '#d29922'; btn.disabled = false; btn.textContent = "I've sent the payment"; }
+    } catch(e) { status.textContent = 'Verification failed.'; status.style.color = '#f85149'; btn.disabled = false; btn.textContent = "I've sent the payment"; }
+  }
+  function closeXrpModal() { document.getElementById('xrp-modal').classList.add('hidden'); clearInterval(_xrpTimer); }
+
   async function upgradePlan(plan, key) {
     const resp = await fetch('/api/upgrade', {
       method: 'POST',
@@ -150,6 +214,33 @@ const wsEndpoint = `wss://s1.xrplmesh.com/e/${key}`;
     if (data.url) { window.location.href = data.url; return; }
     alert(data.error || 'Failed');
   }
+
+  // Post-checkout fulfillment fallback: if redirected back with session_id,
+  // poll the status endpoint to ensure payment is fulfilled even if webhook missed
+  (function() {
+    var params = new URLSearchParams(window.location.search);
+    var sessionId = params.get('session_id');
+    if (!sessionId) return;
+    // Clean URL so refresh doesn't re-trigger
+    history.replaceState(null, '', '/dashboard');
+    var attempts = 0;
+    function checkStatus() {
+      attempts++;
+      fetch('/api/checkout-status?session_id=' + encodeURIComponent(sessionId))
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          if (d.status === 'paid' && d.fulfilled) {
+            window.location.reload();
+          } else if (d.status === 'pending' && attempts < 8) {
+            setTimeout(checkStatus, 2000);
+          }
+        })
+        .catch(function() {
+          if (attempts < 8) setTimeout(checkStatus, 2000);
+        });
+    }
+    checkStatus();
+  })();
 
   // Live usage polling
   (function() {
@@ -174,9 +265,13 @@ const wsEndpoint = `wss://s1.xrplmesh.com/e/${key}`;
         const d = await r.json();
         const c = d.usage?.[email] || 0;
         document.getElementById('usage-used').textContent = fmt(c);
-        const pct = planRaw === Infinity || !planRaw ? 0 : Math.min(100, (c / planRaw) * 100);
-        document.getElementById('usage-bar').style.width = pct + '%';
-        document.getElementById('usage-pct').textContent = pct.toFixed(1) + '% used';
+        var isUnlimited = !planRaw || !isFinite(planRaw);
+        if (!isUnlimited) {
+          var pct = Math.min(100, (c / planRaw) * 100);
+          var bar = document.getElementById('usage-bar');
+          if (bar) bar.style.width = pct + '%';
+          document.getElementById('usage-pct').textContent = pct.toFixed(1) + '% used';
+        }
         // Flash the dot
         dot.style.opacity = '1';
         setTimeout(() => dot.style.opacity = '0.4', 300);
@@ -189,7 +284,7 @@ const wsEndpoint = `wss://s1.xrplmesh.com/e/${key}`;
 </script>
 
 <style>
-  .dash { max-width: 700px; margin: 0 auto; padding: 40px 24px; }
+  .dash { max-width: 700px; margin: 0 auto; padding: 40px 24px; min-height: calc(100vh - 160px); }
   .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
   .user-info { display: flex; align-items: center; gap: 10px; }
   .avatar { width: 28px; height: 28px; border-radius: 50%; }
@@ -207,6 +302,9 @@ const wsEndpoint = `wss://s1.xrplmesh.com/e/${key}`;
   .ep-url { flex: 1; font-size: 0.78rem; color: var(--text-muted); word-break: break-all; }
   .ep-copy { padding: 4px 12px; background: transparent; border: 1px solid var(--border); border-radius: 5px; color: var(--text-muted); font-size: 0.72rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit; white-space: nowrap; }
   .ep-copy:hover { border-color: var(--accent); color: var(--accent); }
+  .ep-error { background: rgba(248,81,73,0.06); border: 1px solid rgba(248,81,73,0.2); border-radius: 8px; padding: 14px 18px; }
+  .ep-error p { font-size: 0.82rem; color: #f85149; margin: 0; }
+  .ep-error a { color: var(--accent); }
   .usage-section { margin-bottom: 16px; }
   .usage-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
   .usage-header h2 { margin-bottom: 0; }
@@ -221,6 +319,23 @@ const wsEndpoint = `wss://s1.xrplmesh.com/e/${key}`;
   .usage-pct { font-size: 0.72rem; color: var(--text-muted); font-family: var(--mono); }
   .usage-rate { font-size: 0.72rem; color: var(--text-dim); }
   .upgrade-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 14px; }
+  .up-group { display: flex; flex-direction: column; gap: 6px; }
+  .up-xrp { padding: 6px; border-radius: 6px; border: 1px solid rgba(63,185,80,0.2); background: rgba(63,185,80,0.06); color: #3fb950; font-size: 0.72rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: var(--font); }
+  .up-xrp:hover { border-color: #3fb950; background: rgba(63,185,80,0.12); }
+  .xrp-modal { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .xrp-modal.hidden { display: none; }
+  .xrp-modal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px; max-width: 420px; width: 100%; position: relative; }
+  .xrp-close { position: absolute; top: 10px; right: 14px; background: none; border: none; color: var(--text-muted); font-size: 1.4rem; cursor: pointer; }
+  .xrp-modal-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; }
+  .xrp-plan-info { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px; }
+  .xrp-details { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+  .xrp-field { display: flex; flex-direction: column; gap: 3px; }
+  .xrp-label { font-size: 0.62rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+  .xrp-val { font-family: var(--mono); font-size: 0.82rem; color: var(--text); background: var(--bg); padding: 7px 10px; border-radius: 6px; border: 1px solid var(--border); word-break: break-all; display: block; }
+  .xrp-tag-hl { color: #3fb950; border-color: rgba(63,185,80,0.3); background: rgba(63,185,80,0.06); font-weight: 700; font-size: 0.95rem; }
+  .xrp-warn { font-size: 0.72rem; color: #d29922; margin-bottom: 12px; }
+  .xrp-status { font-size: 0.8rem; font-family: var(--mono); min-height: 1.2em; }
+  .xrp-expires { font-size: 0.68rem; color: var(--text-dim); text-align: center; }
   .up-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 16px; background: transparent; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s; font-family: var(--font); }
   .up-btn:hover { border-color: var(--accent); transform: translateY(-1px); }
   .up-btn.highlight { border-color: var(--accent); }

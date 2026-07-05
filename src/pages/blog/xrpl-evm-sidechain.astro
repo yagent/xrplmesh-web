@@ -1,0 +1,101 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+---
+
+<Base title="XRPL EVM Sidechain - Ethereum Smart Contracts on the XRP Ledger | XRPL Stream" description="XRPL EVM sidechain explained. How Ethereum smart contracts work on the XRP Ledger, bridge mechanics, DeFi opportunities, and developer tools.">
+  <Header />
+  <article class="post">
+    <div class="post-header">
+      <a href="/blog" class="back-link">Back to Blog</a>
+      <div class="post-meta">
+        <span class="post-tag">EVM</span>
+        <span class="post-tag">Sidechain</span>
+        <time>April 13, 2026</time>
+      </div>
+      <h1>XRPL EVM Sidechain</h1>
+      <p class="post-lead">The XRPL EVM sidechain brings Ethereum-compatible smart contracts to the XRP Ledger ecosystem. Deploy Solidity contracts, bridge assets, and build DeFi applications -- all connected to the XRPL mainnet.</p>
+    </div>
+    <div class="post-body">
+      <h2>What is the XRPL EVM sidechain</h2>
+      <p>The XRPL EVM sidechain is a separate blockchain that runs the Ethereum Virtual Machine (EVM) while maintaining a bridge to the XRP Ledger mainnet. This means developers can write smart contracts in Solidity -- the same language used on Ethereum, Polygon, Arbitrum, and BSC -- and deploy them in the XRPL ecosystem.</p>
+      <p>The sidechain uses XRP as its native gas token. Transactions are fast and cheap compared to Ethereum mainnet. The bridge allows assets to move between the XRPL mainnet and the EVM sidechain, combining the XRPL's speed and liquidity with the EVM's programmability.</p>
+
+      <h2>Why it matters</h2>
+      <p>The XRP Ledger mainnet intentionally does not support Turing-complete smart contracts. This is a design choice -- it keeps the attack surface small, consensus fast, and the network reliable (13+ years, zero outages). But it means complex DeFi protocols, lending markets, and automated strategies cannot run natively on the XRPL.</p>
+      <p>The EVM sidechain solves this. Developers get smart contract capabilities without compromising the mainnet's reliability. The bridge connects both worlds -- XRPL's native DEX, fast settlement, and token ecosystem on one side, and EVM smart contract logic on the other.</p>
+
+      <h2>Bridge mechanics</h2>
+      <p>The Axelar bridge connects the XRPL mainnet to the EVM sidechain. Assets can move in both directions:</p>
+      <ul>
+        <li><strong>XRPL to EVM:</strong> Lock XRP or tokens on mainnet, receive wrapped versions on the sidechain</li>
+        <li><strong>EVM to XRPL:</strong> Burn wrapped tokens on the sidechain, unlock originals on mainnet</li>
+      </ul>
+      <p>The bridge is secured by Axelar's validator network, which monitors transactions on both chains and processes cross-chain messages. Bridge transactions typically complete in minutes.</p>
+
+      <h2>DeFi on the XRPL EVM</h2>
+      <p>The EVM sidechain opens up DeFi use cases that are not possible on the XRPL mainnet:</p>
+      <ul>
+        <li><strong>Lending and borrowing:</strong> Aave-style protocols where users deposit collateral and borrow against it</li>
+        <li><strong>Yield farming:</strong> Liquidity mining with complex reward distribution logic</li>
+        <li><strong>Synthetic assets:</strong> Create on-chain derivatives tracking real-world prices</li>
+        <li><strong>DAOs:</strong> Governance contracts for community-managed protocols</li>
+        <li><strong>Complex DEX logic:</strong> Concentrated liquidity, limit orders with conditions, automated strategies</li>
+      </ul>
+      <p>While the XRPL mainnet has a native DEX and AMM, the EVM sidechain enables programmable financial logic that goes beyond what the base protocol offers.</p>
+
+      <h2>Developer experience</h2>
+      <p>If you have built on Ethereum, you already know how to build on the XRPL EVM sidechain. The tooling is identical:</p>
+      <ul>
+        <li><strong>Languages:</strong> Solidity, Vyper</li>
+        <li><strong>Frameworks:</strong> Hardhat, Foundry, Remix</li>
+        <li><strong>Libraries:</strong> ethers.js, web3.js, viem</li>
+        <li><strong>Wallets:</strong> MetaMask (add the XRPL EVM network)</li>
+        <li><strong>Block explorers:</strong> Standard EVM explorers work with the sidechain</li>
+      </ul>
+      <p>The only difference is the RPC endpoint. Point your tools at the XRPL EVM RPC and everything works as expected.</p>
+
+      <h2>XRPL mainnet vs EVM sidechain</h2>
+      <p>They serve different purposes and complement each other:</p>
+      <ul>
+        <li><strong>XRPL mainnet:</strong> Payments, DEX trading, token issuance, NFTs, compliance features. Fast, cheap, reliable. No smart contracts.</li>
+        <li><strong>EVM sidechain:</strong> Smart contracts, DeFi protocols, complex logic. EVM compatible. Connected to mainnet via bridge.</li>
+      </ul>
+      <p>For most payment and trading use cases, the XRPL mainnet is the right choice. For programmable finance and complex DeFi, the EVM sidechain adds capabilities without compromising mainnet stability.</p>
+
+      <h2>Accessing XRPL data from the EVM</h2>
+      <p>DeFi protocols on the EVM sidechain often need mainnet data -- token prices from the XRPL DEX, account balances, transaction confirmations. XRPL Stream provides API access to both the mainnet and sidechain data, enabling cross-chain applications that read from the XRPL mainnet and execute logic on the EVM sidechain.</p>
+
+      <div class="post-cta">
+        <a href="/login" class="btn btn-primary">Get API Access</a>
+        <a href="/guides/xrpl-api" class="btn btn-ghost">XRPL API Guide</a>
+      </div>
+    </div>
+  </article>
+  <Footer />
+</Base>
+
+<style>
+  .post { max-width: 1400px; margin: 0 auto; padding: 48px 40px 64px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 24px; transition: color 0.2s; }
+  .back-link:hover { color: var(--accent); text-decoration: none; }
+  .post-header { margin-bottom: 40px; }
+  .post-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .post-tag { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); padding: 3px 10px; border-radius: 6px; }
+  time { font-size: 0.8rem; color: var(--text-dim); }
+  h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; }
+  .post-lead { font-size: 1.1rem; color: var(--text-muted); line-height: 1.7; }
+  .post-body h2 { font-size: 1.25rem; font-weight: 700; margin: 40px 0 12px; color: var(--text); }
+  .post-body p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 16px; }
+  .post-body a { color: var(--accent); }
+  .post-body ul { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin: 0 0 16px 20px; }
+  .post-body li { margin-bottom: 8px; }
+  .post-body li strong { color: var(--text); }
+  .post-cta { display: flex; gap: 12px; margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
+  .btn { display: inline-block; padding: 11px 28px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
+  .btn-primary { background: var(--accent); color: #fff; font-weight: 700; }
+  .btn-primary:hover { text-decoration: none; }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text-muted); }
+  .btn-ghost:hover { border-color: var(--accent); text-decoration: none; color: var(--text); }
+</style>

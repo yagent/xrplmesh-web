@@ -4,14 +4,15 @@ import { getSessionFromCookie } from '../../lib/auth';
 
 const STRIPE_KEY = import.meta.env.STRIPE_SECRET_KEY || '';
 const stripe = STRIPE_KEY ? new Stripe(STRIPE_KEY) : null;
-const API_URL = import.meta.env.API_URL || 'https://s1.xrplmesh.com';
-const SITE_URL = import.meta.env.SITE_URL || 'https://xrplmesh.com';
+const API_URL = import.meta.env.API_URL || 'https://s1.xrpl.stream';
+const SITE_URL = import.meta.env.SITE_URL || 'https://xrpl.stream';
 const ADMIN_TOKEN = import.meta.env.ADMIN_TOKEN || '';
 
 const PRICE_MAP: Record<string, string> = {
   builder: 'price_1TFxtmKGdeOOrl7Lv5wrxwY8',
   pro: 'price_1TFxtnKGdeOOrl7LgxFEmdlR',
   scale: 'price_1TFxtoKGdeOOrl7LiTo6TayY',
+  enterprise: import.meta.env.STRIPE_ENTERPRISE_PRICE || '',
 };
 
 export const POST: APIRoute = async ({ request }) => {
@@ -21,7 +22,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   const session = getSessionFromCookie(request);
   if (!session) {
-    return new Response(JSON.stringify({ error: 'login_required', redirect: '/api/auth/login' }), { status: 401 });
+    return new Response(JSON.stringify({ error: 'login_required', redirect: '/login' }), { status: 401 });
   }
 
   const { plan } = await request.json();
@@ -44,21 +45,31 @@ export const POST: APIRoute = async ({ request }) => {
     }
   } catch {}
 
+  // Check if identifier is an email or r-address (Xaman wallet login)
+  const isEmail = session.email.includes('@');
+
   // Reuse existing Stripe customer to avoid duplicates
   let customer: string | undefined;
   try {
-    const customers = await stripe.customers.list({ email: session.email, limit: 1 });
-    if (customers.data.length > 0) customer = customers.data[0].id;
+    if (isEmail) {
+      const customers = await stripe.customers.list({ email: session.email, limit: 1 });
+      if (customers.data.length > 0) customer = customers.data[0].id;
+    }
   } catch {}
 
   // Don't create key here - webhook creates it after payment succeeds
+  const customerFields: Record<string, any> = {};
+  if (customer) customerFields.customer = customer;
+  else if (isEmail) customerFields.customer_email = session.email;
+  // Wallet logins: Stripe will collect email during checkout
+
   const checkoutSession = await stripe.checkout.sessions.create({
     mode: 'subscription',
-    ...(customer ? { customer } : { customer_email: session.email }),
+    ...customerFields,
     line_items: [{ price: priceId, quantity: 1 }],
     metadata: { api_key: existingKey, plan, owner: session.email, name: session.name },
-    success_url: `${SITE_URL}/dashboard`,
-    cancel_url: `${SITE_URL}/#pricing`,
+    success_url: `${SITE_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${SITE_URL}/pricing`,
   });
 
   return new Response(JSON.stringify({ url: checkoutSession.url }), { status: 200 });

@@ -1,0 +1,168 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+const posts = [
+  {
+    slug: 'what-is-xrp',
+    title: 'What is XRP? The Complete Guide',
+    date: '2026-04-13',
+    summary: 'What is XRP, how the XRP Ledger works, what makes it different from Bitcoin and Ethereum, tokenomics, use cases, and how to get started.',
+    tag: 'Beginner',
+  },
+  {
+    slug: 'xrp-vs-solana',
+    title: 'XRP vs Solana - Speed, Fees, and Reliability Compared',
+    date: '2026-04-13',
+    summary: 'Head-to-head comparison of XRP and Solana. Transaction speed, fees, uptime, DEX, NFTs, and which chain is better for your use case.',
+    tag: 'Comparison',
+  },
+  {
+    slug: 'xrpl-stablecoin',
+    title: 'XRPL Stablecoins - RLUSD and Fiat Tokens on XRP Ledger',
+    date: '2026-04-13',
+    summary: 'Stablecoins on the XRP Ledger including RLUSD, GateHub tokens, and Bitstamp EUR. How they work, compliance features, and CBDC potential.',
+    tag: 'Stablecoin',
+  },
+  {
+    slug: 'xrpl-public-servers',
+    title: 'XRPL Public Servers Compared',
+    date: '2026-04-13',
+    summary: 'Compare all public XRP Ledger RPC endpoints. s1.ripple.com, xrplcluster, XRPL Stream. Rate limits, features, and which to use for production.',
+    tag: 'Infrastructure',
+  },
+  {
+    slug: 'xrpl-full-history-node',
+    title: 'XRPL Full History Node - Why Full History Matters',
+    date: '2026-04-13',
+    summary: 'What is an XRPL full history node, the 39TB storage challenge, and how to access complete ledger history without running your own node.',
+    tag: 'Infrastructure',
+  },
+  {
+    slug: 'xrp-burn-rate',
+    title: 'XRP Burn Rate - How Much XRP is Destroyed Per Day',
+    date: '2026-04-13',
+    summary: 'Every XRPL transaction destroys XRP permanently. Daily burn statistics, total destroyed since genesis, and what it means for supply economics.',
+    tag: 'Data',
+  },
+  {
+    slug: 'xrpl-evm-sidechain',
+    title: 'XRPL EVM Sidechain - Ethereum Smart Contracts on XRP Ledger',
+    date: '2026-04-13',
+    summary: 'How the XRPL EVM sidechain brings Solidity smart contracts to the XRP ecosystem. Bridge mechanics, DeFi, and developer tools.',
+    tag: 'EVM',
+  },
+  {
+    slug: 'xrp-etf',
+    title: 'XRP ETF - Everything You Need to Know',
+    date: '2026-04-13',
+    summary: 'XRP ETF filings, timeline, spot vs futures, and what it means for the XRP Ledger ecosystem and institutional adoption.',
+    tag: 'Market',
+  },
+  {
+    slug: 'xrpl-network-history',
+    title: 'XRPL Network History - 13 Years of Uptime',
+    date: '2026-04-13',
+    summary: 'Complete history of the XRP Ledger network. Major events, amendments, zero outages, and why the XRPL is one of the most reliable blockchains.',
+    tag: 'Network',
+  },
+  {
+    slug: 'xrpl-fees-explained',
+    title: 'XRPL Transaction Fees Explained',
+    date: '2026-04-13',
+    summary: 'How XRP Ledger transaction fees work. Base fees, open ledger fees, fee escalation, drops vs XRP, and how fees are permanently destroyed.',
+    tag: 'Technical',
+  },
+  {
+    slug: 'xrpl-for-enterprise',
+    title: 'XRPL for Enterprise',
+    date: '2026-04-13',
+    summary: 'Why enterprises choose the XRP Ledger. 3-5 second settlement, built-in DEX, tokenization, compliance features, and real-world use cases.',
+    tag: 'Enterprise',
+  },
+  {
+    slug: 'xrpl-nodes-guide',
+    title: 'XRPL Nodes Guide',
+    date: '2026-04-13',
+    summary: 'Understanding XRP Ledger node types, hardware requirements, public RPC providers, and when to use a managed provider like XRPL Stream.',
+    tag: 'Infrastructure',
+  },
+  {
+    slug: 'born-from-the-ledger',
+    title: 'Born from the Ledger: Why We Built XRPL Stream',
+    date: '2026-04-02',
+    summary: 'We built XRPL Stream to supply reliable, full-history data to our analytics app and toolkit xrpl.to. Once the infrastructure was running, we opened it to every developer building on the XRP Ledger.',
+    tag: 'Origin Story',
+  },
+];
+
+function formatDate(d: string) {
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+---
+
+<Base title="Blog - XRPL Stream" description="Engineering insights, product updates, and guides from the XRPL Stream team.">
+  <Header />
+
+  <div class="container">
+    <h1>Blog</h1>
+    <p class="blog-sub">Engineering insights, product updates, and guides.</p>
+
+    <div class="posts">
+      {posts.map(p => (
+        <a href={`/blog/${p.slug}`} class="post-link">
+          <article class="post-card">
+            <div class="post-meta">
+              <span class="post-tag">{p.tag}</span>
+              <span class="post-date">{formatDate(p.date)}</span>
+            </div>
+            <h2>{p.title}</h2>
+            <p>{p.summary}</p>
+          </article>
+        </a>
+      ))}
+    </div>
+  </div>
+
+  <Footer />
+</Base>
+
+<style>
+  .container { max-width: 1400px; margin: 0 auto; padding: 48px 40px 64px; min-height: calc(100vh - 160px); }
+  @media (max-width: 600px) { .container { padding: 32px 16px 48px; } }
+  h1 { font-size: 2rem; font-weight: 800; margin-bottom: 8px; }
+  .blog-sub { color: var(--text-muted); font-size: 1rem; margin-bottom: 40px; }
+  .posts { display: flex; flex-direction: column; gap: 16px; }
+  .post-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .post-link { text-decoration: none; }
+  .post-card:hover { border-color: rgba(88,166,255,0.3); transform: translateY(-2px); }
+  .post-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .post-tag {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    background: rgba(88,166,255,0.08);
+    border: 1px solid rgba(88,166,255,0.15);
+    padding: 3px 10px;
+    border-radius: 6px;
+  }
+  .post-date { font-size: 0.75rem; color: var(--text-dim); }
+  .post-card h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+  .post-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
+
+  @media (max-width: 600px) {
+    .container { padding: 32px 16px 48px; }
+    h1 { font-size: 1.6rem; }
+    .post-card { padding: 20px; }
+    .post-card h2 { font-size: 1rem; }
+  }
+</style>

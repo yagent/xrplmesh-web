@@ -4,7 +4,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 ---
 
-<Base title="XRPL API for AI Agents - Build Autonomous XRP Ledger Agents | XRPL Mesh" description="Give your AI agents direct access to full history XRP Ledger data. WebSocket streaming, JSON-RPC, and MCP-ready infrastructure built for autonomous agent workflows.">
+<Base title="XRPL API for AI Agents - Build Autonomous XRP Ledger Agents | XRPL Stream" description="Give your AI agents direct access to full history XRP Ledger data. WebSocket streaming, JSON-RPC, and MCP-ready infrastructure built for autonomous agent workflows.">
   <Header />
 
   <!-- Hero -->
@@ -111,7 +111,7 @@ import Footer from '../components/Footer.astro';
           <div class="code-label">xrpl.js</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
           <pre set:html={`<span class="kw">import</span> { Client } <span class="kw">from</span> <span class="str">'xrpl'</span>;
 
-<span class="kw">const</span> client = <span class="kw">new</span> Client(<span class="str">'wss://s1.xrplmesh.com/e/YOUR_KEY'</span>);
+<span class="kw">const</span> client = <span class="kw">new</span> Client(<span class="str">'wss://s1.xrpl.stream/e/YOUR_KEY'</span>);
 <span class="kw">await</span> client.connect();
 
 <span class="cm">// Query any account's complete history</span>
@@ -132,7 +132,7 @@ import Footer from '../components/Footer.astro';
           <div class="code-label">Python</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
           <pre set:html={`<span class="kw">import</span> requests
 
-endpoint = <span class="str">"https://s1.xrplmesh.com/e/YOUR_KEY"</span>
+endpoint = <span class="str">"https://s1.xrpl.stream/e/YOUR_KEY"</span>
 
 <span class="cm"># Analyze any account</span>
 resp = requests.post(endpoint, json={
@@ -147,7 +147,7 @@ balance = resp[<span class="str">"result"</span>][<span class="str">"account_dat
         </div>
         <div class="code-block">
           <div class="code-label">cURL</div><button class="copy-btn" onclick="copyCode(this)">Copy</button>
-          <pre set:html={`curl -X POST https://s1.xrplmesh.com/e/YOUR_KEY \\
+          <pre set:html={`curl -X POST https://s1.xrpl.stream/e/YOUR_KEY \\
   -H <span class="str">"Content-Type: application/json"</span> \\
   -d <span class="str">'{ "method": "server_info" }'</span>`} />
         </div>
@@ -222,7 +222,7 @@ balance = resp[<span class="str">"result"</span>][<span class="str">"account_dat
       <div class="faq-list">
         <details class="faq-item">
           <summary>How do I connect an AI agent to the XRP Ledger?</summary>
-          <p>Sign up for a free XRPL Mesh endpoint. Use the WebSocket URL with xrpl.js, or the HTTP URL with any language's HTTP client. Your agent gets full access to every XRPL command -account queries, transaction history, ledger data, and real-time subscriptions.</p>
+          <p>Sign up for a free XRPL Stream endpoint. Use the WebSocket URL with xrpl.js, or the HTTP URL with any language's HTTP client. Your agent gets full access to every XRPL command -account queries, transaction history, ledger data, and real-time subscriptions.</p>
         </details>
         <details class="faq-item">
           <summary>What XRPL data can my AI agent access?</summary>
@@ -237,16 +237,16 @@ balance = resp[<span class="str">"result"</span>][<span class="str">"account_dat
           <p>Yes. Sign up with Google and get a free endpoint with 10M monthly credits and 15 requests per second -enough to build and test your agent. Paid plans scale to 2,000 requests per second.</p>
         </details>
         <details class="faq-item">
-          <summary>What makes XRPL Mesh different from public XRP Ledger nodes?</summary>
+          <summary>What makes XRPL Stream different from public XRP Ledger nodes?</summary>
           <p>Full ledger history since genesis (public nodes often lack this), higher rate limits, dedicated endpoints, automatic failover, WebSocket subscription reliability, and gzip compression for large responses.</p>
         </details>
         <details class="faq-item">
-          <summary>Does XRPL Mesh work with xrpl.js and xrpl-py?</summary>
-          <p>Yes. XRPL Mesh is a drop-in replacement for any XRPL endpoint. Replace the URL in your xrpl.js Client or Python xrpl library configuration -no other code changes needed.</p>
+          <summary>Does XRPL Stream work with xrpl.js and xrpl-py?</summary>
+          <p>Yes. XRPL Stream is a drop-in replacement for any XRPL endpoint. Replace the URL in your xrpl.js Client or Python xrpl library configuration -no other code changes needed.</p>
         </details>
         <details class="faq-item">
-          <summary>Can I use XRPL Mesh with an MCP server for AI assistants?</summary>
-          <p>Yes. Point your MCP server's XRPL connection to your XRPL Mesh endpoint. Your AI assistant gets reliable, full-history access to the XRP Ledger through the MCP protocol.</p>
+          <summary>Can I use XRPL Stream with an MCP server for AI assistants?</summary>
+          <p>Yes. Point your MCP server's XRPL connection to your XRPL Stream endpoint. Your AI assistant gets reliable, full-history access to the XRP Ledger through the MCP protocol.</p>
         </details>
         <details class="faq-item">
           <summary>How does real-time WebSocket streaming work for agents?</summary>
@@ -277,12 +277,12 @@ balance = resp[<span class="str">"result"</span>][<span class="str">"account_dat
     "@context": "https://schema.org",
     "@type": "FAQPage",
     "mainEntity": [
-      { "@type": "Question", "name": "How do I connect an AI agent to the XRP Ledger?", "acceptedAnswer": { "@type": "Answer", "text": "Sign up for a free XRPL Mesh endpoint. Use the WebSocket URL with xrpl.js, or the HTTP URL with any language's HTTP client. Your agent gets full access to every XRPL command." }},
+      { "@type": "Question", "name": "How do I connect an AI agent to the XRP Ledger?", "acceptedAnswer": { "@type": "Answer", "text": "Sign up for a free XRPL Stream endpoint. Use the WebSocket URL with xrpl.js, or the HTTP URL with any language's HTTP client. Your agent gets full access to every XRPL command." }},
       { "@type": "Question", "name": "What XRPL data can my AI agent access?", "acceptedAnswer": { "@type": "Answer", "text": "Everything on the XRP Ledger since genesis -account balances, trust lines, transaction history, order books, NFTs, AMM pools, payment channels, and escrows." }},
       { "@type": "Question", "name": "Can my AI agent submit transactions to the XRP Ledger?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Your agent can sign and submit transactions through the submit command -payments, offers, NFT operations, trust line changes, and more." }},
       { "@type": "Question", "name": "Is there a free tier for AI agent development?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Sign up with Google and get a free endpoint with 10M monthly credits and 15 requests per second." }},
-      { "@type": "Question", "name": "Does XRPL Mesh work with xrpl.js and xrpl-py?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. XRPL Mesh is a drop-in replacement for any XRPL endpoint. Replace the URL -no other code changes needed." }},
-      { "@type": "Question", "name": "Can I use XRPL Mesh with an MCP server for AI assistants?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Point your MCP server's XRPL connection to your XRPL Mesh endpoint for reliable, full-history access through the MCP protocol." }},
+      { "@type": "Question", "name": "Does XRPL Stream work with xrpl.js and xrpl-py?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. XRPL Stream is a drop-in replacement for any XRPL endpoint. Replace the URL -no other code changes needed." }},
+      { "@type": "Question", "name": "Can I use XRPL Stream with an MCP server for AI assistants?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Point your MCP server's XRPL connection to your XRPL Stream endpoint for reliable, full-history access through the MCP protocol." }},
     ]
   })} />
 </Base>
@@ -328,15 +328,46 @@ balance = resp[<span class="str">"result"</span>][<span class="str">"account_dat
 
   /* Code examples */
   .code-examples { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
-  .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-  .code-label { padding: 8px 16px; font-size: 0.7rem; font-weight: 600; color: var(--text-dim); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.05em; }
-  .code-block { position: relative; }
-  .code-block pre { padding: 16px; font-size: 0.78rem; line-height: 1.6; color: var(--text-muted); overflow: hidden; font-family: var(--mono); margin: 0; }
-  .copy-btn { position: absolute; top: 36px; right: 8px; padding: 4px 10px; background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); border-radius: 5px; color: var(--text-dim); font-size: 0.65rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; }
-  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .code-block { position: relative; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); box-shadow: 0 4px 24px rgba(0,0,0,0.3); }
+  .code-label {
+    padding: 10px 16px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.3);
+    background: linear-gradient(180deg, #1e222a 0%, #181c24 100%);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: var(--mono);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .code-label::before {
+    content: '';
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #ff5f57;
+    box-shadow: 14px 0 0 #febc2e, 28px 0 0 #28c840;
+    margin-right: 32px;
+    flex-shrink: 0;
+  }
+  .code-block pre {
+    padding: 18px 16px;
+    font-size: 0.78rem;
+    line-height: 1.7;
+    color: #e6edf3;
+    overflow-x: auto;
+    font-family: var(--mono);
+    margin: 0;
+    background: #0c1018;
+  }
+  .copy-btn { position: absolute; top: 6px; right: 8px; padding: 4px 10px; background: transparent; border: 1px solid rgba(255,255,255,0.08); border-radius: 5px; color: rgba(255,255,255,0.3); font-size: 0.65rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+  .copy-btn:hover { color: var(--accent); border-color: rgba(88,166,255,0.3); }
   .kw { color: #ff7b72; }
   .str { color: #a5d6ff; }
-  .cm { color: #484f58; }
+  .cm { color: #6e7681; }
 
   /* Use cases */
   .usecases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }

@@ -2,11 +2,8 @@
 import Base from '../layouts/Base.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import Stats from '../components/Stats.astro';
 import ApiDocs from '../components/ApiDocs.astro';
-import NetworkMap from '../components/NetworkMap.astro';
-import Pricing from '../components/Pricing.astro';
-import { Zap, Globe, ShieldCheck, RefreshCw, Cable, KeyRound } from 'lucide-astro';
+import { Zap, Globe, ShieldCheck, RefreshCw, Cable, KeyRound, Banknote, TrendingUp, Image, BarChart3, ArrowRight, Wallet, Building2 } from 'lucide-astro';
 import { getSessionFromCookie } from '../lib/auth';
 
 const session = getSessionFromCookie(Astro.request);
@@ -27,7 +24,7 @@ if (session) {
   } catch {}
 }
 
-const API_URL = import.meta.env.API_URL || 'https://s1.xrplmesh.com';
+const API_URL = import.meta.env.API_URL || 'https://s1.xrpl.stream';
 // SSR: fetch from local node (same server), fallback to public API
 const SSR_URL = import.meta.env.SSR_API_URL || 'http://127.0.0.1:9000';
 let network = {
@@ -52,10 +49,23 @@ if (!network.nodes_total) {
   } catch {}
 }
 
-const regionCount = Object.keys(network.regions || {}).length;
 ---
 
-<Base title="XRPL Mesh -Full History XRP Ledger API" description="Free XRP Ledger full history API. Global edge network. WebSocket and JSON-RPC. Get started in seconds.">
+<Base title="XRPL Stream - Full History XRP Ledger API" description="Free XRP Ledger full history API. WebSocket and JSON-RPC for mainnet, testnet, and devnet. Drop-in replacement for any XRPL endpoint." schema={{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "XRPL Stream",
+  "url": "https://xrpl.stream",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "description": "Full history XRP Ledger API. Build faster with instant access to every transaction since genesis.",
+  "offers": [
+    { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "USD", "description": "5 req/s, 1M monthly credits" },
+    { "@type": "Offer", "name": "Builder", "price": "29", "priceCurrency": "USD", "description": "50 req/s, 100M monthly credits" },
+    { "@type": "Offer", "name": "Pro", "price": "79", "priceCurrency": "USD", "description": "150 req/s, 500M monthly credits" },
+    { "@type": "Offer", "name": "Scale", "price": "199", "priceCurrency": "USD", "description": "300 req/s, 2B monthly credits" }
+  ]
+}}>
   <Header />
   <div class="hero">
     <canvas id="cmd-flow" class="grid-canvas"></canvas>
@@ -63,80 +73,263 @@ const regionCount = Object.keys(network.regions || {}).length;
     <div class="hero-glow hero-glow-2"></div>
     <div class="hero-scanline"></div>
     <div class="container">
-      <div class="hero-badge"><span class="badge-dot"></span> XRP Ledger Full History Nodes</div>
-      <h1><span class="accent">XRPL</span> Mesh</h1>
-      <p class="subtitle">Full history XRP Ledger API endpoint. Build faster with instant access to every transaction since genesis.</p>
+      <div class="hero-badge"><span class="badge-dot"></span> Full History XRP Ledger API</div>
+      <h1><span class="accent">XRPL</span> Stream <span class="h1-sub">The XRP Ledger API for Developers</span></h1>
+      <p class="subtitle">Query every transaction since genesis. Submit new ones instantly. One endpoint, every network.</p>
+      <div class="network-badges">
+        <span class="net-badge net-mainnet">Mainnet</span>
+        <span class="net-badge net-testnet">Testnet</span>
+        <span class="net-badge net-devnet">Devnet</span>
+      </div>
 
       <div class="hero-data-strip">
         <div class="data-cell">
-          <span class="data-label">LEDGER</span>
+          <span class="data-label">LATEST LEDGER</span>
           <span class="data-value mono" id="hero-ledger">{network.latest_ledger?.toLocaleString() || '---'}</span>
         </div>
         <div class="data-sep"></div>
         <div class="data-cell">
-          <span class="data-label">NODES</span>
-          <span class="data-value mono"><span class="data-green">{network.nodes_online}</span>/{network.nodes_total}</span>
-        </div>
-        <div class="data-sep"></div>
-        <div class="data-cell">
-          <span class="data-label">REGIONS</span>
-          <span class="data-value mono">{regionCount}</span>
+          <span class="data-label">HISTORY</span>
+          <span class="data-value mono"><span class="data-green">Genesis</span></span>
         </div>
         <div class="data-sep"></div>
         <div class="data-cell">
           <span class="data-label">AVG RESPONSE</span>
           <span class="data-value mono"><span class="data-green">&lt;50ms</span></span>
         </div>
+        <div class="data-sep"></div>
+        <div class="data-cell">
+          <span class="data-label">UPTIME</span>
+          <span class="data-value mono"><span class="data-green">99.9%</span></span>
+        </div>
       </div>
 
       <div class="hero-actions">
-        <a href="#quickstart" class="btn btn-primary">Get Started</a>
-        <a href="#api" class="btn btn-ghost">View API</a>
+        <a href="/login" class="btn btn-primary">Get Started Free</a>
+        <a href="#quickstart" class="btn btn-ghost">Quick Start</a>
       </div>
     </div>
   </div>
 
   <div class="container">
-    <NetworkMap network={network} />
-
-    <section class="features-grid">
-      <div class="feature">
-        <div class="feature-icon"><Zap size={22} /></div>
-        <h3>Full Ledger History</h3>
-        <p>Access every transaction and ledger since genesis. No archive add-ons, no restrictions.</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon"><Globe size={22} /></div>
-        <h3>Globally Distributed</h3>
-        <p>Global edge network across {regionCount} regions. Your queries are served from the nearest location.</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon"><ShieldCheck size={22} /></div>
-        <h3>Always Accurate</h3>
-        <p>Only validated, finalized data is served. No stale results, no inconsistencies.</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon"><RefreshCw size={22} /></div>
-        <h3>Highly Available</h3>
-        <p>Redundant infrastructure with automatic failover. The network self-heals and rebalances.</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon"><Cable size={22} /></div>
-        <h3>Drop-in Compatible</h3>
-        <p>Works with every XRPL client library. Swap one URL. xrpl.js, ripple-lib, any SDK.</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon"><KeyRound size={22} /></div>
-        <h3>Free Tier Included</h3>
-        <p>Sign up with Google, get your endpoint in seconds. 10M credits free every month.</p>
+    <section class="features-section">
+      <h2>Why XRPL Stream</h2>
+      <p class="section-sub">Everything you need to build on the XRP Ledger.</p>
+      <div class="features-grid">
+        <div class="feature">
+          <div class="feature-icon"><Zap size={22} /></div>
+          <h3>Full Ledger History</h3>
+          <p>Every transaction since genesis ledger 32570. Read and submit through a single endpoint.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon"><Globe size={22} /></div>
+          <h3>Low Latency</h3>
+          <p>Responses in under 50ms. Intelligent caching ensures your most frequent queries are served instantly.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon"><ShieldCheck size={22} /></div>
+          <h3>Always Accurate</h3>
+          <p>Only validated, finalized data. No stale results, no inconsistencies between requests.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon"><RefreshCw size={22} /></div>
+          <h3>99.9% Uptime</h3>
+          <p>Built-in redundancy and automatic failover. Your queries are always served.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon"><Cable size={22} /></div>
+          <h3>Drop-in Compatible</h3>
+          <p>Swap one URL. Works with xrpl.js, xrpl-py, xrpl4j, ripple-lib, and every XRPL client.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon"><KeyRound size={22} /></div>
+          <h3>Free to Start</h3>
+          <p>Sign in, get your endpoint. 15 requests per second and 10M credits every month, no card required.</p>
+        </div>
       </div>
     </section>
 
-    <Pricing userPlan={userPlan} />
+    <!-- Speed Comparison -->
+    <section class="speed-section">
+      <div class="speed-layout">
+        <div class="speed-text">
+          <h2>Performance that keeps you ahead</h2>
+          <p class="section-sub-left">Cached responses and optimized routing deliver data faster than public XRPL endpoints. Less waiting, more building.</p>
+          <div class="speed-stats">
+            <div class="speed-stat">
+              <span class="speed-num">~4x</span>
+              <span class="speed-label">Faster responses</span>
+            </div>
+            <div class="speed-stat">
+              <span class="speed-num">99.9%</span>
+              <span class="speed-label">Uptime</span>
+            </div>
+          </div>
+        </div>
+        <div class="speed-visual">
+          <div class="speed-card">
+            <div class="speed-card-header">
+              <span class="speed-tag">LIVE BENCHMARK</span>
+              <span class="speed-method mono">account_info</span>
+            </div>
+            <div class="speed-bars">
+              <div class="speed-row">
+                <span class="speed-bar-label">XRPL Stream</span>
+                <div class="speed-bar-track">
+                  <div class="speed-bar speed-bar-us" style="--target:18%">
+                    <span class="speed-bar-val">&lt;50ms</span>
+                  </div>
+                </div>
+              </div>
+              <div class="speed-row">
+                <span class="speed-bar-label">Public Node A</span>
+                <div class="speed-bar-track">
+                  <div class="speed-bar speed-bar-them" style="--target:55%">
+                    <span class="speed-bar-val">~180ms</span>
+                  </div>
+                </div>
+              </div>
+              <div class="speed-row">
+                <span class="speed-bar-label">Public Node B</span>
+                <div class="speed-bar-track">
+                  <div class="speed-bar speed-bar-them" style="--target:78%">
+                    <span class="speed-bar-val">~290ms</span>
+                  </div>
+                </div>
+              </div>
+              <div class="speed-row">
+                <span class="speed-bar-label">Rate Limited</span>
+                <div class="speed-bar-track">
+                  <div class="speed-bar speed-bar-fail" style="--target:100%">
+                    <span class="speed-bar-val">TIMEOUT</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="speed-card-footer">
+              <span class="speed-dot"></span> Cached query from nearest region
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Use Cases -->
+    <section class="use-cases">
+      <h2>Built for Every Use Case</h2>
+      <p class="section-sub">From payments to analytics, one API powers it all.</p>
+      <div class="uc-grid">
+        <div class="uc-card">
+          <div class="uc-icon"><Banknote size={22} /></div>
+          <div class="uc-text"><h3>Payments</h3>
+          <p>Cross-border payments, settlement tracking, and delivery validation in real time.</p></div>
+        </div>
+        <div class="uc-card">
+          <div class="uc-icon"><TrendingUp size={22} /></div>
+          <div class="uc-text"><h3>DeFi</h3>
+          <p>Live order books, AMM pools, path finding, and trade streaming on the XRPL DEX.</p></div>
+        </div>
+        <div class="uc-card">
+          <div class="uc-icon"><Image size={22} /></div>
+          <div class="uc-text"><h3>NFTs</h3>
+          <p>Mint, transfer, and query NFTs. Browse offers, track provenance, and index collections.</p></div>
+        </div>
+        <div class="uc-card">
+          <div class="uc-icon"><BarChart3 size={22} /></div>
+          <div class="uc-text"><h3>Analytics</h3>
+          <p>Index every transaction since genesis. Build dashboards and analyze on-chain activity.</p></div>
+        </div>
+        <div class="uc-card">
+          <div class="uc-icon"><Wallet size={22} /></div>
+          <div class="uc-text"><h3>Wallets</h3>
+          <p>Real-time balances, transaction history, and trust lines with fast lookups.</p></div>
+        </div>
+        <div class="uc-card">
+          <div class="uc-icon"><Building2 size={22} /></div>
+          <div class="uc-text"><h3>Fintech</h3>
+          <p>Compliance tools, audit trails, and financial reporting with full ledger access.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Infrastructure -->
+    <section class="infra-section">
+      <div class="infra-layout">
+        <div class="infra-visual">
+          <div class="globe-container">
+            <div class="globe">
+              <div class="globe-ring globe-ring-1"></div>
+              <div class="globe-ring globe-ring-2"></div>
+              <div class="globe-ring globe-ring-3"></div>
+              <div class="globe-core">
+                <div class="core-grid"></div>
+              </div>
+              <div class="orbit orbit-1"><div class="orbit-dot"></div></div>
+              <div class="orbit orbit-2"><div class="orbit-dot orbit-dot-green"></div></div>
+              <div class="orbit orbit-3"><div class="orbit-dot orbit-dot-cyan"></div></div>
+            </div>
+            <div class="float-card fc-1">
+              <div class="fc-row"><span class="fc-dot fc-dot-green"></span><span class="fc-label">REQUEST</span></div>
+              <span class="fc-val mono">account_info <span class="fc-ok">200</span></span>
+            </div>
+            <div class="float-card fc-2">
+              <div class="fc-row"><span class="fc-dot fc-dot-blue"></span><span class="fc-label">LATENCY</span></div>
+              <span class="fc-val mono"><span class="fc-green">12ms</span></span>
+            </div>
+            <div class="float-card fc-3">
+              <div class="fc-row"><span class="fc-dot fc-dot-cyan"></span><span class="fc-label">SOURCE</span></div>
+              <span class="fc-val mono">cache <span class="fc-ok">hit</span></span>
+            </div>
+          </div>
+        </div>
+        <div class="infra-text">
+          <h2>Reliable by design</h2>
+          <p class="section-sub-left">Automatic failover, intelligent caching, and continuous monitoring. Your queries are served even during upstream disruptions.</p>
+          <div class="infra-metrics">
+            <div class="infra-metric">
+              <span class="im-val">99.9%</span>
+              <span class="im-label">Uptime</span>
+            </div>
+            <div class="infra-metric">
+              <span class="im-val">&lt;50ms</span>
+              <span class="im-label">Avg Latency</span>
+            </div>
+            <div class="infra-metric">
+              <span class="im-val">24/7</span>
+              <span class="im-label">Monitoring</span>
+            </div>
+          </div>
+          <a href="/pricing" class="btn btn-ghost infra-cta">See plans <ArrowRight size={14} /></a>
+        </div>
+      </div>
+    </section>
 
     <div id="quickstart">
       <ApiDocs />
     </div>
+
+    <!-- Blog Preview -->
+    <section class="blog-preview">
+      <div class="bp-header">
+        <h2>From the blog</h2>
+        <a href="/blog" class="bp-link">View all <ArrowRight size={14} /></a>
+      </div>
+      <a href="/blog/born-from-the-ledger" class="bp-card">
+        <span class="bp-tag">Origin Story</span>
+        <h3>Born from the Ledger: Why We Built XRPL Stream</h3>
+        <p>We built XRPL Stream to supply reliable, full-history data to our analytics app and toolkit xrpl.to. Once the infrastructure was running, we opened it to every developer building on the XRP Ledger.</p>
+      </a>
+    </section>
+
+    <!-- Bottom CTA -->
+    <section class="bottom-cta">
+      <h2>Ready to build on the XRP Ledger?</h2>
+      <p>Get your endpoint in seconds. No credit card required.</p>
+      <div class="cta-actions">
+        <a href="/login" class="btn btn-primary">Create Free Account</a>
+        <a href="/docs" class="btn btn-ghost">Read the Docs <ArrowRight size={14} /></a>
+      </div>
+    </section>
 
     <script is:inline>
     // --- XRPL Command Flow ---
@@ -252,8 +445,7 @@ const regionCount = Object.keys(network.regions || {}).length;
         requestAnimationFrame(draw);
       }
 
-      init();
-      draw();
+      requestAnimationFrame(() => { init(); draw(); });
       window.addEventListener('resize', init);
     })();
 
@@ -317,6 +509,17 @@ const regionCount = Object.keys(network.regions || {}).length;
     text-align: center;
     margin-bottom: 0;
   }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: linear-gradient(to bottom, transparent, var(--bg));
+    pointer-events: none;
+    z-index: 3;
+  }
   .hero-glow {
     position: absolute;
     top: -120px;
@@ -324,7 +527,7 @@ const regionCount = Object.keys(network.regions || {}).length;
     transform: translateX(-50%);
     width: 700px;
     height: 500px;
-    background: radial-gradient(ellipse, rgba(88,166,255,0.10) 0%, rgba(140,80,255,0.04) 40%, transparent 70%);
+    background: radial-gradient(ellipse, rgba(77,158,255,0.12) 0%, rgba(62,207,142,0.03) 40%, transparent 70%);
     pointer-events: none;
     z-index: 0;
   }
@@ -332,7 +535,7 @@ const regionCount = Object.keys(network.regions || {}).length;
     top: -60px;
     width: 500px;
     height: 400px;
-    background: radial-gradient(ellipse, rgba(200,60,255,0.06) 0%, transparent 60%);
+    background: radial-gradient(ellipse, rgba(62,207,142,0.05) 0%, transparent 60%);
   }
   .container { max-width: 1400px; margin: 0 auto; padding: 0 40px; position: relative; z-index: 4; }
   .hero-badge {
@@ -370,12 +573,43 @@ const regionCount = Object.keys(network.regions || {}).length;
     line-height: 1.1;
   }
   .accent { color: var(--accent); text-shadow: 0 0 40px rgba(88,166,255,0.3); }
+  .h1-sub { display: block; font-size: 1.2rem; font-weight: 400; color: var(--text-muted); margin-top: 8px; letter-spacing: 0; }
   .subtitle {
     color: var(--text-muted);
     font-size: 1.1rem;
     line-height: 1.7;
     max-width: 520px;
-    margin: 0 auto 32px;
+    margin: 0 auto 16px;
+  }
+  .network-badges {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+  .net-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 6px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-family: var(--mono);
+  }
+  .net-mainnet {
+    color: #3fb950;
+    background: rgba(63,185,80,0.08);
+    border: 1px solid rgba(63,185,80,0.25);
+  }
+  .net-testnet {
+    color: #d29922;
+    background: rgba(210,153,34,0.08);
+    border: 1px solid rgba(210,153,34,0.25);
+  }
+  .net-devnet {
+    color: #a371f7;
+    background: rgba(163,113,247,0.08);
+    border: 1px solid rgba(163,113,247,0.25);
   }
 
   /* Data strip */
@@ -424,9 +658,9 @@ const regionCount = Object.keys(network.regions || {}).length;
     transition: all 0.2s ease;
     cursor: pointer;
   }
-  .btn-primary {
+  .btn-primary, a.btn-primary {
     background: var(--accent);
-    color: #0a0e17;
+    color: #fff !important;
     box-shadow: 0 0 20px rgba(88,166,255,0.2), 0 0 60px rgba(88,166,255,0.08);
   }
   .btn-primary:hover { background: #79c0ff; text-decoration: none; box-shadow: 0 0 30px rgba(88,166,255,0.35), 0 0 80px rgba(88,166,255,0.12); }
@@ -437,11 +671,12 @@ const regionCount = Object.keys(network.regions || {}).length;
   }
   .btn-ghost:hover { border-color: var(--accent); color: var(--text); text-decoration: none; }
 
+  .features-section { margin-bottom: 96px; }
+  .features-section h2 { font-size: 1.5rem; font-weight: 700; text-align: center; margin-bottom: 8px; }
   .features-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
-    margin-bottom: 56px;
   }
   .feature {
     background: var(--surface);
@@ -466,18 +701,33 @@ const regionCount = Object.keys(network.regions || {}).length;
   .feature h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; color: var(--text); }
   .feature p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.55; }
 
+  /* Use Cases */
+  .use-cases { margin-bottom: 96px; }
+  .use-cases h2 { font-size: 1.5rem; font-weight: 700; text-align: center; margin-bottom: 8px; }
+  .section-sub { text-align: center; color: var(--text-muted); font-size: 0.95rem; margin-bottom: 32px; }
+  .uc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .uc-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 28px; transition: border-color 0.2s, transform 0.2s; }
+  .uc-card:hover { border-color: rgba(88,166,255,0.3); transform: translateY(-2px); }
+  .uc-icon { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); border-radius: 10px; color: var(--accent); margin-bottom: 14px; }
+  .uc-text { min-width: 0; }
+  .uc-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; }
+  .uc-card p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.55; }
+
   @media (max-width: 768px) {
     .container { padding: 0 16px; }
     .hero { padding: 80px 0 60px; margin-bottom: 36px; }
     h1 { font-size: 2.4rem; }
     .subtitle { font-size: 0.95rem; }
     .btn { padding: 9px 20px; font-size: 0.85rem; }
-    .features-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 36px; }
+    .net-badge { font-size: 0.62rem; padding: 3px 10px; }
+    .features-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
     .feature { padding: 20px; }
+    .uc-grid { grid-template-columns: 1fr 1fr; }
     .hero-data-strip { gap: 0; }
     .data-cell { padding: 6px 14px; }
     .data-value.mono { font-size: 0.82rem; }
     .data-sep { height: 22px; }
+    .sp-logos { grid-template-columns: repeat(3, 1fr); gap: 10px; }
   }
   @media (max-width: 480px) {
     .container { padding: 0 12px; }
@@ -487,10 +737,214 @@ const regionCount = Object.keys(network.regions || {}).length;
     .btn { width: 100%; text-align: center; }
     .features-grid { grid-template-columns: 1fr; gap: 10px; }
     .feature { padding: 18px; }
-    .hero-data-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+    .uc-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .uc-card { padding: 16px; }
+    .uc-icon { width: 34px; height: 34px; margin-bottom: 10px; }
+    .uc-card h3 { font-size: 0.85rem; margin-bottom: 4px; }
+    .uc-card p { font-size: 0.75rem; line-height: 1.4; }
+    .hero-data-strip { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0; }
     .data-sep { display: none; }
     .data-cell { padding: 8px 6px; }
     .data-value.mono { font-size: 0.78rem; }
     .data-label { font-size: 0.52rem; }
+    .sp-logos { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .sp-logo { padding: 10px 8px; }
+    .sp-name { font-size: 0.78rem; }
+  }
+
+  /* Speed Comparison */
+  .speed-section { margin-bottom: 96px; }
+  .speed-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+  .speed-text h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 12px; text-align: left; }
+  .section-sub-left { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 28px; }
+  .speed-stats { display: flex; gap: 32px; }
+  .speed-stat { display: flex; flex-direction: column; }
+  .speed-num { font-size: 2rem; font-weight: 800; color: var(--accent); font-family: var(--mono); line-height: 1; }
+  .speed-label { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+
+  .speed-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+  .speed-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .speed-tag { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #3fb950; background: rgba(63,185,80,0.1); border: 1px solid rgba(63,185,80,0.2); padding: 3px 10px; border-radius: 6px; }
+  .speed-method { font-size: 0.78rem; color: var(--text-muted); }
+  .speed-bars { display: flex; flex-direction: column; gap: 12px; }
+  .speed-row { display: flex; align-items: center; gap: 12px; }
+  .speed-bar-label { font-size: 0.72rem; color: var(--text-muted); width: 100px; flex-shrink: 0; text-align: right; }
+  .speed-bar-track { flex: 1; height: 28px; background: rgba(255,255,255,0.03); border-radius: 6px; overflow: hidden; position: relative; }
+  .speed-bar { height: 100%; border-radius: 6px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; width: 0; animation: bar-fill 1.5s ease-out forwards; animation-delay: 0.5s; }
+  .speed-bar-val { font-size: 0.68rem; font-weight: 700; font-family: var(--mono); white-space: nowrap; }
+  .speed-bar-us { background: linear-gradient(90deg, rgba(88,166,255,0.2), rgba(88,166,255,0.4)); }
+  .speed-bar-us .speed-bar-val { color: var(--accent); }
+  .speed-bar-them { background: linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.08)); }
+  .speed-bar-them .speed-bar-val { color: var(--text-muted); }
+  .speed-bar-fail { background: linear-gradient(90deg, rgba(248,81,73,0.1), rgba(248,81,73,0.2)); }
+  .speed-bar-fail .speed-bar-val { color: #f85149; }
+  @keyframes bar-fill { to { width: var(--target); } }
+
+  .speed-card-footer { margin-top: 16px; font-size: 0.7rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+  .speed-dot { width: 6px; height: 6px; background: #3fb950; border-radius: 50%; box-shadow: 0 0 6px #3fb950; }
+
+  @media (max-width: 768px) {
+    .speed-layout { grid-template-columns: 1fr; gap: 28px; }
+    .speed-text h2 { text-align: center; }
+    .section-sub-left { text-align: center; }
+    .speed-stats { justify-content: center; }
+    .speed-bar-label { width: 80px; font-size: 0.65rem; }
+  }
+  @media (max-width: 480px) {
+    .speed-bar-label { width: 70px; font-size: 0.6rem; }
+    .speed-num { font-size: 1.6rem; }
+  }
+
+  /* Infrastructure / Globe */
+  .infra-section { margin-bottom: 96px; }
+  .infra-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+  .infra-text h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 12px; text-align: left; }
+  .infra-metrics { display: flex; gap: 28px; margin-bottom: 24px; }
+  .infra-metric { display: flex; flex-direction: column; }
+  .im-val { font-size: 1.6rem; font-weight: 800; color: var(--accent); font-family: var(--mono); line-height: 1; }
+  .im-label { font-size: 0.68rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+  .infra-cta { display: inline-flex; align-items: center; gap: 6px; }
+
+  .globe-container { position: relative; width: 100%; aspect-ratio: 1; max-width: 340px; margin: 0 auto; perspective: 900px; }
+  .globe { position: absolute; inset: 10%; transform-style: preserve-3d; }
+  .globe-core {
+    position: absolute; inset: 18%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 32%, rgba(77,158,255,0.14), rgba(62,207,142,0.03) 60%, transparent 80%);
+    border: 1px solid rgba(77,158,255,0.1);
+    box-shadow: 0 0 100px rgba(77,158,255,0.06), inset 0 0 60px rgba(77,158,255,0.03);
+    overflow: hidden;
+  }
+  .core-grid {
+    position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 24%, rgba(77,158,255,0.04) 24%, rgba(77,158,255,0.04) 25%)
+      ,repeating-linear-gradient(90deg, transparent, transparent 24%, rgba(77,158,255,0.03) 24%, rgba(77,158,255,0.03) 25%);
+    border-radius: 50%;
+    animation: grid-rotate 60s linear infinite;
+  }
+  @keyframes grid-rotate { to { transform: rotate(360deg); } }
+  .globe-ring {
+    position: absolute; inset: 0;
+    border: 1px solid rgba(77,158,255,0.08);
+    border-radius: 50%;
+    transform-style: preserve-3d;
+  }
+  .globe-ring-1 { transform: rotateX(75deg); animation: ring-spin 25s linear infinite; border-color: rgba(77,158,255,0.1); }
+  .globe-ring-2 { transform: rotateY(75deg); animation: ring-spin 30s linear infinite reverse; border-color: rgba(62,207,142,0.06); }
+  .globe-ring-3 { transform: rotateX(75deg) rotateY(45deg); animation: ring-spin 35s linear infinite; border-color: rgba(77,158,255,0.04); }
+  @keyframes ring-spin { to { transform: rotateX(75deg) rotateZ(360deg); } }
+
+  .orbit { position: absolute; border: none; border-radius: 50%; transform-style: preserve-3d; }
+  .orbit::after { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgba(77,158,255,0.04); }
+  .orbit-1 { inset: -5%; transform: rotateX(70deg) rotateZ(0deg); animation: orbit-spin-1 10s linear infinite; }
+  .orbit-2 { inset: -15%; transform: rotateX(55deg) rotateZ(90deg); animation: orbit-spin-2 14s linear infinite; }
+  .orbit-3 { inset: -22%; transform: rotateX(65deg) rotateZ(45deg); animation: orbit-spin-3 18s linear infinite; }
+  @keyframes orbit-spin-1 { to { transform: rotateX(70deg) rotateZ(360deg); } }
+  @keyframes orbit-spin-2 { to { transform: rotateX(55deg) rotateZ(450deg); } }
+  @keyframes orbit-spin-3 { to { transform: rotateX(65deg) rotateZ(405deg); } }
+  .orbit-dot {
+    position: absolute; top: 0; left: 50%;
+    width: 5px; height: 5px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--accent), 0 0 20px rgba(77,158,255,0.3);
+    transform: translate(-50%, -50%);
+  }
+  .orbit-dot::after { content: ''; position: absolute; top: 50%; left: 50%; width: 20px; height: 2px; background: linear-gradient(90deg, rgba(77,158,255,0.4), transparent); transform: translate(-100%, -50%); border-radius: 2px; }
+  .orbit-dot-green { background: #3ecf8e; box-shadow: 0 0 10px #3ecf8e, 0 0 20px rgba(62,207,142,0.3); }
+  .orbit-dot-green::after { background: linear-gradient(90deg, rgba(62,207,142,0.4), transparent); }
+  .orbit-dot-cyan { background: #22d3ee; box-shadow: 0 0 10px #22d3ee, 0 0 20px rgba(34,211,238,0.3); }
+  .orbit-dot-cyan::after { background: linear-gradient(90deg, rgba(34,211,238,0.4), transparent); }
+
+  .float-card {
+    position: absolute;
+    background: rgba(10,10,15,0.85);
+    border: 1px solid rgba(77,158,255,0.1);
+    border-radius: 10px;
+    padding: 10px 14px;
+    backdrop-filter: blur(12px);
+    animation: float-bob 5s ease-in-out infinite;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .float-card:hover { border-color: rgba(77,158,255,0.25); box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+  .fc-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .fc-dot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
+  .fc-dot-green { background: #3ecf8e; box-shadow: 0 0 6px rgba(62,207,142,0.5); }
+  .fc-dot-blue { background: #4d9eff; box-shadow: 0 0 6px rgba(77,158,255,0.5); }
+  .fc-dot-cyan { background: #22d3ee; box-shadow: 0 0 6px rgba(34,211,238,0.5); }
+  .fc-label { font-size: 0.48rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
+  .fc-val { font-size: 0.72rem; color: var(--text-muted); }
+  .fc-ok { color: #3ecf8e; font-weight: 600; }
+  .fc-green { color: #3ecf8e; font-weight: 700; }
+  .fc-1 { top: 8%; right: -8%; animation-delay: 0s; }
+  .fc-2 { bottom: 22%; left: -10%; animation-delay: 1.8s; }
+  .fc-3 { bottom: 3%; right: 2%; animation-delay: 3.5s; }
+  @keyframes float-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  @media (max-width: 768px) {
+    .infra-layout { grid-template-columns: 1fr; gap: 28px; }
+    .infra-text h2 { text-align: center; }
+    .infra-text .section-sub-left { text-align: center; }
+    .infra-metrics { justify-content: center; }
+    .infra-cta { margin: 0 auto; }
+    .globe-container { max-width: 240px; }
+    .float-card { display: none; }
+  }
+
+  /* Social Proof */
+  .social-proof { text-align: center; margin-bottom: 96px; }
+  .sp-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 20px; }
+  .sp-logos { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; max-width: 700px; margin: 0 auto 16px; }
+  .sp-logo {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: border-color 0.2s;
+  }
+  .sp-logo:hover { border-color: rgba(88,166,255,0.3); }
+  .sp-name { font-family: var(--mono); font-size: 0.88rem; font-weight: 700; color: var(--accent); }
+  .sp-lang { font-size: 0.62rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; }
+  .sp-note { font-size: 0.78rem; color: var(--text-dim); }
+
+  /* Blog Preview */
+  .blog-preview { margin-bottom: 96px; padding-top: 64px; border-top: 1px solid var(--border); }
+  .bp-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .bp-header h2 { font-size: 1.3rem; font-weight: 700; }
+  .bp-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--accent); font-weight: 500; transition: gap 0.2s; }
+  .bp-link:hover { gap: 10px; text-decoration: none; }
+  .bp-card { display: block; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; transition: border-color 0.2s, transform 0.2s; text-decoration: none; }
+  .bp-card:hover { border-color: rgba(88,166,255,0.3); transform: translateY(-2px); text-decoration: none; }
+  .bp-tag { font-size: 0.62rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); padding: 3px 10px; border-radius: 6px; }
+  .bp-card h3 { font-size: 1.05rem; font-weight: 700; margin: 12px 0 8px; color: var(--text); }
+  .bp-card p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.6; }
+
+  /* Bottom CTA */
+  .bottom-cta {
+    text-align: center;
+    padding: 56px 0;
+    margin-bottom: 0;
+    border-top: 1px solid var(--border);
+  }
+  .bottom-cta a.btn-primary { color: #fff !important; }
+  .bottom-cta h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: 10px; }
+  .bottom-cta p { color: var(--text-muted); font-size: 1rem; margin-bottom: 28px; }
+  .cta-actions { display: flex; gap: 12px; justify-content: center; }
+  .cta-actions .btn-ghost { display: inline-flex; align-items: center; gap: 6px; }
+
+  @media (max-width: 768px) {
+    .bottom-cta h2 { font-size: 1.4rem; }
+  }
+  @media (max-width: 480px) {
+    .cta-actions { flex-direction: column; align-items: center; width: 100%; }
+    .cta-actions .btn { width: 100%; text-align: center; justify-content: center; }
   }
 </style>

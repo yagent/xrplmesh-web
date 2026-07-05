@@ -1,0 +1,98 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+---
+
+<Base title="Best XRP Wallets - Top XRPL Wallets Compared | XRPL Stream" description="Compare the best XRP wallets. Xaman, Crossmark, GemWallet, Ledger, Trust Wallet. Features, security, DEX access, and NFT support.">
+  <Header />
+  <article class="post">
+    <div class="post-header">
+      <a href="/guides" class="back-link">Back to Guides</a>
+      <div class="post-meta">
+        <span class="post-tag">Wallets</span>
+        <span class="post-tag">Security</span>
+        <time>April 13, 2026</time>
+      </div>
+      <h1>Best XRP Wallets</h1>
+      <p class="post-lead">Choosing the right XRP wallet depends on what you need -- DEX trading, NFTs, hardware security, or browser integration. Here are the top options compared.</p>
+    </div>
+    <div class="post-body">
+      <h2>Xaman (formerly XUMM)</h2>
+      <p><strong>Best for:</strong> Most users. Full-featured XRPL wallet with DEX, NFTs, and dApp signing.</p>
+      <p>Xaman is the most popular dedicated XRP Ledger wallet. Built by XRPL Labs, it provides native access to the XRPL DEX, NFT viewing, trust line management, and transaction signing for third-party dApps. The sign request system lets you approve transactions from websites and services without exposing your secret key. Available on iOS and Android.</p>
+      <p><strong>Pros:</strong> Full XRPL feature set, dApp ecosystem, active development, good UX. <strong>Cons:</strong> Mobile only, no desktop app.</p>
+
+      <h2>Crossmark</h2>
+      <p><strong>Best for:</strong> Browser-based dApp interaction, developers.</p>
+      <p>Crossmark is a browser extension wallet for the XRP Ledger, similar to what MetaMask is for Ethereum. It integrates directly into web browsers (Chrome, Brave, Firefox) and provides a signing interface for XRPL dApps. Developers building web applications on the XRPL typically support Crossmark for in-browser transaction signing.</p>
+      <p><strong>Pros:</strong> Browser extension, developer-friendly API, fast signing. <strong>Cons:</strong> Smaller ecosystem than Xaman, desktop browsers only.</p>
+
+      <h2>GemWallet</h2>
+      <p><strong>Best for:</strong> Simple browser extension wallet, lightweight use.</p>
+      <p>GemWallet is another browser extension for the XRPL. It focuses on simplicity -- send and receive XRP, manage trust lines, and sign transactions. It supports Chrome and Brave browsers. GemWallet is a good choice if you want a lightweight wallet without the complexity of full-featured alternatives.</p>
+      <p><strong>Pros:</strong> Simple, lightweight, browser extension. <strong>Cons:</strong> Fewer features than Xaman or Crossmark.</p>
+
+      <h2>Ledger (Hardware)</h2>
+      <p><strong>Best for:</strong> Long-term storage, maximum security.</p>
+      <p>Ledger hardware wallets (Nano S Plus, Nano X, Stax) support XRP natively. Your private keys never leave the hardware device, making it the most secure option for storing significant amounts of XRP. Ledger works with Xaman and other XRPL applications for transaction signing -- you approve each transaction on the physical device.</p>
+      <p><strong>Pros:</strong> Hardware security, private keys never exposed, works with Xaman. <strong>Cons:</strong> Costs money ($80-400), less convenient for frequent transactions.</p>
+
+      <h2>Trust Wallet</h2>
+      <p><strong>Best for:</strong> Multi-chain users who also hold XRP.</p>
+      <p>Trust Wallet supports XRP alongside hundreds of other cryptocurrencies. It is a good choice if you manage a diverse portfolio and want one wallet for everything. However, it does not support XRPL-specific features like the DEX, trust lines, or NFTs. For XRP-only usage, a dedicated XRPL wallet is better.</p>
+      <p><strong>Pros:</strong> Multi-chain, large user base, Binance-backed. <strong>Cons:</strong> No XRPL DEX, no trust lines, no NFTs, no dApp signing.</p>
+
+      <h2>Which wallet should you choose</h2>
+      <ul>
+        <li><strong>Trading on the XRPL DEX:</strong> Xaman -- native DEX access, token management</li>
+        <li><strong>Using XRPL dApps in browser:</strong> Crossmark -- browser extension, developer ecosystem</li>
+        <li><strong>Long-term holding:</strong> Ledger + Xaman -- hardware security with full feature access</li>
+        <li><strong>Simple send and receive:</strong> GemWallet -- lightweight, no complexity</li>
+        <li><strong>Multi-chain portfolio:</strong> Trust Wallet -- one app for everything</li>
+      </ul>
+
+      <h2>Security best practices</h2>
+      <ul>
+        <li><strong>Never share your secret key or family seed.</strong> No legitimate service will ask for it.</li>
+        <li><strong>Use a hardware wallet</strong> for amounts you cannot afford to lose.</li>
+        <li><strong>Enable account authorization</strong> if you are issuing tokens and need KYC controls.</li>
+        <li><strong>Set a regular key</strong> so you can rotate keys without changing your account address.</li>
+        <li><strong>Back up your recovery phrase</strong> offline in a secure location.</li>
+      </ul>
+
+      <h2>Building wallet integrations</h2>
+      <p>If you are building a wallet or integrating XRP payments into your application, XRPL Stream provides the API infrastructure you need. Real-time balance queries, transaction history, trust line management, and WebSocket subscriptions for live transaction monitoring -- all from a single endpoint with full history from genesis.</p>
+
+      <div class="post-cta">
+        <a href="/login" class="btn btn-primary">Get API Access</a>
+        <a href="/guides/xrpl-api" class="btn btn-ghost">XRPL API Guide</a>
+      </div>
+    </div>
+  </article>
+  <Footer />
+</Base>
+
+<style>
+  .post { max-width: 1400px; margin: 0 auto; padding: 48px 40px 64px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 24px; transition: color 0.2s; }
+  .back-link:hover { color: var(--accent); text-decoration: none; }
+  .post-header { margin-bottom: 40px; }
+  .post-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .post-tag { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); padding: 3px 10px; border-radius: 6px; }
+  time { font-size: 0.8rem; color: var(--text-dim); }
+  h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; }
+  .post-lead { font-size: 1.1rem; color: var(--text-muted); line-height: 1.7; }
+  .post-body h2 { font-size: 1.25rem; font-weight: 700; margin: 40px 0 12px; color: var(--text); }
+  .post-body p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 16px; }
+  .post-body a { color: var(--accent); }
+  .post-body ul { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin: 0 0 16px 20px; }
+  .post-body li { margin-bottom: 8px; }
+  .post-body li strong { color: var(--text); }
+  .post-cta { display: flex; gap: 12px; margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
+  .btn { display: inline-block; padding: 11px 28px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
+  .btn-primary { background: var(--accent); color: #fff; font-weight: 700; }
+  .btn-primary:hover { text-decoration: none; }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text-muted); }
+  .btn-ghost:hover { border-color: var(--accent); text-decoration: none; color: var(--text); }
+</style>

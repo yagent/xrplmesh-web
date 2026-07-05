@@ -1,0 +1,82 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+---
+
+<Base title="XRPL Transaction Fees Explained - How XRP Ledger Fees Work | XRPL Stream" description="How XRP Ledger transaction fees work. Base fees, open ledger fees, fee escalation, drops vs XRP, and how fees are burned. Complete guide for developers.">
+  <Header />
+  <article class="post">
+    <div class="post-header">
+      <a href="/blog" class="back-link">Back to Blog</a>
+      <div class="post-meta">
+        <span class="post-tag">Technical</span>
+        <time>April 13, 2026</time>
+      </div>
+      <h1>XRPL Transaction Fees Explained</h1>
+      <p class="post-lead">The XRP Ledger uses a fee mechanism that is fundamentally different from gas-based blockchains. Fees are tiny, predictable, and permanently destroyed. Here is how they work.</p>
+    </div>
+    <div class="post-body">
+      <h2>Drops, not gas</h2>
+      <p>XRP is divisible to six decimal places. The smallest unit is called a <strong>drop</strong> -- one millionth of an XRP (0.000001 XRP). All fees on the XRPL are denominated in drops. A typical transaction costs 10-12 drops, which is roughly $0.00002 at current prices. Compare that to Ethereum where a simple transfer can cost several dollars.</p>
+
+      <h2>Base fee</h2>
+      <p>The reference transaction cost is defined by the network validators through a consensus process. Currently, the base fee is <strong>10 drops</strong> (0.00001 XRP). This is the minimum cost for a standard transaction like a Payment, OfferCreate, or TrustSet. Some transaction types cost more -- for example, creating an EscrowCreate or setting up a multi-sign list requires a higher fee because they consume more ledger space.</p>
+
+      <h2>Open ledger fee</h2>
+      <p>When the network is under heavy load, the XRPL uses an escalating fee mechanism. If the current open ledger already contains a high number of transactions, the required fee increases. This is called the <strong>open ledger fee</strong>. It prevents spam during peak periods without affecting normal usage. You can check the current open ledger fee using the <strong>fee</strong> API method.</p>
+
+      <h2>Fee escalation</h2>
+      <p>The escalation formula works like this: as more transactions queue for the next ledger, the minimum fee required to be included increases exponentially. The first transactions in a ledger pay the base fee. As the ledger fills up, later transactions need to pay progressively more. Once the ledger closes (every 3-5 seconds), the fee resets. This means sustained spam is extremely expensive, while normal users rarely pay more than the base fee.</p>
+
+      <h2>Fees are destroyed</h2>
+      <p>Unlike most blockchains where fees go to validators or miners, <strong>XRPL transaction fees are permanently destroyed</strong>. They are removed from the total XRP supply forever. This makes XRP slightly deflationary over time. Since the ledger launched in 2012, approximately 12 million XRP have been destroyed through fees -- a tiny fraction of the 100 billion total supply, but a meaningful economic mechanism.</p>
+
+      <h2>Fee comparison</h2>
+      <p>Here is how XRPL fees compare to other major blockchains:</p>
+      <ul>
+        <li><strong>XRP Ledger:</strong> ~0.00001 XRP ($0.00002) per transaction</li>
+        <li><strong>Solana:</strong> ~0.000005 SOL ($0.001) per transaction</li>
+        <li><strong>Ethereum:</strong> Variable, typically $1-50+ depending on gas</li>
+        <li><strong>Bitcoin:</strong> Variable, typically $1-20+ depending on congestion</li>
+      </ul>
+      <p>The XRPL is one of the cheapest networks to transact on, which makes it ideal for micropayments, high-frequency trading on the DEX, and enterprise settlement.</p>
+
+      <h2>Reserve requirements</h2>
+      <p>Separate from transaction fees, the XRPL requires accounts to maintain a minimum reserve of XRP. The current base reserve is <strong>1 XRP</strong> to activate an account, plus <strong>0.2 XRP</strong> for each object the account owns (trust lines, offers, escrows, etc.). These reserves are not fees -- they are held in the account and can be recovered by removing objects.</p>
+
+      <h2>Querying fees with XRPL Stream</h2>
+      <p>You can check current fee levels using the XRPL Stream API. The <strong>fee</strong> method returns the current base fee, open ledger fee, and median fee. The <strong>server_info</strong> method includes validated ledger fee information. Both are available on mainnet, testnet, and devnet endpoints.</p>
+
+      <div class="post-cta">
+        <a href="/login" class="btn btn-primary">Get Started Free</a>
+        <a href="/docs" class="btn btn-ghost">Read the Docs</a>
+      </div>
+    </div>
+  </article>
+  <Footer />
+</Base>
+
+<style>
+  .post { max-width: 1400px; margin: 0 auto; padding: 48px 40px 64px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 24px; transition: color 0.2s; }
+  .back-link:hover { color: var(--accent); text-decoration: none; }
+  .post-header { margin-bottom: 40px; }
+  .post-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .post-tag { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); padding: 3px 10px; border-radius: 6px; }
+  time { font-size: 0.8rem; color: var(--text-dim); }
+  h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; }
+  .post-lead { font-size: 1.1rem; color: var(--text-muted); line-height: 1.7; }
+  .post-body h2 { font-size: 1.25rem; font-weight: 700; margin: 40px 0 12px; color: var(--text); }
+  .post-body p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 16px; }
+  .post-body a { color: var(--accent); }
+  .post-body ul { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin: 0 0 16px 20px; }
+  .post-body li { margin-bottom: 8px; }
+  .post-body li strong { color: var(--text); }
+  .post-cta { display: flex; gap: 12px; margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
+  .btn { display: inline-block; padding: 11px 28px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
+  .btn-primary { background: var(--accent); color: #fff; font-weight: 700; }
+  .btn-primary:hover { text-decoration: none; }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text-muted); }
+  .btn-ghost:hover { border-color: var(--accent); text-decoration: none; color: var(--text); }
+</style>

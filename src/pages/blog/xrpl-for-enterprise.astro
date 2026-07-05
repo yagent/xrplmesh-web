@@ -1,0 +1,82 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+---
+
+<Base title="XRPL for Enterprise - Why Businesses Choose the XRP Ledger | XRPL Stream" description="Why enterprises choose the XRP Ledger. 3-5 second settlement, built-in DEX, tokenization, compliance features, and real-world use cases.">
+  <Header />
+  <article class="post">
+    <div class="post-header">
+      <a href="/blog" class="back-link">Back to Blog</a>
+      <div class="post-meta">
+        <span class="post-tag">Enterprise</span>
+        <time>April 13, 2026</time>
+      </div>
+      <h1>XRPL for Enterprise</h1>
+      <p class="post-lead">The XRP Ledger was built for institutional use from day one. Fast settlement, negligible fees, built-in compliance tools, and a native decentralized exchange make it uniquely suited for enterprise applications.</p>
+    </div>
+    <div class="post-body">
+      <h2>3-5 second settlement</h2>
+      <p>Every transaction on the XRP Ledger settles in 3-5 seconds with finality. There is no concept of unconfirmed transactions or chain reorganizations. Once a transaction appears in a validated ledger, it is permanent. This makes the XRPL suitable for real-time payments, trade settlement, and any workflow where immediate confirmation matters.</p>
+
+      <h2>Negligible transaction costs</h2>
+      <p>A standard XRPL transaction costs approximately 0.00001 XRP -- less than a fraction of a cent. This makes high-volume use cases economically viable. An enterprise processing millions of transactions per month pays essentially nothing in network fees. Compare this to Ethereum where the same volume could cost thousands of dollars in gas.</p>
+
+      <h2>Built-in decentralized exchange</h2>
+      <p>The XRPL has a native order book DEX built directly into the protocol. Any token issued on the ledger can be traded against any other token without needing a third-party exchange or smart contract. This enables on-chain forex, cross-currency payments with automatic path finding, and institutional trading without counterparty risk from external DEX contracts.</p>
+
+      <h2>Tokenization</h2>
+      <p>Enterprises can issue tokens directly on the XRPL representing any asset -- fiat currencies, securities, commodities, loyalty points, or stablecoins. The trust line model gives issuers granular control: they can freeze individual holdings, set transfer fees, require authorization for holders, and claw back tokens if needed for compliance. Several central banks have explored or piloted CBDC issuance on the XRPL.</p>
+
+      <h2>Compliance and control</h2>
+      <p>The XRPL provides built-in compliance features that enterprises need:</p>
+      <ul>
+        <li><strong>Authorized trust lines:</strong> Require KYC approval before users can hold your token</li>
+        <li><strong>Freezing:</strong> Freeze individual accounts or global supply for compliance actions</li>
+        <li><strong>Clawback:</strong> Recover tokens from holders when legally required</li>
+        <li><strong>Transfer fees:</strong> Charge a percentage on every transfer of your token</li>
+        <li><strong>Deposit authorization:</strong> Require approval before receiving payments</li>
+      </ul>
+
+      <h2>Real-world use cases</h2>
+      <p><strong>Cross-border payments:</strong> Ripple and its partners use XRP and the XRPL for real-time cross-border settlement. Financial institutions can move value across borders in seconds instead of days, with transparent fees and full audit trails.</p>
+      <p><strong>Stablecoins:</strong> Multiple stablecoin issuers operate on the XRPL, including fiat-backed tokens for USD, EUR, and other currencies. The built-in DEX provides instant liquidity between them.</p>
+      <p><strong>NFTs and digital assets:</strong> The XLS-20 NFT standard enables native NFT minting, trading, and royalty enforcement at the protocol level. Enterprises use this for digital collectibles, event tickets, identity documents, and proof of ownership.</p>
+      <p><strong>Supply chain:</strong> The combination of fast settlement, low fees, and token issuance makes the XRPL suitable for supply chain tracking and trade finance applications.</p>
+
+      <h2>Infrastructure with XRPL Stream</h2>
+      <p>XRPL Stream provides enterprise-grade API access to the XRP Ledger. Full transaction history from genesis, 21-node global edge network, WebSocket subscriptions, and dedicated endpoints with guaranteed rate limits. Whether you are building a payment system, trading platform, or analytics dashboard, XRPL Stream gives you the data infrastructure to move fast.</p>
+
+      <div class="post-cta">
+        <a href="/login" class="btn btn-primary">Get Started Free</a>
+        <a href="/pricing" class="btn btn-ghost">Enterprise Plans</a>
+      </div>
+    </div>
+  </article>
+  <Footer />
+</Base>
+
+<style>
+  .post { max-width: 1400px; margin: 0 auto; padding: 48px 40px 64px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 24px; transition: color 0.2s; }
+  .back-link:hover { color: var(--accent); text-decoration: none; }
+  .post-header { margin-bottom: 40px; }
+  .post-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .post-tag { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); padding: 3px 10px; border-radius: 6px; }
+  time { font-size: 0.8rem; color: var(--text-dim); }
+  h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; }
+  .post-lead { font-size: 1.1rem; color: var(--text-muted); line-height: 1.7; }
+  .post-body h2 { font-size: 1.25rem; font-weight: 700; margin: 40px 0 12px; color: var(--text); }
+  .post-body p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 16px; }
+  .post-body a { color: var(--accent); }
+  .post-body ul { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin: 0 0 16px 20px; }
+  .post-body li { margin-bottom: 8px; }
+  .post-body li strong { color: var(--text); }
+  .post-cta { display: flex; gap: 12px; margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
+  .btn { display: inline-block; padding: 11px 28px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
+  .btn-primary { background: var(--accent); color: #fff; font-weight: 700; }
+  .btn-primary:hover { text-decoration: none; }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text-muted); }
+  .btn-ghost:hover { border-color: var(--accent); text-decoration: none; color: var(--text); }
+</style>

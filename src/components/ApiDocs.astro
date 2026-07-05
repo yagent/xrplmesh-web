@@ -8,14 +8,14 @@ import { Copy, Play, ArrowRight } from 'lucide-astro';
     <div class="endpoint">
       <div class="endpoint-header">
         <span class="method post">POST</span>
-        <code class="url">https://s1.xrplmesh.com/e/YOUR_TOKEN</code>
+        <code class="url">https://s1.xrpl.stream/e/YOUR_TOKEN</code>
       </div>
-      <p class="desc">Your dedicated endpoint. Full XRPL API, full history.</p>
+      <p class="desc">Your dedicated endpoint. Full history queries and transaction submission.</p>
     </div>
     <div class="endpoint">
       <div class="endpoint-header">
         <span class="method ws">WS</span>
-        <code class="url">wss://s1.xrplmesh.com/e/YOUR_TOKEN</code>
+        <code class="url">wss://s1.xrpl.stream/e/YOUR_TOKEN</code>
       </div>
       <p class="desc">WebSocket endpoint for subscriptions and live streaming.</p>
     </div>
@@ -48,7 +48,7 @@ import { Copy, Play, ArrowRight } from 'lucide-astro';
 
     <!-- cURL -->
     <div class="terminal-body tab-panel active" data-panel="curl">
-      <div class="term-line"><span class="prompt">$</span> <span class="cmd typed" style="--chars:62">curl -s -X POST https://s1.xrplmesh.com/e/YOUR_TOKEN \</span></div>
+      <div class="term-line"><span class="prompt">$</span> <span class="cmd typed" style="--chars:62">curl -s -X POST https://s1.xrpl.stream/e/YOUR_TOKEN \</span></div>
       <div class="term-line"><span class="prompt">&gt;</span> <span class="cmd typed" style="--chars:42;--delay:1.2s">  -H "Content-Type: application/json" \</span></div>
       <div class="term-line"><span class="prompt">&gt;</span> <span class="cmd typed" style="--chars:56;--delay:2s">  -d '{"{"}"command":"account_info","account":"rPT1..."{"}"}'</span></div>
       <div class="term-blank"></div>
@@ -69,7 +69,7 @@ import { Copy, Play, ArrowRight } from 'lucide-astro';
     <div class="terminal-body tab-panel" data-panel="js">
       <div class="term-line"><span class="kw">import</span> {`{`} Client {`}`} <span class="kw">from</span> <span class="jv">'xrpl'</span></div>
       <div class="term-blank"></div>
-      <div class="term-line"><span class="kw">const</span> client = <span class="kw">new</span> <span class="fn">Client</span>(<span class="jv">'wss://s1.xrplmesh.com/e/YOUR_TOKEN'</span>)</div>
+      <div class="term-line"><span class="kw">const</span> client = <span class="kw">new</span> <span class="fn">Client</span>(<span class="jv">'wss://s1.xrpl.stream/e/YOUR_TOKEN'</span>)</div>
       <div class="term-line"><span class="kw">await</span> client.<span class="fn">connect</span>()</div>
       <div class="term-blank"></div>
       <div class="term-line"><span class="kw">const</span> resp = <span class="kw">await</span> client.<span class="fn">request</span>({`{`}</div>
@@ -86,7 +86,7 @@ import { Copy, Play, ArrowRight } from 'lucide-astro';
       <div class="term-line"><span class="kw">from</span> xrpl.clients <span class="kw">import</span> JsonRpcClient</div>
       <div class="term-line"><span class="kw">from</span> xrpl.models <span class="kw">import</span> AccountInfo</div>
       <div class="term-blank"></div>
-      <div class="term-line">client = <span class="fn">JsonRpcClient</span>(<span class="jv">"https://s1.xrplmesh.com/e/YOUR_TOKEN"</span>)</div>
+      <div class="term-line">client = <span class="fn">JsonRpcClient</span>(<span class="jv">"https://s1.xrpl.stream/e/YOUR_TOKEN"</span>)</div>
       <div class="term-blank"></div>
       <div class="term-line">resp = client.<span class="fn">request</span>(<span class="fn">AccountInfo</span>(</div>
       <div class="term-line">    account=<span class="jv">"rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe"</span></div>
@@ -98,6 +98,7 @@ import { Copy, Play, ArrowRight } from 'lucide-astro';
   </div>
 
   <div class="qs-footer">
+    <a href="/login" class="qs-cta">Get your API key free <ArrowRight size={14} /></a>
     <a href="/docs" class="qs-link">Read the docs <ArrowRight size={14} /></a>
   </div>
 </section>
@@ -188,7 +189,7 @@ import { Copy, Play, ArrowRight } from 'lucide-astro';
     padding: 6px 14px;
     border: none;
     background: transparent;
-    color: var(--text-dim);
+    color: var(--text-muted);
     font-size: 0.75rem;
     font-weight: 600;
     font-family: var(--mono);
@@ -196,7 +197,7 @@ import { Copy, Play, ArrowRight } from 'lucide-astro';
     cursor: pointer;
     transition: all 0.2s;
   }
-  .tab:hover { color: var(--text-muted); }
+  .tab:hover { color: var(--text); }
   .tab.active { background: rgba(88,166,255,0.1); color: var(--accent); }
 
   /* Terminal */
@@ -286,7 +287,21 @@ import { Copy, Play, ArrowRight } from 'lucide-astro';
   @keyframes blink { 50% { opacity: 0; } }
 
   /* Footer link */
-  .qs-footer { margin-top: 16px; text-align: right; }
+  .qs-footer { margin-top: 20px; display: flex; align-items: center; justify-content: space-between; }
+  .qs-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.88rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 0 20px rgba(88,166,255,0.2);
+  }
+  .qs-cta:hover { background: #79c0ff; text-decoration: none; box-shadow: 0 0 30px rgba(88,166,255,0.35); }
   .qs-link {
     display: inline-flex;
     align-items: center;

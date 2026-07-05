@@ -1,0 +1,101 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+---
+
+<Base title="XRPL Network History - Uptime, Reliability, and Major Events | XRPL Stream" description="Complete history of the XRP Ledger network. Uptime record, major events, amendments, and why the XRPL is one of the most reliable blockchains.">
+  <Header />
+  <article class="post">
+    <div class="post-header">
+      <a href="/blog" class="back-link">Back to Blog</a>
+      <div class="post-meta">
+        <span class="post-tag">Network</span>
+        <span class="post-tag">History</span>
+        <time>April 13, 2026</time>
+      </div>
+      <h1>XRPL Network History</h1>
+      <p class="post-lead">The XRP Ledger has been running continuously since June 2012 -- over 13 years of uninterrupted operation. Here is the complete history of major network events, upgrades, and what makes the XRPL one of the most reliable blockchains ever built.</p>
+    </div>
+    <div class="post-body">
+      <h2>13 years of uptime</h2>
+      <p>The XRP Ledger launched on June 2, 2012. Since then, it has processed over 2.8 billion transactions across more than 100 million validated ledgers. The network closes a new ledger every 3-5 seconds, 24/7/365. Unlike many other blockchains, the XRPL has never experienced a prolonged network outage or halt.</p>
+      <p>For context, Solana has experienced over 10 major outages since its 2020 launch, some lasting over 17 hours. Ethereum has never halted but has experienced significant congestion events. The XRPL's consensus mechanism was specifically designed for continuous, predictable operation.</p>
+
+      <h2>How consensus works</h2>
+      <p>The XRPL uses a unique federated consensus protocol -- not proof-of-work, not proof-of-stake. Validators propose transaction sets and vote in rounds until at least 80% of trusted validators agree. This typically takes 3-5 seconds per ledger. The model avoids the energy waste of mining and the centralization risks of staking, while providing fast finality.</p>
+      <p>There are approximately 150+ validators on the network, with about 35 on the default Unique Node List (UNL). Validators do not earn rewards -- they run nodes because they have a stake in the network's operation (exchanges, institutions, community members).</p>
+
+      <h2>Major network events</h2>
+      <ul>
+        <li><strong>June 2012:</strong> XRP Ledger launches with ledger 32,570 as the first public ledger</li>
+        <li><strong>2013-2015:</strong> Early growth period. Network processes its first million transactions. Gateways issue IOU tokens for fiat currencies.</li>
+        <li><strong>2017-2018:</strong> Massive adoption wave. XRP reaches all-time high price. Network handles record transaction volumes without issues.</li>
+        <li><strong>2020:</strong> SEC files lawsuit against Ripple. No network impact -- the XRPL operates independently of Ripple the company.</li>
+        <li><strong>2021:</strong> Federated sidechains proposal. Network continues growing despite regulatory uncertainty.</li>
+        <li><strong>2022:</strong> XLS-20 NFT amendment activates. Native NFT minting, trading, and royalty enforcement on-chain.</li>
+        <li><strong>2023:</strong> AMM (Automated Market Maker) amendment activates. Native liquidity pools alongside the existing order book DEX.</li>
+        <li><strong>2024:</strong> Ripple vs SEC settlement. Clawback amendment activates for compliance. Multi-purpose tokens proposed.</li>
+        <li><strong>2025-2026:</strong> DID (Decentralized Identity) features. Xahau sidechain launches. EVM sidechain development continues. XRP ETF filings.</li>
+      </ul>
+
+      <h2>Amendment process</h2>
+      <p>The XRPL upgrades through an on-chain amendment process. When developers propose a new feature, validators vote on whether to activate it. An amendment needs sustained 80% support from trusted validators over a two-week period to activate. This ensures backward compatibility and prevents contentious changes. Failed amendments simply expire without affecting the network.</p>
+      <p>Recent amendments include Clawback (token compliance), AMM (automated market maker pools), and NFTokenMintOffer (streamlined NFT minting). Each one was debated, tested on devnet and testnet, and activated through validator consensus.</p>
+
+      <h2>Why the XRPL does not go down</h2>
+      <p>Several design decisions contribute to the XRPL's reliability:</p>
+      <ul>
+        <li><strong>No mining or staking:</strong> Consensus does not depend on economic incentives that can create perverse dynamics</li>
+        <li><strong>Fast finality:</strong> 3-5 second ledger close means transactions are confirmed quickly, preventing backlog buildup</li>
+        <li><strong>Fee escalation:</strong> Spam is automatically priced out during high load without affecting normal users</li>
+        <li><strong>No smart contracts on mainnet:</strong> The attack surface is smaller than Turing-complete chains. Complex logic runs on sidechains.</li>
+        <li><strong>Diverse validator set:</strong> Validators are run by different organizations across different jurisdictions and hosting providers</li>
+      </ul>
+
+      <h2>Network statistics</h2>
+      <ul>
+        <li><strong>Active since:</strong> June 2, 2012</li>
+        <li><strong>Total ledgers:</strong> 100+ million</li>
+        <li><strong>Total transactions:</strong> 2.8+ billion</li>
+        <li><strong>Ledger close time:</strong> 3-5 seconds average</li>
+        <li><strong>Active validators:</strong> 150+</li>
+        <li><strong>UNL validators:</strong> ~35</li>
+        <li><strong>Major outages:</strong> Zero</li>
+      </ul>
+
+      <h2>Accessing network history</h2>
+      <p>XRPL Stream provides full access to the entire XRPL history -- every transaction, every ledger, every account state change since ledger 32,570 in 2012. Our 21-node global network maintains complete history and serves it through WebSocket and JSON-RPC APIs with sub-50ms latency. Whether you are building analytics, auditing past transactions, or researching network trends, the complete history is available through a single endpoint.</p>
+
+      <div class="post-cta">
+        <a href="/login" class="btn btn-primary">Get Full History Access</a>
+        <a href="/stats" class="btn btn-ghost">Live Network Stats</a>
+      </div>
+    </div>
+  </article>
+  <Footer />
+</Base>
+
+<style>
+  .post { max-width: 1400px; margin: 0 auto; padding: 48px 40px 64px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 24px; transition: color 0.2s; }
+  .back-link:hover { color: var(--accent); text-decoration: none; }
+  .post-header { margin-bottom: 40px; }
+  .post-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .post-tag { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.15); padding: 3px 10px; border-radius: 6px; }
+  time { font-size: 0.8rem; color: var(--text-dim); }
+  h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; }
+  .post-lead { font-size: 1.1rem; color: var(--text-muted); line-height: 1.7; }
+  .post-body h2 { font-size: 1.25rem; font-weight: 700; margin: 40px 0 12px; color: var(--text); }
+  .post-body p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin-bottom: 16px; }
+  .post-body a { color: var(--accent); }
+  .post-body ul { color: var(--text-muted); font-size: 0.95rem; line-height: 1.75; margin: 0 0 16px 20px; }
+  .post-body li { margin-bottom: 8px; }
+  .post-body li strong { color: var(--text); }
+  .post-cta { display: flex; gap: 12px; margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
+  .btn { display: inline-block; padding: 11px 28px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
+  .btn-primary { background: var(--accent); color: #fff; font-weight: 700; }
+  .btn-primary:hover { text-decoration: none; }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text-muted); }
+  .btn-ghost:hover { border-color: var(--accent); text-decoration: none; color: var(--text); }
+</style>
