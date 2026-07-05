@@ -116,6 +116,34 @@ for (const node of scoredResults) {
 function statusColor(s: string) {
   return s === 'online' ? '#238636' : s === 'degraded' ? '#d29922' : '#f85149';
 }
+
+// Provider colors: deterministic hue from the provider name (same idiom as the
+// version badge) — any provider added to network.json gets a stable color.
+function providerHue(p: string) {
+  const h = [...(p || '')].reduce((h, c) => c.charCodeAt(0) + ((h << 5) - h), 0);
+  return ((h % 360) + 360) % 360;
+}
+const providers = [...new Set(scoredResults.map((n: any) => n.provider).filter(Boolean))] as string[];
+const providerCounts = new Map(providers.map(p => [p, scoredResults.filter((n: any) => n.provider === p).length]));
+
+// Fleet-wide service frequency: services on most machines are baseline
+// (xrpl-proxy, fail2ban); rarer ones are what makes a machine different —
+// those get highlighted and sorted first.
+const svcMachineCount = new Map<string, number>();
+let svcReporting = 0;
+for (const n of scoredResults) {
+  const svcs = (n as any).services;
+  if (!svcs) continue;
+  svcReporting++;
+  const names = new Set<string>([...svcs.pm2.map((s: any) => s.name), ...svcs.system.map((s: any) => s.name)]);
+  for (const name of names) svcMachineCount.set(name, (svcMachineCount.get(name) || 0) + 1);
+}
+const isDistinctSvc = (name: string) => (svcMachineCount.get(name) || 0) < svcReporting * 0.8;
+// System list is top-8-by-RSS, so small daemons (udisksd, fwupd) drop in and
+// out per machine and look falsely "rare" — require real weight to highlight.
+const isDistinctSys = (s: any) => isDistinctSvc(s.name) && (s.mem_mb >= 100 || s.cpu_pct >= 10);
+const byDistinct = (a: any, b: any) => Number(isDistinctSvc(b.name)) - Number(isDistinctSvc(a.name));
+const byDistinctSys = (a: any, b: any) => Number(isDistinctSys(b)) - Number(isDistinctSys(a));
 ---
 
 <Base title="Network Status - XRPL Stream" description="Real-time health and performance of the XRPL Stream global network. Uptime, latency, and ledger sync across all regions.">
@@ -162,6 +190,17 @@ function statusColor(s: string) {
       </button>
     </div>
 
+    <div class="filter-bar">
+      <span class="filter-label">Host</span>
+      <button class="filter-btn active" data-filter="all">All ({scoredResults.length})</button>
+      {providers.map(p => (
+        <button class="filter-btn" data-filter={p}>
+          <span class="filter-dot" style={`background:hsl(${providerHue(p)}, 60%, 50%)`}></span>
+          {p} ({providerCounts.get(p)})
+        </button>
+      ))}
+    </div>
+
     {[...regionMap.entries()].map(([region, nodes]) => {
       const regionOnline = nodes.filter(n => n.status === 'online').length;
       const regionColor = regionOnline === nodes.length ? '#238636' : '#d29922';
@@ -174,11 +213,11 @@ function statusColor(s: string) {
           </div>
           <div class="nodes-row">
             {nodes.map(n => (
-              <div class="node-card" data-node={n.label}>
+              <div class="node-card" data-node={n.label} data-provider={n.provider} style={`border-left:3px solid hsl(${providerHue(n.provider)}, 55%, 42%)`}>
                 <div class="node-top">
                   <div class="node-dot" data-node-dot={n.label} style={`background:${statusColor(n.status)};box-shadow:0 0 4px ${statusColor(n.status)}`}></div>
                   <span class="node-id">{n.label}</span>
-                  <span class="node-provider">{n.provider} &middot; ${n.cost}/mo</span>
+                  <span class="node-provider" style={`background:hsl(${providerHue(n.provider)}, 50%, 16%);color:hsl(${providerHue(n.provider)}, 65%, 68%)`}>{n.provider} &middot; ${n.cost}/mo</span>
                   {n.version && <span class="node-ver" style={`background:hsl(${[...n.version].reduce((h,c)=>c.charCodeAt(0)+((h<<5)-h),0)%360}, 50%, 20%); color:hsl(${[...n.version].reduce((h,c)=>c.charCodeAt(0)+((h<<5)-h),0)%360}, 70%, 70%)`}>{n.version}</span>}
                   {n.ip === '204.168.216.162' && <span class="node-main">main</span>}
                   <span class="node-status" data-node-status={n.label} style={`color:${statusColor(n.status)}`}>{n.status}</span>
@@ -233,13 +272,13 @@ function statusColor(s: string) {
                   <div class="node-services">
                     <span class="svc-heading">Running</span>
                     <div class="svc-tags">
-                      {(n as any).services.pm2.map((s: any) => (
-                        <span class={`svc-tag ${s.status === 'online' ? 'svc-on' : 'svc-off'}`} title={`pm2 · ${s.restarts} restarts · up ${s.uptime_h}h · ${s.cpu_pct}% cpu`}>
+                      {[...(n as any).services.pm2].sort(byDistinct).map((s: any) => (
+                        <span class={`svc-tag ${s.status === 'online' ? 'svc-on' : 'svc-off'}${isDistinctSvc(s.name) ? ' svc-uniq' : ''}`} title={`pm2 · ${s.restarts} restarts · up ${s.uptime_h}h · ${s.cpu_pct}% cpu · on ${svcMachineCount.get(s.name)}/${svcReporting} machines`}>
                           {s.name}{s.status === 'online' ? ` ${s.mem_mb}MB` : ` (${s.status})`}
                         </span>
                       ))}
-                      {(n as any).services.system.map((s: any) => (
-                        <span class="svc-tag svc-sys" title={`system · ${s.procs} proc · ${s.cpu_pct}% cpu`}>{s.name} {s.mem_mb}MB</span>
+                      {[...(n as any).services.system].sort(byDistinctSys).map((s: any) => (
+                        <span class={`svc-tag svc-sys${isDistinctSys(s) ? ' svc-uniq' : ''}`} title={`system · ${s.procs} proc · ${s.cpu_pct}% cpu · on ${svcMachineCount.get(s.name)}/${svcReporting} machines`}>{s.name} {s.mem_mb}MB</span>
                       ))}
                     </div>
                   </div>
@@ -332,6 +371,25 @@ function statusColor(s: string) {
     }catch(e){}
   },15000);
   </script>
+  <script is:inline>
+  // Host filter: show only nodes from the selected provider; hide regions
+  // that end up empty. Provider list comes from network.json via SSR.
+  document.querySelectorAll('.filter-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.filter-btn').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      var f = btn.getAttribute('data-filter');
+      document.querySelectorAll('.node-card').forEach(function (card) {
+        card.style.display = (f === 'all' || card.getAttribute('data-provider') === f) ? '' : 'none';
+      });
+      document.querySelectorAll('.region-section').forEach(function (sec) {
+        var visible = 0;
+        sec.querySelectorAll('.node-card').forEach(function (c) { if (c.style.display !== 'none') visible++; });
+        sec.style.display = visible ? '' : 'none';
+      });
+    });
+  });
+  </script>
   <Footer />
 </Base>
 
@@ -361,6 +419,12 @@ function statusColor(s: string) {
   .node-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
   .node-id { font-size: 0.82rem; font-weight: 600; font-family: var(--mono); }
   .node-provider { font-size: 0.58rem; color: var(--text-dim); background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 3px; }
+  .filter-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 14px 0 4px; }
+  .filter-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-right: 4px; }
+  .filter-btn { display: inline-flex; align-items: center; gap: 5px; font-size: 0.68rem; font-family: var(--mono); color: var(--text-muted); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 3px 10px; border-radius: 999px; cursor: pointer; transition: all 0.15s; }
+  .filter-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+  .filter-btn.active { color: var(--text); background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.3); }
+  .filter-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
   .node-ver { font-size: 0.55rem; font-family: var(--mono); padding: 1px 6px; border-radius: 3px; }
   .node-main { font-size: 0.55rem; font-weight: 700; color: var(--accent); background: rgba(88,166,255,0.1); padding: 1px 6px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.05em; }
   .node-sub { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
@@ -387,6 +451,7 @@ function statusColor(s: string) {
   .svc-on { color: #3fb950; }
   .svc-off { color: var(--text-dim); text-decoration: line-through; }
   .svc-sys { color: #d29922; }
+  .svc-uniq { border: 1px solid rgba(210,153,34,0.55); background: rgba(210,153,34,0.1); font-weight: 600; box-shadow: 0 0 6px rgba(210,153,34,0.15); }
 
   @media (max-width: 768px) {
     .container { padding: 16px 16px 40px; }
