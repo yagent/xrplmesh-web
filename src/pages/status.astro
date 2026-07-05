@@ -2,30 +2,17 @@
 import Base from '../layouts/Base.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { getSessionFromCookie } from '../lib/auth';
+import { loadNodes } from '../lib/nodes';
 
-const NODES = [
-  { id: 'slc-2', region: 'US West', ip: '144.225.144.34' },
-  { id: 'slc-1', region: 'US West', ip: '144.225.144.33' },
-  { id: 'lax-1', region: 'US West', ip: '172.99.249.123' },
-  { id: 'nyc-1', region: 'US East', ip: '157.254.224.90' },
-  { id: 'mia-1', region: 'US East', ip: '69.166.231.61' },
-  { id: 'us-1', region: 'US East', ip: '74.208.76.39' },
-  { id: 'us-2', region: 'US East', ip: '74.208.76.45' },
-  { id: 'rbx-1', region: 'EU West', ip: '137.74.16.215' },
-  { id: 'rbx-2', region: 'EU West', ip: '137.74.16.217' },
-  { id: 'rbx-3', region: 'EU West', ip: '137.74.16.216' },
-  { id: 'hel1-1', region: 'EU North', ip: '204.168.216.162' },
-  { id: 'hel1-2', region: 'EU North', ip: '37.27.195.72' },
-  { id: 'hel1-3', region: 'EU North', ip: '46.62.200.125' },
-  { id: 'hel1-4', region: 'EU North', ip: '65.21.83.210' },
-  { id: 'ded-1', region: 'EU North', ip: '65.108.227.154' },
-  { id: 'de-1', region: 'EU Central', ip: '135.125.254.37' },
-  { id: 'de-2', region: 'EU Central', ip: '135.125.254.47' },
-  { id: 'de-3', region: 'EU Central', ip: '135.125.254.48' },
-  { id: 'it-1', region: 'EU South', ip: '57.131.46.7' },
-  { id: 'it-2', region: 'EU South', ip: '57.131.46.8' },
-  { id: 'it-3', region: 'EU South', ip: '57.131.46.9' },
-];
+const session = getSessionFromCookie(Astro.request);
+if (!session || session.email !== 'yannierlesende@gmail.com') {
+  return Astro.redirect('/');
+}
+
+// Node registry comes from the proxy's git-synced network.json (see lib/nodes.ts).
+// Adding/removing/replacing nodes there updates this page automatically.
+const NODES = loadNodes();
 
 const results = await Promise.all(
   NODES.map(async (node, idx) => {
@@ -35,18 +22,42 @@ const results = await Promise.all(
       const latency = Date.now() - t0;
       if (resp.ok) {
         const h = await resp.json();
+        const res = h.resources || {};
         return {
-          label: `Node ${idx + 1}`, region: node.region, status: 'online' as const, latency, ledger: h.latest_ledger || 0,
+          label: `Node ${idx + 1}`, region: node.region, provider: node.provider, ip: node.ip, cost: node.cost, status: 'online' as const, latency, ledger: h.latest_ledger || 0,
           requests: h.requests_served || 0,
           cache_hit: h.cache?.hit_rate || '0%',
           response_p50: h.latency_ms?.overall?.p50 || 0,
           response_p95: h.latency_ms?.overall?.p95 || 0,
           uptime: h.uptime || 0,
+          version: h.version || '',
+          cpu_cores: res.cpu_cores || 0,
+          cpu_pct: res.load_pct || 0,
+          mem_total_mb: res.mem_total_mb || 0,
+          mem_used_mb: res.mem_used_mb || 0,
+          mem_pct: res.mem_pct || 0,
+          disk_total_gb: res.disk_total_gb || 0,
+          disk_used_gb: res.disk_used_gb || 0,
+          disk_pct: res.disk_pct || 0,
+          inode_total: res.inode_total || 0,
+          inode_used: res.inode_used || 0,
+          inode_pct: res.inode_pct || 0,
+          fd_used: res.fd_used || 0,
+          fd_max: res.fd_max || 0,
+          fd_pct: res.fd_pct || 0,
+          sock_estab: res.sock_established || 0,
+          sock_tw: res.sock_time_wait || 0,
+          sock_cw: res.sock_close_wait || 0,
+          swap_total_mb: res.swap_total_mb || 0,
+          swap_used_mb: res.swap_used_mb || 0,
+          swap_pct: res.swap_pct || 0,
+          mem_pressure: res.mem_pressure || 0,
+          entropy: res.entropy || 0,
         };
       }
-      return { label: `Node ${idx + 1}`, region: node.region, status: 'degraded' as const, latency, ledger: 0 };
+      return { label: `Node ${idx + 1}`, region: node.region, provider: node.provider, ip: node.ip, cost: node.cost, status: 'degraded' as const, latency, ledger: 0 };
     } catch {
-      return { label: `Node ${idx + 1}`, region: node.region, status: 'offline' as const, latency: Date.now() - t0, ledger: 0 };
+      return { label: `Node ${idx + 1}`, region: node.region, provider: node.provider, ip: node.ip, cost: node.cost, status: 'offline' as const, latency: Date.now() - t0, ledger: 0 };
     }
   })
 );
@@ -63,9 +74,37 @@ const avgP50 = onlineNodes.length ? Math.round(onlineNodes.reduce((s: number, n:
 const avgP95 = onlineNodes.length ? Math.round(onlineNodes.reduce((s: number, n: any) => s + parseFloat(n.response_p95), 0) / onlineNodes.length) : 0;
 const totalRequests = onlineNodes.reduce((s: number, n: any) => s + (n.requests || 0), 0);
 
+const totalCpuCores = results.reduce((s: number, n: any) => s + (n.cpu_cores || 0), 0);
+const totalRamGB = +(results.reduce((s: number, n: any) => s + (n.mem_total_mb || 0), 0) / 1024).toFixed(1);
+const totalDiskGB = +results.reduce((s: number, n: any) => s + (n.disk_total_gb || 0), 0).toFixed(0);
+const totalCost = +results.reduce((s: number, n: any) => s + (n.cost || 0), 0).toFixed(2);
+
+// Value score: cores/$ + GB_RAM/$ + GB_SSD/$, normalized to fleet best = 10
+const onlineWithCost = results.filter((n: any) => n.status === 'online' && n.cost > 0 && n.cpu_cores > 0);
+const bestCoresPerDollar = Math.max(...onlineWithCost.map((n: any) => n.cpu_cores / n.cost), 0.01);
+const bestRamPerDollar = Math.max(...onlineWithCost.map((n: any) => (n.mem_total_mb / 1024) / n.cost), 0.01);
+const bestDiskPerDollar = Math.max(...onlineWithCost.map((n: any) => n.disk_total_gb / n.cost), 0.01);
+
+function valueScore(n: any) {
+  if (!n.cost || n.status !== 'online' || !n.cpu_cores) return 0;
+  const ramGB = (n.mem_total_mb || 0) / 1024;
+  const cpuNorm = (n.cpu_cores / n.cost) / bestCoresPerDollar;
+  const ramNorm = (ramGB / n.cost) / bestRamPerDollar;
+  const diskNorm = (n.disk_total_gb / n.cost) / bestDiskPerDollar;
+  return +((cpuNorm + ramNorm + diskNorm) / 3 * 10).toFixed(1);
+}
+function valueLabel(v: number) {
+  if (v <= 0) return { text: '--', color: 'var(--text-dim)' };
+  if (v >= 8) return { text: 'Excellent', color: '#238636' };
+  if (v >= 5) return { text: 'Great', color: '#3fb950' };
+  if (v >= 3) return { text: 'Good', color: '#d29922' };
+  return { text: 'Low', color: '#f85149' };
+}
+const scoredResults = results.map(n => ({ ...n, value: valueScore(n) }));
+
 // Group by region
-const regionMap = new Map<string, typeof results>();
-for (const node of results) {
+const regionMap = new Map<string, typeof scoredResults>();
+for (const node of scoredResults) {
   if (!regionMap.has(node.region)) regionMap.set(node.region, []);
   regionMap.get(node.region)!.push(node);
 }
@@ -75,7 +114,7 @@ function statusColor(s: string) {
 }
 ---
 
-<Base title="Network Status - XRPL Mesh" description="Real-time health and performance status of the XRPL Mesh global network.">
+<Base title="Network Status - XRPL Stream" description="Real-time health and performance of the XRPL Stream global network. Uptime, latency, and ledger sync across all regions.">
   <Header />
 
   <div class="container">
@@ -97,6 +136,26 @@ function statusColor(s: string) {
         <span class="banner-val mono" id="b-p50">{avgP50 < 1 ? '<1' : avgP50}ms</span>
         <span class="banner-label">Avg Response</span>
       </div>
+      <div class="banner-meta">
+        <span class="banner-val mono" id="b-cores">{totalCpuCores}</span>
+        <span class="banner-label">CPU Cores</span>
+      </div>
+      <div class="banner-meta">
+        <span class="banner-val mono" id="b-ram">{totalRamGB} GB</span>
+        <span class="banner-label">Total RAM</span>
+      </div>
+      <div class="banner-meta">
+        <span class="banner-val mono" id="b-disk">{totalDiskGB} GB</span>
+        <span class="banner-label">Total SSD</span>
+      </div>
+      <div class="banner-meta">
+        <span class="banner-val mono" id="b-cost">${totalCost}</span>
+        <span class="banner-label">Monthly Cost</span>
+      </div>
+      <button class="copy-json-btn" id="copy-json" title="Copy all node info as JSON">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        <span id="copy-json-label">Copy JSON</span>
+      </button>
     </div>
 
     {[...regionMap.entries()].map(([region, nodes]) => {
@@ -115,14 +174,59 @@ function statusColor(s: string) {
                 <div class="node-top">
                   <div class="node-dot" data-node-dot={n.label} style={`background:${statusColor(n.status)};box-shadow:0 0 4px ${statusColor(n.status)}`}></div>
                   <span class="node-id">{n.label}</span>
+                  <span class="node-provider">{n.provider} &middot; ${n.cost}/mo</span>
+                  {n.version && <span class="node-ver" style={`background:hsl(${[...n.version].reduce((h,c)=>c.charCodeAt(0)+((h<<5)-h),0)%360}, 50%, 20%); color:hsl(${[...n.version].reduce((h,c)=>c.charCodeAt(0)+((h<<5)-h),0)%360}, 70%, 70%)`}>{n.version}</span>}
+                  {n.ip === '204.168.216.162' && <span class="node-main">main</span>}
                   <span class="node-status" data-node-status={n.label} style={`color:${statusColor(n.status)}`}>{n.status}</span>
+                </div>
+                <div class="node-sub">
+                  <span class="node-ip">{n.ip}</span>
+                  {n.value > 0 && <span class="node-value" style={`color:${valueLabel(n.value).color}`}>{valueLabel(n.value).text} ({n.value}x)</span>}
                 </div>
                 <div class="node-detail">
                   <span class="nd-item"><span class="nd-label">Response</span><span class="nd-val" data-node-p50={n.label}>{!n.response_p50 ? '--' : parseFloat(n.response_p50) < 1 ? '<1ms' : n.response_p50 + 'ms'}</span></span>
                   <span class="nd-item"><span class="nd-label">p95</span><span class="nd-val" data-node-p95={n.label}>{!n.response_p95 ? '--' : parseFloat(n.response_p95) < 1 ? '<1ms' : n.response_p95 + 'ms'}</span></span>
-                  <span class="nd-item"><span class="nd-label">Cache</span><span class="nd-val" data-node-cache={n.label}>{n.cache_hit || '--'}</span></span>
                   <span class="nd-item"><span class="nd-label">Uptime</span><span class="nd-val" data-node-uptime={n.label}>{n.uptime ? (n.uptime > 86400 ? Math.floor(n.uptime/86400)+'d' : n.uptime > 3600 ? Math.floor(n.uptime/3600)+'h' : Math.floor(n.uptime/60)+'m') : '--'}</span></span>
                 </div>
+                {n.status === 'online' && n.cpu_cores > 0 && (
+                <div class="node-resources">
+                  <div class="res-row">
+                    <span class="res-label">CPU</span>
+                    <div class="res-bar-bg"><div class="res-bar-fill" data-node-cpu-bar={n.label} style={`width:${Math.min(100, n.cpu_pct)}%;background:${n.cpu_pct > 80 ? '#f85149' : n.cpu_pct > 50 ? '#d29922' : '#238636'}`}></div></div>
+                    <span class="res-val" data-node-cpu={n.label}>{n.cpu_cores} {n.cpu_cores === 1 ? 'core' : 'cores'} &middot; {n.cpu_pct}%</span>
+                  </div>
+                  <div class="res-row">
+                    <span class="res-label">RAM</span>
+                    <div class="res-bar-bg"><div class="res-bar-fill" data-node-mem-bar={n.label} style={`width:${Math.min(100, n.mem_pct)}%;background:${n.mem_pct > 85 ? '#f85149' : n.mem_pct > 65 ? '#d29922' : '#238636'}`}></div></div>
+                    <span class="res-val" data-node-mem={n.label}>{(n.mem_used_mb/1024).toFixed(1)} / {(n.mem_total_mb/1024).toFixed(1)} GB</span>
+                  </div>
+                  <div class="res-row">
+                    <span class="res-label">SSD</span>
+                    <div class="res-bar-bg"><div class="res-bar-fill" data-node-disk-bar={n.label} style={`width:${Math.min(100, n.disk_pct)}%;background:${n.disk_pct > 90 ? '#f85149' : n.disk_pct > 75 ? '#d29922' : '#238636'}`}></div></div>
+                    <span class="res-val" data-node-disk={n.label}>{n.disk_used_gb} / {n.disk_total_gb} GB</span>
+                  </div>
+                  {n.inode_total > 0 && (
+                  <div class="res-row">
+                    <span class="res-label">INO</span>
+                    <div class="res-bar-bg"><div class="res-bar-fill" data-node-inode-bar={n.label} style={`width:${Math.min(100, n.inode_pct)}%;background:${n.inode_pct > 90 ? '#f85149' : n.inode_pct > 75 ? '#d29922' : '#238636'}`}></div></div>
+                    <span class="res-val" data-node-inode={n.label}>{(n.inode_used/1000).toFixed(0)}k / {(n.inode_total/1000).toFixed(0)}k &middot; {n.inode_pct}%</span>
+                  </div>
+                  )}
+                  {n.swap_total_mb > 0 && (
+                  <div class="res-row">
+                    <span class="res-label">SWAP</span>
+                    <div class="res-bar-bg"><div class="res-bar-fill" data-node-swap-bar={n.label} style={`width:${Math.min(100, n.swap_pct)}%;background:${n.swap_pct > 50 ? '#f85149' : n.swap_pct > 10 ? '#d29922' : '#238636'}`}></div></div>
+                    <span class="res-val" data-node-swap={n.label}>{(n.swap_used_mb/1024).toFixed(1)} / {(n.swap_total_mb/1024).toFixed(1)} GB</span>
+                  </div>
+                  )}
+                  <div class="res-tags">
+                    <span class="res-tag" data-node-fd={n.label} style={`color:${n.fd_used > 50000 ? '#f85149' : n.fd_used > 20000 ? '#d29922' : 'var(--text-muted)'}`}>FD {(n.fd_used/1000).toFixed(1)}k</span>
+                    <span class="res-tag" data-node-sock={n.label}>TCP {n.sock_estab}{n.sock_tw > 0 ? ` · TW ${n.sock_tw}` : ''}{n.sock_cw > 0 ? ` · CW ${n.sock_cw}` : ''}</span>
+                    {n.mem_pressure > 0 && <span class="res-tag" style="color:#f85149" data-node-psi={n.label}>PSI {n.mem_pressure}%</span>}
+                    {n.entropy < 200 && <span class="res-tag" style="color:#f85149" data-node-ent={n.label}>ENT {n.entropy}</span>}
+                  </div>
+                </div>
+                )}
               </div>
             ))}
           </div>
@@ -131,7 +235,20 @@ function statusColor(s: string) {
     })}
   </div>
 
-  <script is:inline>
+  <script is:inline define:vars={{ NODES, results }}>
+  var _nodes = NODES;
+  var _results = results;
+  document.getElementById('copy-json').addEventListener('click', function(){
+    var data = _nodes.map(function(node, i){
+      var r = _results[i] || {};
+      return { id: node.id, ip: node.ip, region: node.region, provider: node.provider, cost: node.cost, status: r.status || 'unknown', version: r.version || '', cpu_cores: r.cpu_cores || 0, mem_total_mb: r.mem_total_mb || 0, disk_total_gb: r.disk_total_gb || 0 };
+    });
+    navigator.clipboard.writeText(JSON.stringify(data, null, 2)).then(function(){
+      var lb = document.getElementById('copy-json-label');
+      lb.textContent = 'Copied!';
+      setTimeout(function(){ lb.textContent = 'Copy JSON'; }, 1500);
+    });
+  });
   var SC={online:'#238636',degraded:'#d29922',offline:'#f85149'};
   var SL={operational:'All Systems Operational',degraded:'Partial Degradation',outage:'Service Disruption'};
   setInterval(async function(){
@@ -156,10 +273,35 @@ function statusColor(s: string) {
         if(p50)p50.textContent=!n.response_p50?'--':parseFloat(n.response_p50)<1?'<1ms':n.response_p50+'ms';
         var p95=document.querySelector('[data-node-p95="'+n.label+'"]');
         if(p95)p95.textContent=!n.response_p95?'--':parseFloat(n.response_p95)<1?'<1ms':n.response_p95+'ms';
-        var ch=document.querySelector('[data-node-cache="'+n.label+'"]');
-        if(ch)ch.textContent=n.cache_hit||'--';
         var ut=document.querySelector('[data-node-uptime="'+n.label+'"]');
         if(ut)ut.textContent=n.uptime?(n.uptime>86400?Math.floor(n.uptime/86400)+'d':n.uptime>3600?Math.floor(n.uptime/3600)+'h':Math.floor(n.uptime/60)+'m'):'--';
+        function resColor(pct,hi,mid){return pct>hi?'#f85149':pct>mid?'#d29922':'#238636'}
+        var cpuBar=document.querySelector('[data-node-cpu-bar="'+n.label+'"]');
+        if(cpuBar){cpuBar.style.width=Math.min(100,n.cpu_pct||0)+'%';cpuBar.style.background=resColor(n.cpu_pct,80,50)}
+        var cpuV=document.querySelector('[data-node-cpu="'+n.label+'"]');
+        if(cpuV)cpuV.textContent=(n.cpu_cores||0)+' '+(n.cpu_cores===1?'core':'cores')+' · '+(n.cpu_pct||0)+'%';
+        var memBar=document.querySelector('[data-node-mem-bar="'+n.label+'"]');
+        if(memBar){memBar.style.width=Math.min(100,n.mem_pct||0)+'%';memBar.style.background=resColor(n.mem_pct,85,65)}
+        var memV=document.querySelector('[data-node-mem="'+n.label+'"]');
+        if(memV)memV.textContent=((n.mem_used_mb||0)/1024).toFixed(1)+' / '+((n.mem_total_mb||0)/1024).toFixed(1)+' GB';
+        var dkBar=document.querySelector('[data-node-disk-bar="'+n.label+'"]');
+        if(dkBar){dkBar.style.width=Math.min(100,n.disk_pct||0)+'%';dkBar.style.background=resColor(n.disk_pct,90,75)}
+        var dkV=document.querySelector('[data-node-disk="'+n.label+'"]');
+        if(dkV)dkV.textContent=(n.disk_used_gb||0)+' / '+(n.disk_total_gb||0)+' GB';
+        var inBar=document.querySelector('[data-node-inode-bar="'+n.label+'"]');
+        if(inBar){inBar.style.width=Math.min(100,n.inode_pct||0)+'%';inBar.style.background=resColor(n.inode_pct,90,75)}
+        var inV=document.querySelector('[data-node-inode="'+n.label+'"]');
+        if(inV)inV.textContent=Math.round((n.inode_used||0)/1000)+'k / '+Math.round((n.inode_total||0)/1000)+'k · '+(n.inode_pct||0)+'%';
+        var swBar=document.querySelector('[data-node-swap-bar="'+n.label+'"]');
+        if(swBar){var sp=n.swap_pct||0;swBar.style.width=Math.min(100,sp)+'%';swBar.style.background=sp>50?'#f85149':sp>10?'#d29922':'#238636'}
+        var swV=document.querySelector('[data-node-swap="'+n.label+'"]');
+        if(swV)swV.textContent=((n.swap_used_mb||0)/1024).toFixed(1)+' / '+((n.swap_total_mb||0)/1024).toFixed(1)+' GB';
+        var fdEl=document.querySelector('[data-node-fd="'+n.label+'"]');
+        if(fdEl){var fu=n.fd_used||0;fdEl.textContent='FD '+(fu/1000).toFixed(1)+'k';fdEl.style.color=fu>50000?'#f85149':fu>20000?'#d29922':'var(--text-muted)'}
+        var skEl=document.querySelector('[data-node-sock="'+n.label+'"]');
+        if(skEl)skEl.textContent='TCP '+(n.sock_established||0)+(n.sock_time_wait?' · TW '+n.sock_time_wait:'')+(n.sock_close_wait?' · CW '+n.sock_close_wait:'');
+        var psiEl=document.querySelector('[data-node-psi="'+n.label+'"]');
+        if(psiEl)psiEl.textContent='PSI '+(n.mem_pressure||0)+'%';
       });
       for(var reg in regions){
         var rc=regions[reg].online===regions[reg].total?'#238636':'#d29922';
@@ -176,7 +318,7 @@ function statusColor(s: string) {
 
 <style>
   .mono { font-family: var(--mono); }
-  .container { max-width: 1400px; margin: 0 auto; padding: 24px 40px 48px; }
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px 40px 48px; min-height: calc(100vh - 160px); }
 
   .banner { display: flex; align-items: center; gap: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 28px; margin-bottom: 20px; }
   .banner-icon { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
@@ -186,22 +328,39 @@ function statusColor(s: string) {
   .banner-meta { text-align: center; padding: 0 16px; border-left: 1px solid var(--border); }
   .banner-val { display: block; font-size: 1.1rem; font-weight: 700; }
   .banner-label { display: block; font-size: 0.62rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+  .copy-json-btn { display: flex; align-items: center; gap: 6px; padding: 6px 14px; background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.2); border-radius: 6px; color: var(--accent); font-size: 0.72rem; font-weight: 600; cursor: pointer; transition: background 0.15s, border-color 0.15s; white-space: nowrap; margin-left: 8px; }
+  .copy-json-btn:hover { background: rgba(88,166,255,0.15); border-color: rgba(88,166,255,0.4); }
 
   .region-section { margin-bottom: 16px; }
   .region-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid rgba(88,166,255,0.04); }
   .region-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
   .region-name { font-size: 0.85rem; font-weight: 600; }
   .region-count { font-size: 0.72rem; color: var(--text-dim); font-family: var(--mono); margin-left: auto; }
-  .nodes-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
-  .node-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+  .nodes-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+  .node-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
   .node-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
   .node-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
   .node-id { font-size: 0.82rem; font-weight: 600; font-family: var(--mono); }
+  .node-provider { font-size: 0.58rem; color: var(--text-dim); background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 3px; }
+  .node-ver { font-size: 0.55rem; font-family: var(--mono); padding: 1px 6px; border-radius: 3px; }
+  .node-main { font-size: 0.55rem; font-weight: 700; color: var(--accent); background: rgba(88,166,255,0.1); padding: 1px 6px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .node-sub { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .node-ip { font-size: 0.68rem; font-family: var(--mono); color: var(--text-dim); }
+  .node-value { font-size: 0.62rem; font-weight: 700; font-family: var(--mono); }
   .node-status { margin-left: auto; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
   .node-detail { display: flex; gap: 16px; }
   .nd-item { display: flex; flex-direction: column; }
   .nd-label { font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
   .nd-val { font-size: 0.78rem; font-family: var(--mono); color: var(--text-muted); }
+
+  .node-resources { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.04); }
+  .res-row { display: flex; align-items: center; gap: 6px; }
+  .res-label { font-size: 0.58rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; width: 24px; flex-shrink: 0; }
+  .res-bar-bg { flex: 1; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+  .res-bar-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; min-width: 1px; }
+  .res-val { font-size: 0.68rem; font-family: var(--mono); color: var(--text-muted); width: 110px; text-align: right; flex-shrink: 0; white-space: nowrap; }
+  .res-tags { display: flex; flex-wrap: wrap; gap: 4px 8px; margin-top: 4px; }
+  .res-tag { font-size: 0.6rem; font-family: var(--mono); color: var(--text-muted); background: rgba(255,255,255,0.03); padding: 1px 5px; border-radius: 3px; white-space: nowrap; }
 
   @media (max-width: 768px) {
     .container { padding: 16px 16px 40px; }

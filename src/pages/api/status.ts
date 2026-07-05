@@ -1,28 +1,5 @@
 import type { APIRoute } from 'astro';
-
-const NODES = [
-  { id: 'slc-2', region: 'US West', ip: '144.225.144.34' },
-  { id: 'slc-1', region: 'US West', ip: '144.225.144.33' },
-  { id: 'lax-1', region: 'US West', ip: '172.99.249.123' },
-  { id: 'nyc-1', region: 'US East', ip: '157.254.224.90' },
-  { id: 'mia-1', region: 'US East', ip: '69.166.231.61' },
-  { id: 'us-1', region: 'US East', ip: '74.208.76.39' },
-  { id: 'us-2', region: 'US East', ip: '74.208.76.45' },
-  { id: 'rbx-1', region: 'EU West', ip: '137.74.16.215' },
-  { id: 'rbx-2', region: 'EU West', ip: '137.74.16.217' },
-  { id: 'rbx-3', region: 'EU West', ip: '137.74.16.216' },
-  { id: 'hel1-1', region: 'EU North', ip: '204.168.216.162' },
-  { id: 'hel1-2', region: 'EU North', ip: '37.27.195.72' },
-  { id: 'hel1-3', region: 'EU North', ip: '46.62.200.125' },
-  { id: 'hel1-4', region: 'EU North', ip: '65.21.83.210' },
-  { id: 'ded-1', region: 'EU North', ip: '65.108.227.154' },
-  { id: 'de-1', region: 'EU Central', ip: '135.125.254.37' },
-  { id: 'de-2', region: 'EU Central', ip: '135.125.254.47' },
-  { id: 'de-3', region: 'EU Central', ip: '135.125.254.48' },
-  { id: 'it-1', region: 'EU South', ip: '57.131.46.7' },
-  { id: 'it-2', region: 'EU South', ip: '57.131.46.8' },
-  { id: 'it-3', region: 'EU South', ip: '57.131.46.9' },
-];
+import { loadNodes } from '../../lib/nodes';
 
 let cache: { data: any; expires: number } | null = null;
 
@@ -33,6 +10,7 @@ export const GET: APIRoute = async () => {
     });
   }
 
+  const NODES = loadNodes();
   const results = await Promise.all(
     NODES.map(async (node) => {
       const t0 = Date.now();
@@ -41,12 +19,34 @@ export const GET: APIRoute = async () => {
         const latency = Date.now() - t0;
         if (resp.ok) {
           const h = await resp.json();
+          const res = h.resources || {};
           return {
             ...node, status: 'online', latency, ledger: h.latest_ledger || 0,
             cache_hit: h.cache?.hit_rate || '0%',
             response_p50: h.latency_ms?.overall?.p50 || 0,
             response_p95: h.latency_ms?.overall?.p95 || 0,
             uptime: h.uptime || 0,
+            cpu_cores: res.cpu_cores || 0,
+            cpu_pct: res.load_pct || 0,
+            mem_total_mb: res.mem_total_mb || 0,
+            mem_used_mb: res.mem_used_mb || 0,
+            mem_pct: res.mem_pct || 0,
+            disk_total_gb: res.disk_total_gb || 0,
+            disk_used_gb: res.disk_used_gb || 0,
+            disk_pct: res.disk_pct || 0,
+            inode_total: res.inode_total || 0,
+            inode_used: res.inode_used || 0,
+            inode_pct: res.inode_pct || 0,
+            fd_used: res.fd_used || 0,
+            fd_pct: res.fd_pct || 0,
+            sock_established: res.sock_established || 0,
+            sock_time_wait: res.sock_time_wait || 0,
+            sock_close_wait: res.sock_close_wait || 0,
+            swap_total_mb: res.swap_total_mb || 0,
+            swap_used_mb: res.swap_used_mb || 0,
+            swap_pct: res.swap_pct || 0,
+            mem_pressure: res.mem_pressure || 0,
+            entropy: res.entropy || 0,
           };
         }
         return { ...node, status: 'degraded', latency, ledger: 0 };
